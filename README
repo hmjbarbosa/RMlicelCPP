@@ -1,0 +1,15 @@
+ABOUT THE PROJECT
+
+This project is an effort to develop basic C++ libraries for dealing
+with LIDAR (laser detection and ranging) data files, particularly
+those recorded by the instruments from Raymetrics/Licel
+manufactures. All code were written from stracht based on the licel
+data format:
+
+http://www.licel.com/raw_data_format.html
+
+ABOUT ME
+
+Want to contribute or use it? Contact me!
+
+hmj.barbosa+git [at] gmail (dot) com
