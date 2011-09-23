@@ -2,26 +2,33 @@
 EXEC=dataread
 
 OBJ=\
-	dataread.o \
 	RMlicelUSP.o
+
+PROGS=\
+	dataread \
+	rm2csv \
+	rm2dat
 
 CC=g++
 
 CFLAGS=-g -Wall
-FFLAGS=
 
-dataread	:	$(OBJ)
-	$(CC) -o $(EXEC) $(LFLAGS) $(OBJ)
+all	:	$(PROGS)
 
-dataread.o	:	dataread.cpp RMlicelUSP.o
-	$(CC) -c $(CFLAGS) dataread.cpp
+rm2csv	:	rm2csv.cpp $(OBJ)
+	$(CC) -o rm2csv $(CFLAGS) $(OBJ) rm2csv.cpp
+
+rm2dat	:	rm2dat.cpp $(OBJ)
+	$(CC) -o rm2dat $(CFLAGS) $(OBJ) rm2dat.cpp
+
+dataread	:	dataread.cpp $(OBJ)
+	$(CC) -o dataread $(CFLAGS) $(OBJ) $<
 
 RMlicelUSP.o	:	RMlicelUSP.cpp
 	$(CC) -c $(CFLAGS) RMlicelUSP.cpp
 
-Char.o	:	Char.cpp
-	$(CC) -c $(CFLAGS) Char.cpp
-
 clean	:	
-	rm -f $(OBJ)
+	rm -f $(OBJ) 
+	rm -f $(PROGS)
 	rm -f $(EXEC)
+	rm -f *~

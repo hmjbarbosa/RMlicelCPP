@@ -87,22 +87,24 @@ extern int file_error(FILE *filep);
 
 extern void channel_debug(channel ch);
 extern void channel_read  (FILE *fp, channel*ch);
-extern void channel_printf(FILE *fp, channel ch, single beg, single sep);
+extern void channel_printf(FILE *fp, channel ch, const char* beg, const char* sep);
 
 extern void header_debug(RMDataFile rm);
 extern void header_read  (FILE *fp, RMDataFile*rm);
 extern void header_printf(FILE *fp, RMDataFile rm, 
-                          single beg, single sep, single sep2);
+                          const char* beg, const char* sep, const char* sep2);
 
 extern void raw_debug(RMDataFile rm, int imax);
-extern void raw_printf(FILE *fp, RMDataFile rm, int imax, single sep);
+extern void raw_write(FILE *fp, RMDataFile rm);
+extern void raw_printf(FILE *fp, RMDataFile rm, int imax, const char* sep);
 
 extern void phy_debug(RMDataFile rm, int imax);
-extern void phy_printf(FILE *fp, RMDataFile rm, int imax, single sep);
+extern void phy_printf(FILE *fp, RMDataFile rm, int imax, const char* sep);
 
 extern void profile_debug(RMDataFile rm);
-extern void profile_read (char* fname, RMDataFile *rm);
-extern void profile_printf(RMDataFile rm, int imax, 
-                           single beg, single sep, single sep2);
+extern void profile_read (const char* fname, RMDataFile *rm);
+extern void profile_write(FILE *fp, RMDataFile rm);
+extern void profile_printf(FILE *fp, RMDataFile rm, int imax, 
+                           const char* beg, const char* sep, const char* sep2);
 
 #endif /* _RMLICELUSP_H */

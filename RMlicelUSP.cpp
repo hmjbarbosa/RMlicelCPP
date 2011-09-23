@@ -62,7 +62,7 @@ void channel_read(FILE *fp, channel *ch)
   fscanf(fp,"%5d.%1c 0 0 00 000 ",&ch->wlen,&ch->pol); 
   fscanf(fp,"%2d",&ch->bits); 
   fscanf(fp,"%6d",&ch->nshoots); 
-  fscanf(fp,"%6f",&ch->discr); 
+  fscanf(fp,"%6f",&ch->discr);
   fscanf(fp,"%3s\n",ch->tr);
 }
 
@@ -72,29 +72,29 @@ void channel_read(FILE *fp, channel *ch)
   Author: hbarbosa
   Date: 30 may 2011
  */
-void channel_printf(FILE *fp, channel ch, single beg, single sep) 
+void channel_printf(FILE *fp, channel ch, const char* beg, const char* sep) 
 {
-  fprintf(fp,"%1c",beg);
-  fprintf(fp,"%1d%1c",ch.active,sep);
-  fprintf(fp,"%1d%1c",ch.photons,sep); 
-  fprintf(fp,"%1d%1c",ch.elastic,sep);
-  fprintf(fp,"%05d%1c",ch.ndata,sep);
-  fprintf(fp,"%1d%1c",1,sep);
-  fprintf(fp,"%04d%1c",ch.pmtv,sep);
-  fprintf(fp,"%04.2f%1c",ch.binw,sep);
-  fprintf(fp,"%05d.%1c%1c",ch.wlen,ch.pol,sep);
-  fprintf(fp,"%1d%1c",0,sep);
-  fprintf(fp,"%1d%1c",0,sep);
-  fprintf(fp,"%02d%1c",0,sep);
-  fprintf(fp,"%03d%1c",0,sep); 
-  fprintf(fp,"%02d%1c",ch.bits,sep);
-  fprintf(fp,"%06d%1c",ch.nshoots,sep);
+  fprintf(fp,"%1s",beg);
+  fprintf(fp,"%1d%1s",ch.active,sep);
+  fprintf(fp,"%1d%1s",ch.photons,sep); 
+  fprintf(fp,"%1d%1s",ch.elastic,sep);
+  fprintf(fp,"%05d%1s",ch.ndata,sep);
+  fprintf(fp,"%1d%1s",1,sep);
+  fprintf(fp,"%04d%1s",ch.pmtv,sep);
+  fprintf(fp,"%04.2f%1s",ch.binw,sep);
+  fprintf(fp,"%05d.%1c%1s",ch.wlen,ch.pol,sep);
+  fprintf(fp,"%1d%1s",0,sep);
+  fprintf(fp,"%1d%1s",0,sep);
+  fprintf(fp,"%02d%1s",0,sep);
+  fprintf(fp,"%03d%1s",0,sep); 
+  fprintf(fp,"%02d%1s",ch.bits,sep);
+  fprintf(fp,"%06d%1s",ch.nshoots,sep);
   if (!ch.photons)
-    fprintf(fp,"%05.3f%1c",ch.discr,sep);
+    fprintf(fp,"%05.3f%1s",ch.discr,sep);
   else
-    fprintf(fp,"%06.4f%1c",ch.discr,sep);
+    fprintf(fp,"%06.4f%1s",ch.discr,sep);
 
-  fprintf(fp,"%3s%1c",ch.tr,sep);
+  fprintf(fp,"%3s%1s",ch.tr,sep);
   fprintf(fp,"\n");
 }
 
@@ -177,36 +177,36 @@ void header_read(FILE *fp, RMDataFile *rm)
   Author: hbarbosa
   Date: 30 may 2011
  */
-void header_printf(FILE *fp, RMDataFile rm, single beg, single sep) 
+void header_printf(FILE *fp, RMDataFile rm, const char* beg, const char* sep) 
 {
   // line 1
-  fprintf(fp,"%1c",beg);
-  fprintf(fp,"%13s%1c",rm.file,sep);
+  fprintf(fp,"%1s",beg);
+  fprintf(fp,"%13s%1s",rm.file,sep);
   fprintf(fp,"\n");
   
   // Line 2
-  fprintf(fp,"%1c",beg);
-  fprintf(fp,"%s%1c",rm.site,sep);
-  fprintf(fp,"%02d/%02d/%04d%1c",rm.start.DD,rm.start.MM,rm.start.YY,sep);
-  fprintf(fp,"%02d:%02d:%02d%1c",rm.start.hh,rm.start.mn,rm.start.ss,sep);
-  fprintf(fp,"%02d/%02d/%04d%1c",rm.end.DD,rm.end.MM,rm.end.YY,sep);
-  fprintf(fp,"%02d:%02d:%02d%1c",rm.end.hh,rm.end.mn,rm.end.ss,sep);
-  fprintf(fp,"%04d%1c",rm.alt,sep);
-  fprintf(fp,"%06.1f%1c",rm.lon,sep);
-  fprintf(fp,"%06.1f%1c",rm.lat,sep);
-  fprintf(fp,"%02d%1c",rm.zen,sep);
-  fprintf(fp,"%02d%1c",rm.idum,sep);
-  fprintf(fp,"%4.1f%1c",rm.T0,sep);
-  fprintf(fp,"%6.1f%1c",rm.P0,sep);
+  fprintf(fp,"%1s",beg);
+  fprintf(fp,"%s%1s",rm.site,sep);
+  fprintf(fp,"%02d/%02d/%04d%1s",rm.start.DD,rm.start.MM,rm.start.YY,sep);
+  fprintf(fp,"%02d:%02d:%02d%1s",rm.start.hh,rm.start.mn,rm.start.ss,sep);
+  fprintf(fp,"%02d/%02d/%04d%1s",rm.end.DD,rm.end.MM,rm.end.YY,sep);
+  fprintf(fp,"%02d:%02d:%02d%1s",rm.end.hh,rm.end.mn,rm.end.ss,sep);
+  fprintf(fp,"%04d%1s",rm.alt,sep);
+  fprintf(fp,"%06.1f%1s",rm.lon,sep);
+  fprintf(fp,"%06.1f%1s",rm.lat,sep);
+  fprintf(fp,"%02d%1s",rm.zen,sep);
+  fprintf(fp,"%02d%1s",rm.idum,sep);
+  fprintf(fp,"%4.1f%1s",rm.T0,sep);
+  fprintf(fp,"%6.1f%1s",rm.P0,sep);
   fprintf(fp,"\n");
 
   // Line 3
-  fprintf(fp,"%1c",beg);
-  fprintf(fp,"%07d%1c",rm.nshoots,sep);
-  fprintf(fp,"%04d%1c",rm.nhz,sep);
-  fprintf(fp,"%07d%1c",rm.nshoots2,sep);
-  fprintf(fp,"%04d%1c",rm.nhz2,sep);
-  fprintf(fp,"%02d%1c",rm.nch,sep);
+  fprintf(fp,"%1s",beg);
+  fprintf(fp,"%07d%1s",rm.nshoots,sep);
+  fprintf(fp,"%04d%1s",rm.nhz,sep);
+  fprintf(fp,"%07d%1s",rm.nshoots2,sep);
+  fprintf(fp,"%04d%1s",rm.nhz2,sep);
+  fprintf(fp,"%02d%1s",rm.nch,sep);
   fprintf(fp,"\n");
 }
 
@@ -253,7 +253,22 @@ int file_error(FILE *filep)
   return 0;
 }
 
-void raw_printf(FILE *fp, RMDataFile rm, int imax, single sep) 
+void raw_write(FILE *fp, RMDataFile rm) 
+{
+  int ierr;
+
+  // for each channel
+  for (int i=0; i<rm.nch; i++) { 
+    ierr=fwrite(rm.ch[i].raw, sizeof(bin), rm.ch[i].ndata, fp);
+
+    if(ierr!=rm.ch[i].ndata) {
+      fprintf(stderr,"\nwrite block %d corrupt",i+1);
+      exit(0);
+    }
+  }
+}
+
+void raw_printf(FILE *fp, RMDataFile rm, int imax, const char* sep) 
 {
 
   int ndata[rm.nch];
@@ -273,9 +288,9 @@ void raw_printf(FILE *fp, RMDataFile rm, int imax, single sep)
     // for each channel
     for (int i=0; i<rm.nch; i++) { 
       if (k<ndata[i])
-        fprintf(fp,"%1c%8d",sep,rm.ch[i].raw[k]);
+        fprintf(fp,"%1s%8d",sep,rm.ch[i].raw[k]);
       else
-        fprintf(fp,"%1cx",sep);
+        fprintf(fp,"%1sx",sep);
     }
     fprintf(fp,"\n"); 
   }
@@ -309,7 +324,7 @@ void raw_debug(RMDataFile rm, int imax)
   }
 }
 
-void phy_printf(FILE *fp, RMDataFile rm, int imax, single sep) 
+void phy_printf(FILE *fp, RMDataFile rm, int imax, const char* sep) 
 {
 
   int ndata[rm.nch];
@@ -329,9 +344,9 @@ void phy_printf(FILE *fp, RMDataFile rm, int imax, single sep)
     // for each channel
     for (int i=0; i<rm.nch; i++) { 
       if (k<ndata[i])
-        fprintf(fp,"%1c%10.4f",sep,rm.ch[i].phy[k]);
+        fprintf(fp,"%1s%8.4f",sep,rm.ch[i].phy[k]);
       else
-        fprintf(fp,"%1c%10.4f",sep,-999.);
+        fprintf(fp,"%1s%8.4f",sep,-999.);
     }
     fprintf(fp,"\n"); 
   }
@@ -371,7 +386,7 @@ void phy_debug(RMDataFile rm, int imax)
   Author: hbarbosa
   Date: 17 Aug 2011
  */
-void profile_read (char* fname, RMDataFile *rm) 
+void profile_read (const char* fname, RMDataFile *rm) 
 {
   FILE *fp; // file pointer
   int nread; // amount of data read
@@ -445,20 +460,31 @@ void profile_debug(RMDataFile rm)
   phy_debug(rm, 0);
 }
 
-void profile_printf(RMDataFile rm, int imax, single beg, 
-                    single sep, single sep2) 
+void profile_printf(FILE *fp, RMDataFile rm, int imax, const char* beg, 
+                    const char* sep, const char* sep2) 
 {  
   // Print main header
-  header_printf(stdout, rm, beg, sep);
+  header_printf(fp, rm, beg, sep);
   
   // Print lines describing channels
   for (int i=0; i<rm.nch; i++) {
-    channel_printf(stdout, rm.ch[i], beg, sep);
+    channel_printf(fp, rm.ch[i], beg, sep);
   }
 
   // Print bin data
-  std::cerr << "raw\n";
-  raw_printf(stdout, rm, imax, sep2);
-  std::cerr << "phys\n";
-  phy_printf(stdout, rm, imax, sep2);
+  phy_printf(fp, rm, imax, sep2);
+}
+
+void profile_write(FILE *fp, RMDataFile rm) 
+{  
+  // Print main header
+  header_printf(fp, rm, "", "");
+  
+  // Print lines describing channels
+  for (int i=0; i<rm.nch; i++) {
+    channel_printf(fp, rm.ch[i], "", "");
+  }
+
+  // Print bin data
+  raw_write(fp, rm);
 }
