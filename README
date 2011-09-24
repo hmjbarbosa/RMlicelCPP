@@ -1,3 +1,4 @@
+________________________________________________________________________________
 ABOUT THE PROJECT
 
 This project is an effort to develop basic C++ libraries for dealing
@@ -8,6 +9,66 @@ data format:
 
 http://www.licel.com/raw_data_format.html
 
+________________________________________________________________________________
+DISTRIBUTED FILES
+
+*.cpp              Source code of programs and libraries
+*.h                Header files of libraries
+RM???????.???      Binary example files
+RM???????.???.txt  Ascii example files (converted by licel software)
+
+________________________________________________________________________________
+HOW TO COMPILE
+
+To compile the code you will need a working C++ compiler. If you
+are not using GNU/g++, just edit the Makefile as you wish. To compile
+everything at once, just:
+
+make all
+
+Or if you want to compile only on particular program, for exemple,
+rm2bin, try:
+
+make rm2bin
+
+To clean up objects and temporary files, try:
+
+make clean
+
+To clean up everything, including the compiled executables:
+
+make clean-all
+
+________________________________________________________________________________
+HOW TO USE
+
+rm2csv [input binary files] 
+
+  Convert a list of binary raymetric/licel files into ascii files. New
+  files are named by adding a ".csv" after each file's name. Data are
+  converted to physical units. All numbers are separated by ";" to be
+  read into a spreedsheet programa as a comma-separated-values (CSV)
+  file.
+
+rm2dat [input binary files] 
+
+  Convert a list of binary raymetric/licel files into ascii files. New
+  files are named by adding a ".dat" after each file's name. Data are
+  converted to physical units. A "# " is added to each header line
+  and data is separated by tabs. The output format could be used
+  easily with standard ploting utilities such as gnuplot.
+
+rm2bin [output file] [input binary files] 
+
+  Add a list of files and save the result in a binary raymetric/licel
+  file. The new file must not exist. Raw data and number of shoots are
+  accumulated; T0 and P0 are averaged; start and end dates are set to
+  be the earliest and latest amongst all files respectively, hence
+  convering the whole period. All other variables, e.g. altitude,
+  repetition rate, channel configuration, must be the same in all
+  files.
+
+________________________________________________________________________________
 ABOUT ME
 
 Want to contribute or use it? Contact me!

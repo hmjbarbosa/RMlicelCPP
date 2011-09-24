@@ -1,6 +1,4 @@
 
-EXEC=dataread
-
 OBJ=\
 	RMlicelUSP.o
 
@@ -33,6 +31,9 @@ RMlicelUSP.o	:	RMlicelUSP.cpp
 
 clean	:	
 	rm -f $(OBJ) 
+	rm -f *~
+
+clean-all	:	
+	rm -f $(OBJ) 
 	rm -f $(PROGS)
-	rm -f $(EXEC)
 	rm -f *~
