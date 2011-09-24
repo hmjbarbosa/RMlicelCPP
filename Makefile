@@ -6,6 +6,7 @@ OBJ=\
 
 PROGS=\
 	dataread \
+	rm2bin \
 	rm2csv \
 	rm2dat
 
@@ -14,6 +15,9 @@ CC=g++
 CFLAGS=-g -Wall
 
 all	:	$(PROGS)
+
+rm2bin	:	rm2bin.cpp $(OBJ)
+	$(CC) -o rm2bin $(CFLAGS) $(OBJ) rm2bin.cpp
 
 rm2csv	:	rm2csv.cpp $(OBJ)
 	$(CC) -o rm2csv $(CFLAGS) $(OBJ) rm2csv.cpp

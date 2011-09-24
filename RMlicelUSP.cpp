@@ -89,13 +89,15 @@ void channel_printf(FILE *fp, channel ch, const char* beg, const char* sep)
   fprintf(fp,"%03d%1s",0,sep); 
   fprintf(fp,"%02d%1s",ch.bits,sep);
   fprintf(fp,"%06d%1s",ch.nshoots,sep);
-  if (!ch.photons)
+  if (!ch.photons) {
     fprintf(fp,"%05.3f%1s",ch.discr,sep);
-  else
+    fprintf(fp,"%-17s%1s",ch.tr,sep);
+  } else {
     fprintf(fp,"%06.4f%1s",ch.discr,sep);
+    fprintf(fp,"%-16s%1s",ch.tr,sep);
+  }
 
-  fprintf(fp,"%3s%1s",ch.tr,sep);
-  fprintf(fp,"\n");
+  fprintf(fp,"\r\n");
 }
 
 /*
@@ -181,8 +183,8 @@ void header_printf(FILE *fp, RMDataFile rm, const char* beg, const char* sep)
 {
   // line 1
   fprintf(fp,"%1s",beg);
-  fprintf(fp,"%13s%1s",rm.file,sep);
-  fprintf(fp,"\n");
+  fprintf(fp,"%-76s%1s",rm.file,sep);
+  fprintf(fp,"\r\n");
   
   // Line 2
   fprintf(fp,"%1s",beg);
@@ -197,8 +199,7 @@ void header_printf(FILE *fp, RMDataFile rm, const char* beg, const char* sep)
   fprintf(fp,"%02d%1s",rm.zen,sep);
   fprintf(fp,"%02d%1s",rm.idum,sep);
   fprintf(fp,"%4.1f%1s",rm.T0,sep);
-  fprintf(fp,"%6.1f%1s",rm.P0,sep);
-  fprintf(fp,"\n");
+  fprintf(fp,"%6.1f\r\n",rm.P0);
 
   // Line 3
   fprintf(fp,"%1s",beg);
@@ -207,7 +208,7 @@ void header_printf(FILE *fp, RMDataFile rm, const char* beg, const char* sep)
   fprintf(fp,"%07d%1s",rm.nshoots2,sep);
   fprintf(fp,"%04d%1s",rm.nhz2,sep);
   fprintf(fp,"%02d%1s",rm.nch,sep);
-  fprintf(fp,"\n");
+  fprintf(fp,"%48s\r\n"," ");
 }
 
 /*
@@ -257,15 +258,19 @@ void raw_write(FILE *fp, RMDataFile rm)
 {
   int ierr;
 
+  fprintf(fp,"\r\n");
+
   // for each channel
   for (int i=0; i<rm.nch; i++) { 
     ierr=fwrite(rm.ch[i].raw, sizeof(bin), rm.ch[i].ndata, fp);
+    fprintf(fp,"\r\n");
 
     if(ierr!=rm.ch[i].ndata) {
       fprintf(stderr,"\nwrite block %d corrupt",i+1);
       exit(0);
     }
   }
+
 }
 
 void raw_printf(FILE *fp, RMDataFile rm, int imax, const char* sep) 
@@ -380,6 +385,173 @@ void phy_debug(RMDataFile rm, int imax)
   }
 }
 
+bool DateLT(date d1, date d2) 
+{
+  if (d1.YY < d2.YY) return(true);
+  if (d1.YY > d2.YY) return(false);
+  if (d1.MM < d2.MM) return(true);
+  if (d1.MM > d2.MM) return(false);
+  if (d1.DD < d2.DD) return(true);
+  if (d1.DD > d2.DD) return(false);
+
+  if (d1.hh < d2.hh) return(true);
+  if (d1.hh > d2.hh) return(false);
+  if (d1.mn < d2.mn) return(true);
+  if (d1.mn > d2.mn) return(false);
+  if (d1.ss < d2.ss) return(true);
+  if (d1.ss > d2.ss) return(false);
+
+  return(false);
+}
+
+void profile_add (RMDataFile *acum, RMDataFile toadd) 
+{
+  float dScale; // conversion between raw and physical data
+
+  /* ************** RM DATA FILE **********************************   */
+  /* ************** CHECKS ****************************************   */
+
+  // check site name
+  if (strcmp(acum->site, toadd.site)) {
+    fprintf(stderr,"Don't try to add files of different sites!\n");
+    exit(1);
+  }
+  // check alt, lon, lat, zen
+  if (acum->alt!=toadd.alt) {
+    fprintf(stderr,"Altitudes are different!\n");
+    exit(1);
+  }
+  if (acum->lon!=toadd.lon) {
+    fprintf(stderr,"Longitudes are different!\n");
+    exit(1);
+  }
+  if (acum->lat!=toadd.lat) {
+    fprintf(stderr,"Latitudes are different!\n");
+    exit(1);
+  }
+  if (acum->zen!=toadd.zen) {
+    fprintf(stderr,"Zeniths are different!\n");
+    exit(1);
+  }
+  // check repetition rates
+  if (acum->nhz!=toadd.nhz || acum->nhz2!=toadd.nhz2 ) {
+    fprintf(stderr,"Laser repetition rates are different!\n");
+    exit(1);
+  }  
+  // check number of channels
+  if (acum->nch!=toadd.nch) {
+    fprintf(stderr,"Can't add files with differente number of channels!\n");
+    exit(1);
+  }
+
+  /* ************** RM DATA FILE **********************************   */
+  /* ************** SUMS   ****************************************   */
+
+  // update start/end dates
+  if (DateLT(toadd.start, acum->start)) acum->start=toadd.start;
+  if (DateLT(acum->end,toadd.end)) acum->end=toadd.end;
+
+  // Number of files added
+  acum->idum++;
+  if (acum->idum>99) {
+    fprintf(stderr,"Maximum number of files to average is 100!\n");
+    exit(1);    
+  }
+
+  // average T0,P0
+  acum->T0=((acum->T0)*(acum->idum)+toadd.T0)/(acum->idum+1);
+  acum->P0=((acum->P0)*(acum->idum)+toadd.P0)/(acum->idum+1);
+
+  // acumulate shoots
+  acum->nshoots+=toadd.nshoots;
+  acum->nshoots2+=toadd.nshoots2;
+
+  
+  // LOOP TROUGH CHANNELS
+  for (int i=0; i<acum->nch; i++) {
+
+    /* ************** CHANNELS **************************************   */
+    /* ************** CHECKS ****************************************   */
+
+    // check channel activation
+    if (acum->ch[i].active != toadd.ch[i].active) {
+      fprintf(stderr,"Channel #%d 'active' is different!\n",i);
+      exit(1);
+    }
+    // check channel photons
+    if (acum->ch[i].photons != toadd.ch[i].photons) {
+      fprintf(stderr,"Channel #%d 'photons' is different!\n",i);
+      exit(1);
+    }
+    // check channel elastic
+    if (acum->ch[i].elastic != toadd.ch[i].elastic) {
+      fprintf(stderr,"Channel #%d 'elastic' is different!\n",i);
+      exit(1);
+    }
+    // check channel ndata
+    if (acum->ch[i].ndata != toadd.ch[i].ndata) {
+      fprintf(stderr,"Channel #%d 'ndata' is different!\n",i);
+      exit(1);
+    }
+    // check channel pmtv
+    if (acum->ch[i].pmtv != toadd.ch[i].pmtv) {
+      fprintf(stderr,"Channel #%d 'pmtv' is different!\n",i);
+      exit(1);
+    }
+    // check channel binw
+    if (acum->ch[i].binw != toadd.ch[i].binw) {
+      fprintf(stderr,"Channel #%d 'binw' is different!\n",i);
+      exit(1);
+    }
+    // check channel wlen
+    if (acum->ch[i].wlen != toadd.ch[i].wlen) {
+      fprintf(stderr,"Channel #%d 'wlen' is different!\n",i);
+      exit(1);
+    }
+    // check channel pol
+    if (acum->ch[i].pol != toadd.ch[i].pol) {
+      fprintf(stderr,"Channel #%d 'pol' is different!\n",i);
+      exit(1);
+    }
+    // check channel bits
+    if (acum->ch[i].bits != toadd.ch[i].bits) {
+      fprintf(stderr,"Channel #%d 'bits' is different!\n",i);
+      exit(1);
+    }
+    // check channel discr
+    if (acum->ch[i].discr != toadd.ch[i].discr) {
+      fprintf(stderr,"Channel #%d 'discr' is different!\n",i);
+      exit(1);
+    }
+    // check channel tr
+    if (strcmp(acum->ch[i].tr,toadd.ch[i].tr)) {
+      fprintf(stderr,"Channel #%d 'tr' is different!\n",i);
+      exit(1);
+    }
+
+    /* ************** CHANNELS **************************************   */
+    /* ************** SUMS   ****************************************   */
+
+    // add number of shoots
+    acum->ch[i].nshoots += toadd.ch[i].nshoots;
+
+    // add raw data
+    for (int j=0; j<acum->ch[i].ndata; j++)
+      acum->ch[i].raw[j] += toadd.ch[i].raw[j];
+
+    // convert again to physical units
+    if (!acum->ch[i].photons)
+      dScale = acum->ch[i].nshoots*pow(2,acum->ch[i].bits)/(acum->ch[i].discr*1.e3);
+    else 
+      dScale = acum->ch[i].nshoots/20.;
+    
+    for (int j=0; j<acum->ch[i].ndata; j++) 
+      acum->ch[i].phy[j] = (float) acum->ch[i].raw[j] / dScale;
+
+  } // end channel loop
+
+} // end subroutine
+
 /*
   Function: read_single_file
   Description: read one lidar file and store all data inside a RMDataFile variable
@@ -425,8 +597,7 @@ void profile_read (const char* fname, RMDataFile *rm)
       }
       // convert data to physical units
       if (!rm->ch[i].photons)
-        dScale = rm->ch[i].nshoots*pow(2,rm->ch[i].bits)/
-          (rm->ch[i].discr*1.e3);
+        dScale = rm->ch[i].nshoots*pow(2,rm->ch[i].bits)/(rm->ch[i].discr*1.e3);
       else 
         dScale = rm->ch[i].nshoots/20.;
       
@@ -436,7 +607,7 @@ void profile_read (const char* fname, RMDataFile *rm)
       // read end of line
       if(fgets(szBuffer,90,fp)==NULL) {
         if(file_error(fp)!=0) {
-          fprintf(stderr,"\nmarker %d corrupt",i+1);
+          fprintf(stderr,"\nmarker %d corrupt\n",i+1);
           exit(0);
         }
       }

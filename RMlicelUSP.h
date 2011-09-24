@@ -48,7 +48,7 @@ typedef struct{
     int active; // active (1) non-active (0)
     int photons; // photons (1) analog (0)
     int elastic; // elastic (1) raman (2)
-    int ndata; // numer of data points
+    int ndata; // number of data points
     int pmtv; // pmt high voltage (V)
     float binw; // bin width (m)    
     int wlen; // wavelength (nm)
@@ -74,9 +74,9 @@ typedef struct{
     float T0; // reference surface temperature
     float P0; // reference surface pressure
     int nshoots; // number of shoots
-    int nhz; // repedition rate (Hz)
+    int nhz; // repetition rate (Hz)
     int nshoots2; // number of shoots
-    int nhz2; // repedition rate (Hz)
+    int nhz2; // repetition rate (Hz)
     int nch; // number of channels
     channel *ch;
 } RMDataFile;
@@ -84,6 +84,7 @@ typedef struct{
 extern void Free_RMDataFile(RMDataFile *rm);
 extern void Init_RMDataFile(RMDataFile *rm);
 extern int file_error(FILE *filep);
+extern bool DateLT(date d1, date d2);
 
 extern void channel_debug(channel ch);
 extern void channel_read  (FILE *fp, channel*ch);
@@ -103,6 +104,7 @@ extern void phy_printf(FILE *fp, RMDataFile rm, int imax, const char* sep);
 
 extern void profile_debug(RMDataFile rm);
 extern void profile_read (const char* fname, RMDataFile *rm);
+extern void profile_add (RMDataFile *acum, RMDataFile toadd);
 extern void profile_write(FILE *fp, RMDataFile rm);
 extern void profile_printf(FILE *fp, RMDataFile rm, int imax, 
                            const char* beg, const char* sep, const char* sep2);
