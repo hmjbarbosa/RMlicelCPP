@@ -2,11 +2,15 @@
 OBJ=\
 	RMlicelUSP.o
 
+NETCDF=\
+	RMnetcdfUSP.o
+
 PROGS=\
 	dataread \
 	rm2bin \
 	rm2csv \
-	rm2dat
+	rm2dat \
+	rm2nc
 
 CC=g++
 
@@ -26,15 +30,21 @@ rm2dat	:	rm2dat.cpp $(OBJ)
 dataread	:	dataread.cpp $(OBJ)
 	$(CC) -o dataread $(CFLAGS) $(OBJ) $<
 
+rm2nc	:	rm2nc.cpp $(OBJ) $(NETCDF)
+	$(CC) -o rm2nc $(CFLAGS) -lnetcdf $(OBJ) $(NETCDF) $<
+
 RMlicelUSP.o	:	RMlicelUSP.cpp
 	$(CC) -c $(CFLAGS) RMlicelUSP.cpp
 
+RMnetcdfUSP.o	:	RMnetcdfUSP.cpp RMlicelUSP.o
+	$(CC) -c $(CFLAGS) RMnetcdfUSP.cpp
+
 clean	:	
-	rm -f $(OBJ) 
+	rm -f $(OBJ) $(NETCDF)
 	rm -f *~
 
 clean-all	:	
-	rm -f $(OBJ) 
+	rm -f $(OBJ) $(NETCDF)
 	rm -f $(PROGS)
 	rm -f *~
 
