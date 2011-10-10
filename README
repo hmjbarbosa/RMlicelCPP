@@ -54,9 +54,18 @@ rm2dat [input binary files]
 
   Convert a list of binary raymetric/licel files into ascii files. New
   files are named by adding a ".dat" after each file's name. Data are
-  converted to physical units. A "# " is added to each header line
-  and data is separated by tabs. The output format could be used
-  easily with standard ploting utilities such as gnuplot.
+  converted to physical units. A "# " is added to each header line and
+  data is separated by tabs. The output format could be used easily
+  with standard ploting utilities such as gnuplot.
+
+rm2nc [input binary files] 
+
+  Convert a list of binary raymetric/licel files into netcdf
+  files. New files are named by adding a ".nc" after each file's
+  name. Data are converted to physical units. netCDF complies with
+  COARDS conventions besides including fields such as contact and
+  history. The output format could be used easily with standard
+  scientific sotware such as grads, matlab, etc.
 
 rm2bin [output file] [input binary files] 
 

@@ -51,19 +51,36 @@ void Init_RMDataFile(RMDataFile *rm)
   Author: hbarbosa
   Date: 30 may 2011
  */
+void channel_read_error() {
+  fprintf(stderr,"fscanf error while reading channel!\n");
+  exit(-1);
+}
+
 void channel_read(FILE *fp, channel *ch) 
 {
-  fscanf(fp,"%1d",&ch->active); 
-  fscanf(fp,"%1d",&ch->photons);
-  fscanf(fp,"%1d",&ch->elastic);
-  fscanf(fp,"%5d 1",&ch->ndata);
-  fscanf(fp,"%4d",&ch->pmtv);
-  fscanf(fp,"%4f",&ch->binw);
-  fscanf(fp,"%5d.%1c 0 0 00 000 ",&ch->wlen,&ch->pol); 
-  fscanf(fp,"%2d",&ch->bits); 
-  fscanf(fp,"%6d",&ch->nshoots); 
-  fscanf(fp,"%6f",&ch->discr);
-  fscanf(fp,"%3s\n",ch->tr);
+  int n;
+  n=fscanf(fp,"%1d",&ch->active);
+  if (n!=1) channel_read_error();
+  n=fscanf(fp,"%1d",&ch->photons);
+  if (n!=1) channel_read_error();
+  n=fscanf(fp,"%1d",&ch->elastic);
+  if (n!=1) channel_read_error();
+  n=fscanf(fp,"%5d 1",&ch->ndata);
+  if (n!=1) channel_read_error();
+  n=fscanf(fp,"%4d",&ch->pmtv);
+  if (n!=1) channel_read_error();
+  n=fscanf(fp,"%4f",&ch->binw);
+  if (n!=1) channel_read_error();
+  n=fscanf(fp,"%5d.%1c 0 0 00 000 ",&ch->wlen,&ch->pol); 
+  if (n!=2) channel_read_error();
+  n=fscanf(fp,"%2d",&ch->bits); 
+  if (n!=1) channel_read_error();
+  n=fscanf(fp,"%6d",&ch->nshoots); 
+  if (n!=1) channel_read_error();
+  n=fscanf(fp,"%6f",&ch->discr);
+  if (n!=1) channel_read_error();
+  n=fscanf(fp,"%3s\n",ch->tr);
+  if (n!=1) channel_read_error();
 }
 
 /*
@@ -128,30 +145,49 @@ void channel_debug(channel ch)
   Author: hbarbosa
   Date: 17 Aug 2011
  */
+void header_read_error() {
+  fprintf(stderr,"fscanf error while reading header!\n");
+  exit(-1);
+}
+
 void header_read(FILE *fp, RMDataFile *rm) 
 {
   char lat[6];
   char lon[6];
   char T0[4];
   char P0[6];  
+  int n;
 
   // Line 1
-  fscanf(fp,"%13s\n", rm->file);
+  n=fscanf(fp,"%13s\n", rm->file);
+  if (n!=1) header_read_error();
   
   // Line 2
-  fscanf(fp,"%s",rm->site);
-  fscanf(fp,"%2d/%2d/%4d",&rm->start.DD,&rm->start.MM,&rm->start.YY);
-  fscanf(fp,"%2d:%2d:%2d",&rm->start.hh,&rm->start.mn,&rm->start.ss);
-  fscanf(fp,"%2d/%2d/%4d",&rm->end.DD,  &rm->end.MM,  &rm->end.YY);
-  fscanf(fp,"%2d:%2d:%2d",&rm->end.hh,  &rm->end.mn,  &rm->end.ss);
-  fscanf(fp,"%d",&rm->alt);
-  fscanf(fp,"%s",lon);
-  fscanf(fp,"%s",lat);
-  fscanf(fp,"%d", &rm->zen);
-  fscanf(fp,"%d",&rm->idum);
-  fscanf(fp,"%s",T0);
-  fscanf(fp,"%s",P0);
-  fscanf(fp,"\n");
+  n=fscanf(fp,"%s",rm->site);
+  if (n!=1) header_read_error();
+  n=fscanf(fp,"%2d/%2d/%4d",&rm->start.DD,&rm->start.MM,&rm->start.YY);
+  if (n!=3) header_read_error();
+  n=fscanf(fp,"%2d:%2d:%2d",&rm->start.hh,&rm->start.mn,&rm->start.ss);
+  if (n!=3) header_read_error();
+  n=fscanf(fp,"%2d/%2d/%4d",&rm->end.DD,  &rm->end.MM,  &rm->end.YY);
+  if (n!=3) header_read_error();
+  n=fscanf(fp,"%2d:%2d:%2d",&rm->end.hh,  &rm->end.mn,  &rm->end.ss);
+  if (n!=3) header_read_error();
+  n=fscanf(fp,"%d",&rm->alt);
+  if (n!=1) header_read_error();
+  n=fscanf(fp,"%s",lon);
+  if (n!=1) header_read_error();
+  n=fscanf(fp,"%s",lat);
+  if (n!=1) header_read_error();
+  n=fscanf(fp,"%d", &rm->zen);
+  if (n!=1) header_read_error();
+  n=fscanf(fp,"%d",&rm->idum);
+  if (n!=1) header_read_error();
+  n=fscanf(fp,"%s",T0);
+  if (n!=1) header_read_error();
+  n=fscanf(fp,"%s",P0);
+  if (n!=1) header_read_error();
+  n=fscanf(fp,"\n");
 
   // Depending on windows configuration, data file may have numbers
   // separated by comma instead of dot
@@ -169,8 +205,9 @@ void header_read(FILE *fp, RMDataFile *rm)
   rm->P0=atof(P0);
 
   // Line 3
-  fscanf(fp,"%7d %4d %7d %4d %2d\n",
+  n=fscanf(fp,"%7d %4d %7d %4d %2d\n",
          &rm->nshoots, &rm->nhz, &rm->nshoots2, &rm->nhz2,&rm->nch);
+  if (n!=5) header_read_error();
 }
 
 /*

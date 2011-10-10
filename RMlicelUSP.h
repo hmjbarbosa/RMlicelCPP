@@ -87,10 +87,12 @@ extern int file_error(FILE *filep);
 extern bool DateLT(date d1, date d2);
 
 extern void channel_debug(channel ch);
+extern void channel_readerror();
 extern void channel_read  (FILE *fp, channel*ch);
 extern void channel_printf(FILE *fp, channel ch, const char* beg, const char* sep);
 
 extern void header_debug(RMDataFile rm);
+extern void header_read_error();
 extern void header_read  (FILE *fp, RMDataFile*rm);
 extern void header_printf(FILE *fp, RMDataFile rm, 
                           const char* beg, const char* sep, const char* sep2);
