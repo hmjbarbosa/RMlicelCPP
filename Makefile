@@ -1,9 +1,6 @@
-
-OBJ=\
-	RMlicelUSP.o
-
-NETCDF=\
-	RMnetcdfUSP.o
+CC=g++
+CFLAGS=-c -Wall -O2
+LFLAGS=-Wall -O2
 
 PROGS=\
 	dataread \
@@ -12,41 +9,34 @@ PROGS=\
 	rm2dat \
 	rm2nc
 
-CC=g++
-
-CFLAGS=-g -Wall
-
 all	:	$(PROGS)
 
-rm2bin	:	rm2bin.cpp $(OBJ)
-	$(CC) -o rm2bin $(CFLAGS) $(OBJ) rm2bin.cpp
+rm2bin	:	rm2bin.cpp RMlicelUSP.o
+	$(CC) $(LFLAGS) -o rm2bin rm2bin.cpp RMlicelUSP.o
 
-rm2csv	:	rm2csv.cpp $(OBJ)
-	$(CC) -o rm2csv $(CFLAGS) $(OBJ) rm2csv.cpp
+rm2csv	:	rm2csv.cpp RMlicelUSP.o
+	$(CC) $(LFLAGS) -o rm2csv rm2csv.cpp  RMlicelUSP.o
 
-rm2dat	:	rm2dat.cpp $(OBJ)
-	$(CC) -o rm2dat $(CFLAGS) $(OBJ) rm2dat.cpp
+rm2dat	:	rm2dat.cpp RMlicelUSP.o
+	$(CC) $(LFLAGS) -o rm2dat rm2dat.cpp  RMlicelUSP.o
 
-dataread	:	dataread.cpp $(OBJ)
-	$(CC) -o dataread $(CFLAGS) $(OBJ) $<
+dataread	:	dataread.cpp RMlicelUSP.o
+	$(CC) $(LFLAGS) -o dataread dataread.cpp RMlicelUSP.o
 
-rm2nc	:	rm2nc.cpp $(OBJ) $(NETCDF)
-	$(CC) -o rm2nc $(CFLAGS) -lnetcdf $(OBJ) $(NETCDF) $<
+rm2nc	:	rm2nc.cpp RMlicelUSP.o RMnetcdfUSP.o
+	$(CC) $(LFLAGS) -lnetcdf -o rm2nc rm2nc.cpp RMlicelUSP.o RMnetcdfUSP.o
 
 RMlicelUSP.o	:	RMlicelUSP.cpp
-	$(CC) -c $(CFLAGS) RMlicelUSP.cpp
+	$(CC) $(CFLAGS) RMlicelUSP.cpp
 
-RMnetcdfUSP.o	:	RMnetcdfUSP.cpp RMlicelUSP.o
-	$(CC) -c $(CFLAGS) RMnetcdfUSP.cpp
+RMnetcdfUSP.o	:	RMnetcdfUSP.cpp
+	$(CC) $(CFLAGS) RMnetcdfUSP.cpp
 
 clean	:	
-	rm -f $(OBJ) $(NETCDF)
-	rm -f *~
+	rm -f *.o *~ 
 
 clean-all	:	
-	rm -f $(OBJ) $(NETCDF)
-	rm -f $(PROGS)
-	rm -f *~
+	rm -f *.o *~ $(PROGS)
 
 check	: $(PROGS)
 	@echo -n "rm2dat :: dat conversion: "
