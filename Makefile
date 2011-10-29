@@ -1,6 +1,6 @@
 CC=g++
-CFLAGS=-c -Wall -O2
-LFLAGS=-Wall -O2
+CFLAGS=-c -Wall -O1
+LFLAGS=-Wall -O1
 
 PROGS=\
 	dataread \
@@ -20,8 +20,8 @@ rm2csv	:	rm2csv.cpp RMlicelUSP.o
 rm2dat	:	rm2dat.cpp RMlicelUSP.o
 	$(CC) $(LFLAGS) -o rm2dat rm2dat.cpp  RMlicelUSP.o
 
-dataread	:	dataread.cpp RMlicelUSP.o
-	$(CC) $(LFLAGS) -o dataread dataread.cpp RMlicelUSP.o
+dataread	:	dataread.cpp RMlicelUSP.o RMnetcdfUSP.o
+	$(CC) $(LFLAGS) -lnetcdf -o dataread dataread.cpp RMlicelUSP.o RMnetcdfUSP.o
 
 rm2nc	:	rm2nc.cpp RMlicelUSP.o RMnetcdfUSP.o
 	$(CC) $(LFLAGS) -lnetcdf -o rm2nc rm2nc.cpp RMlicelUSP.o RMnetcdfUSP.o

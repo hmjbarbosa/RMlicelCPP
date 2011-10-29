@@ -441,6 +441,131 @@ bool DateLT(date d1, date d2)
   return(false);
 }
 
+/* Compares two profiles for compatibility. This is usually used
+   before adding, averaging or merging two profiles. It halts the
+   program on different errors.
+ */
+void check_profiles (RMDataFile A, RMDataFile B) 
+{
+  /* ************** RM DATA FILE **********************************   */
+  /* ************** CHECKS ****************************************   */
+
+  // check site name
+  if (strcmp(A.site, B.site)) {
+    fprintf(stderr,"Sites are different!\n");
+    fprintf(stderr,"files: %s vs. %s\n",A.file,B.file);
+    exit(1);
+  }
+  // check alt, lon, lat, zen
+  if (A.alt!=B.alt) {
+    fprintf(stderr,"Altitudes are different!\n");
+    fprintf(stderr,"files: %s vs. %s\n",A.file,B.file);
+    exit(1);
+  }
+  if (A.lon!=B.lon) {
+    fprintf(stderr,"Longitudes are different!\n");
+    fprintf(stderr,"files: %s vs. %s\n",A.file,B.file);
+    exit(1);
+  }
+  if (A.lat!=B.lat) {
+    fprintf(stderr,"Latitudes are different!\n");
+    fprintf(stderr,"files: %s vs. %s\n",A.file,B.file);
+    exit(1);
+  }
+  if (A.zen!=B.zen) {
+    fprintf(stderr,"Zeniths are different!\n");
+    fprintf(stderr,"files: %s vs. %s\n",A.file,B.file);
+    exit(1);
+  }
+  // check repetition rates
+  if (A.nhz!=B.nhz || A.nhz2!=B.nhz2 ) {
+    fprintf(stderr,"Laser repetition rates are different!\n");
+    fprintf(stderr,"files: %s vs. %s\n",A.file,B.file);
+    exit(1);
+  }  
+  // check number of channels
+  if (A.nch!=B.nch) {
+    fprintf(stderr,"Number of channels are different!\n");
+    fprintf(stderr,"files: %s vs. %s\n",A.file,B.file);
+    exit(1);
+  }
+
+  // LOOP TROUGH CHANNELS
+  for (int i=0; i<A.nch; i++) {
+
+    /* ************** CHANNELS **************************************   */
+    /* ************** CHECKS ****************************************   */
+
+    // check channel activation
+    if (A.ch[i].active != B.ch[i].active) {
+      fprintf(stderr,"Channel #%d 'active' is different!\n",i);
+      fprintf(stderr,"files: %s vs. %s\n",A.file,B.file);
+      exit(1);
+    }
+    // check channel photons
+    if (A.ch[i].photons != B.ch[i].photons) {
+      fprintf(stderr,"Channel #%d 'photons' is different!\n",i);
+      fprintf(stderr,"files: %s vs. %s\n",A.file,B.file);
+      exit(1);
+    }
+    // check channel elastic
+    if (A.ch[i].elastic != B.ch[i].elastic) {
+      fprintf(stderr,"Channel #%d 'elastic' is different!\n",i);
+      fprintf(stderr,"files: %s vs. %s\n",A.file,B.file);
+      exit(1);
+    }
+    // check channel ndata
+    if (A.ch[i].ndata != B.ch[i].ndata) {
+      fprintf(stderr,"Channel #%d 'ndata' is different!\n",i);
+      fprintf(stderr,"files: %s vs. %s\n",A.file,B.file);
+      exit(1);
+    }
+    // check channel pmtv
+    if (A.ch[i].pmtv != B.ch[i].pmtv) {
+      fprintf(stderr,"Channel #%d 'pmtv' is different!\n",i);
+      fprintf(stderr,"files: %s vs. %s\n",A.file,B.file);
+      exit(1);
+    }
+    // check channel binw
+    if (A.ch[i].binw != B.ch[i].binw) {
+      fprintf(stderr,"Channel #%d 'binw' is different!\n",i);
+      fprintf(stderr,"files: %s vs. %s\n",A.file,B.file);
+      exit(1);
+    }
+    // check channel wlen
+    if (A.ch[i].wlen != B.ch[i].wlen) {
+      fprintf(stderr,"Channel #%d 'wlen' is different!\n",i);
+      fprintf(stderr,"files: %s vs. %s\n",A.file,B.file);
+      exit(1);
+    }
+    // check channel pol
+    if (A.ch[i].pol != B.ch[i].pol) {
+      fprintf(stderr,"Channel #%d 'pol' is different!\n",i);
+      fprintf(stderr,"files: %s vs. %s\n",A.file,B.file);
+      exit(1);
+    }
+    // check channel bits
+    if (A.ch[i].bits != B.ch[i].bits) {
+      fprintf(stderr,"Channel #%d 'bits' is different!\n",i);
+      fprintf(stderr,"files: %s vs. %s\n",A.file,B.file);
+      exit(1);
+    }
+    // check channel discr
+    if (A.ch[i].discr != B.ch[i].discr) {
+      fprintf(stderr,"Channel #%d 'discr' is different!\n",i);
+      fprintf(stderr,"files: %s vs. %s\n",A.file,B.file);
+      exit(1);
+    }
+    // check channel tr
+    if (strcmp(A.ch[i].tr,B.ch[i].tr)) {
+      fprintf(stderr,"Channel #%d 'tr' is different!\n",i);
+      fprintf(stderr,"files: %s vs. %s\n",A.file,B.file);
+      exit(1);
+    }
+  }
+
+}
+
 void profile_add (RMDataFile *acum, RMDataFile toadd) 
 {
   float dScale; // conversion between raw and physical data
@@ -448,38 +573,7 @@ void profile_add (RMDataFile *acum, RMDataFile toadd)
   /* ************** RM DATA FILE **********************************   */
   /* ************** CHECKS ****************************************   */
 
-  // check site name
-  if (strcmp(acum->site, toadd.site)) {
-    fprintf(stderr,"Don't try to add files of different sites!\n");
-    exit(1);
-  }
-  // check alt, lon, lat, zen
-  if (acum->alt!=toadd.alt) {
-    fprintf(stderr,"Altitudes are different!\n");
-    exit(1);
-  }
-  if (acum->lon!=toadd.lon) {
-    fprintf(stderr,"Longitudes are different!\n");
-    exit(1);
-  }
-  if (acum->lat!=toadd.lat) {
-    fprintf(stderr,"Latitudes are different!\n");
-    exit(1);
-  }
-  if (acum->zen!=toadd.zen) {
-    fprintf(stderr,"Zeniths are different!\n");
-    exit(1);
-  }
-  // check repetition rates
-  if (acum->nhz!=toadd.nhz || acum->nhz2!=toadd.nhz2 ) {
-    fprintf(stderr,"Laser repetition rates are different!\n");
-    exit(1);
-  }  
-  // check number of channels
-  if (acum->nch!=toadd.nch) {
-    fprintf(stderr,"Can't add files with differente number of channels!\n");
-    exit(1);
-  }
+  check_profiles(*acum, toadd);
 
   /* ************** RM DATA FILE **********************************   */
   /* ************** SUMS   ****************************************   */
@@ -506,68 +600,6 @@ void profile_add (RMDataFile *acum, RMDataFile toadd)
   
   // LOOP TROUGH CHANNELS
   for (int i=0; i<acum->nch; i++) {
-
-    /* ************** CHANNELS **************************************   */
-    /* ************** CHECKS ****************************************   */
-
-    // check channel activation
-    if (acum->ch[i].active != toadd.ch[i].active) {
-      fprintf(stderr,"Channel #%d 'active' is different!\n",i);
-      exit(1);
-    }
-    // check channel photons
-    if (acum->ch[i].photons != toadd.ch[i].photons) {
-      fprintf(stderr,"Channel #%d 'photons' is different!\n",i);
-      exit(1);
-    }
-    // check channel elastic
-    if (acum->ch[i].elastic != toadd.ch[i].elastic) {
-      fprintf(stderr,"Channel #%d 'elastic' is different!\n",i);
-      exit(1);
-    }
-    // check channel ndata
-    if (acum->ch[i].ndata != toadd.ch[i].ndata) {
-      fprintf(stderr,"Channel #%d 'ndata' is different!\n",i);
-      exit(1);
-    }
-    // check channel pmtv
-    if (acum->ch[i].pmtv != toadd.ch[i].pmtv) {
-      fprintf(stderr,"Channel #%d 'pmtv' is different!\n",i);
-      exit(1);
-    }
-    // check channel binw
-    if (acum->ch[i].binw != toadd.ch[i].binw) {
-      fprintf(stderr,"Channel #%d 'binw' is different!\n",i);
-      exit(1);
-    }
-    // check channel wlen
-    if (acum->ch[i].wlen != toadd.ch[i].wlen) {
-      fprintf(stderr,"Channel #%d 'wlen' is different!\n",i);
-      exit(1);
-    }
-    // check channel pol
-    if (acum->ch[i].pol != toadd.ch[i].pol) {
-      fprintf(stderr,"Channel #%d 'pol' is different!\n",i);
-      exit(1);
-    }
-    // check channel bits
-    if (acum->ch[i].bits != toadd.ch[i].bits) {
-      fprintf(stderr,"Channel #%d 'bits' is different!\n",i);
-      exit(1);
-    }
-    // check channel discr
-    if (acum->ch[i].discr != toadd.ch[i].discr) {
-      fprintf(stderr,"Channel #%d 'discr' is different!\n",i);
-      exit(1);
-    }
-    // check channel tr
-    if (strcmp(acum->ch[i].tr,toadd.ch[i].tr)) {
-      fprintf(stderr,"Channel #%d 'tr' is different!\n",i);
-      exit(1);
-    }
-
-    /* ************** CHANNELS **************************************   */
-    /* ************** SUMS   ****************************************   */
 
     // add number of shoots
     acum->ch[i].nshoots += toadd.ch[i].nshoots;

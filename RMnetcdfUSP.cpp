@@ -1,5 +1,13 @@
 #include "RMnetcdfUSP.h"
 
+int t_dimid, t_varid;
+int z_dimid, z_varid;
+int lat_dimid, lat_varid;
+int lon_dimid, lon_varid;
+
+// netCDF id of channels
+int chnid[NCHANNELS];
+
 /*
   Function: handle_error
   Description: handle netcdf errors
@@ -44,6 +52,63 @@ void handle_error(int status)
   exit(-1);
 }
 
+void profile_add_netcdf(const char* fname, RMDataFile First, RMDataFile toadd) 
+{
+  // return code of netCDF function calls
+  int ok;
+  
+  // netCDF id of file
+  int ncid;
+
+  size_t len;
+
+  float tval[1];
+  size_t tpos[1], start[NDIMS], count[NDIMS];
+  size_t zmax;
+
+  /* ************** RM DATA FILE **********************************   */
+  /* ************** CHECKS ****************************************   */
+
+  check_profiles(First, toadd);
+
+  /* ************** NETCDF  FILE **********************************   */
+  /* ************** WRITE  ****************************************   */
+  ok=nc_open(fname, NC_WRITE, &ncid);
+  if (ok != NC_NOERR) handle_error(ok);
+
+  // get number of 'times' current in this file
+  ok=nc_inq_dimlen(ncid, t_dimid, &len);
+  if (ok != NC_NOERR) handle_error(ok);
+
+  std::cerr<<len<<"\n";
+
+  // get size of vertical
+  ok=nc_inq_dimlen(ncid, z_dimid, &zmax);
+  if (ok != NC_NOERR) handle_error(ok);
+
+  // Fill arrays for data
+
+  //time
+  tval[0]=len; tpos[0]=len;
+  ok=nc_put_var1_float(ncid, t_varid, tpos, tval);
+  if (ok != NC_NOERR) handle_error(ok);
+
+  // because time is unlimited we cannot fill the whole array at once
+  start[0]=len; count[0]=1;
+  start[1]=0; count[1]=zmax;
+  start[2]=0; count[2]=1;
+  start[3]=0; count[3]=1;
+  for (int i=0; i<toadd.nch; i++) {
+    if (toadd.ch[i].active==1) {
+      ok=nc_put_vara_float(ncid, chnid[i], start, count, toadd.ch[i].phy);
+    }
+  }
+
+  // CLOSE netcdf FILE
+  ok=nc_close(ncid);
+  if (ok != NC_NOERR) handle_error(ok);
+
+}
 /*
   Function: profile_write_netcdf
   Description: Writes a RMDataFile as a netcdf file
@@ -58,16 +123,16 @@ void profile_write_netcdf(const char* fname, RMDataFile rm)
   // netCDF id of file
   int ncid;
   // netCDF id of dimensions (T, Z, Y, X)
-  int dimid[4];
-  int vdimid[4];
-  // netCDF id of channels
-  int chnid[5];
+  int dimid[NDIMS];
+  int vdimid[NDIMS];
 
   // temporary string for writing netCDF attributes
   char longstr[256];
 
   // long arrays
   float *fval;
+  float tval[1];
+  size_t tpos[1], start[NDIMS], count[NDIMS];
 
   // max number of bins in all channels
   int zmax;
@@ -82,88 +147,99 @@ void profile_write_netcdf(const char* fname, RMDataFile rm)
    * DEFINE VARIABLES. Although lat/lon are generally fixed, COARDS
    * convection require them to be defined as variables
    */
-  ok=nc_def_dim(ncid, "time", 1   , &dimid[0]);
+  ok=nc_def_dim(ncid, "time", NC_UNLIMITED, &t_dimid);
   if (ok != NC_NOERR) handle_error(ok);
 
-  // net max number of bins in all channels
+  // max number of bins in all channels
   zmax=-1;
   for (int i=0; i<rm.nch; i++)
     if (rm.ch[i].ndata > zmax) 
       zmax=rm.ch[i].ndata;
  
-  ok=nc_def_dim(ncid, "z"   , zmax, &dimid[1]);
+  ok=nc_def_dim(ncid, "z"   , zmax, &z_dimid);
   if (ok != NC_NOERR) handle_error(ok);
 
-  ok=nc_def_dim(ncid, "lat" , 1   , &dimid[2]);
+  ok=nc_def_dim(ncid, "lat" , 1   , &lat_dimid);
   if (ok != NC_NOERR) handle_error(ok);
 
-  ok=nc_def_dim(ncid, "lon" , 1   , &dimid[3]);
+  ok=nc_def_dim(ncid, "lon" , 1   , &lon_dimid);
   if (ok != NC_NOERR) handle_error(ok);
+
+  dimid[0]=t_dimid;
+  dimid[1]=z_dimid;
+  dimid[2]=lat_dimid;
+  dimid[3]=lon_dimid;
 
   /*
    * TIME IN SECONDS
    */
-  ok=nc_def_var(ncid, "time", NC_FLOAT, 1, &dimid[0], &vdimid[0]);
+  ok=nc_def_var(ncid, "time", NC_FLOAT, 1, &t_dimid, &t_varid);
   if (ok != NC_NOERR) handle_error(ok);
 
-  ok=nc_put_att_text(ncid, vdimid[0], "title", 4, "time");
+  ok=nc_put_att_text(ncid, t_varid, "title", 4, "time");
   if (ok != NC_NOERR) handle_error(ok);
 
-  ok=nc_put_att_text(ncid, vdimid[0], "long_name", 4, "time");
+  ok=nc_put_att_text(ncid, t_varid, "long_name", 4, "time");
   if (ok != NC_NOERR) handle_error(ok);
 
-  sprintf(longstr,"seconds since %04d-%02d-%02d %02d:%02d:%02d -4:00",
-          rm.start.YY, rm.start.MM, rm.start.DD, rm.start.hh, rm.start.mn, rm.start.ss);
-  ok=nc_put_att_text(ncid, vdimid[0], "units",strlen(longstr),longstr);
+  // now we start at full minutes
+  sprintf(longstr,"minutes since %04d-%02d-%02d %02d:%02d:00 -4:00",
+          rm.start.YY, rm.start.MM, rm.start.DD, rm.start.hh, rm.start.mn);
+  ok=nc_put_att_text(ncid, t_varid, "units",strlen(longstr),longstr);
   if (ok != NC_NOERR) handle_error(ok);
 
   /*
    * BINS ABOVE GROUND
    */
-  ok=nc_def_var(ncid, "z", NC_FLOAT, 1, &dimid[1], &vdimid[1]);
+  ok=nc_def_var(ncid, "z", NC_FLOAT, 1, &z_dimid, &z_varid);
   if (ok != NC_NOERR) handle_error(ok);
 
-  ok=nc_put_att_text(ncid, vdimid[1], "title", 1, "z");
+  ok=nc_put_att_text(ncid, z_varid, "title", 1, "z");
   if (ok != NC_NOERR) handle_error(ok);
 
-  ok=nc_put_att_text(ncid, vdimid[1], "long_name", 1, "z");
+  ok=nc_put_att_text(ncid, z_varid, "long_name", 1, "z");
   if (ok != NC_NOERR) handle_error(ok);
 
-  ok=nc_put_att_text(ncid, vdimid[1], "units", 5, "level");
+  ok=nc_put_att_text(ncid, z_varid, "units", 5, "level");
   if (ok != NC_NOERR) handle_error(ok);
 
-  ok=nc_put_att_text(ncid, vdimid[1], "positive", 2, "up");
+  ok=nc_put_att_text(ncid, z_varid, "positive", 2, "up");
   if (ok != NC_NOERR) handle_error(ok);
 
   /*
    * LATITUDE
    */
-  ok=nc_def_var(ncid, "lat" , NC_FLOAT, 1, &dimid[2], &vdimid[2]);
+  ok=nc_def_var(ncid, "lat" , NC_FLOAT, 1, &lat_dimid, &lat_varid);
   if (ok != NC_NOERR) handle_error(ok);
 
-  ok=nc_put_att_text(ncid, vdimid[2], "title", 9, "latitude");
+  ok=nc_put_att_text(ncid, lat_varid, "title", 9, "latitude");
   if (ok != NC_NOERR) handle_error(ok);
 
-  ok=nc_put_att_text(ncid, vdimid[2], "long_name", 9, "latitude");
+  ok=nc_put_att_text(ncid, lat_varid, "long_name", 9, "latitude");
   if (ok != NC_NOERR) handle_error(ok);
 
-  ok=nc_put_att_text(ncid, vdimid[2], "units", 13, "degrees_north");
+  ok=nc_put_att_text(ncid, lat_varid, "units", 13, "degrees_north");
   if (ok != NC_NOERR) handle_error(ok);
 
   /*
    * LONGITUDE
    */
-  ok=nc_def_var(ncid, "lon" , NC_FLOAT, 1, &dimid[3], &vdimid[3]);
+  ok=nc_def_var(ncid, "lon" , NC_FLOAT, 1, &lon_dimid, &lon_varid);
   if (ok != NC_NOERR) handle_error(ok);
 
-  ok=nc_put_att_text(ncid, vdimid[3], "title", 9, "longitude");
+  ok=nc_put_att_text(ncid, lon_varid, "title", 9, "longitude");
   if (ok != NC_NOERR) handle_error(ok);
 
-  ok=nc_put_att_text(ncid, vdimid[3], "long_name", 9, "longitude");
+  ok=nc_put_att_text(ncid, lon_varid, "long_name", 9, "longitude");
   if (ok != NC_NOERR) handle_error(ok);
 
-  ok=nc_put_att_text(ncid, vdimid[3], "units", 12, "degrees_east");
+  ok=nc_put_att_text(ncid, lon_varid, "units", 12, "degrees_east");
   if (ok != NC_NOERR) handle_error(ok);
+
+  vdimid[0]=t_varid;
+  vdimid[1]=z_varid;
+  vdimid[2]=lat_varid;
+  vdimid[3]=lon_varid;
 
   /*
    * GENERAL SITE INFORMATION
@@ -184,7 +260,6 @@ void profile_write_netcdf(const char* fname, RMDataFile rm)
   ok=nc_put_att_text(ncid, NC_GLOBAL, "Conventions",strlen(longstr),longstr);
   if (ok != NC_NOERR) handle_error(ok);
   
-
   ok=nc_put_att_text(ncid, NC_GLOBAL, "file_char", strlen(rm.file), rm.file);
   if (ok != NC_NOERR) handle_error(ok);
 
@@ -242,7 +317,7 @@ void profile_write_netcdf(const char* fname, RMDataFile rm)
         sprintf(longstr,"ch%dpc",rm.ch[i].wlen);
       else
         sprintf(longstr,"ch%dan",rm.ch[i].wlen);
-      ok=nc_def_var(ncid, longstr , NC_FLOAT, 4, &dimid[0], &chnid[i]);
+      ok=nc_def_var(ncid, longstr , NC_FLOAT, NDIMS, dimid, &chnid[i]);
       if (ok != NC_NOERR) handle_error(ok);
 
       sprintf(longstr,"channel%d lamb=%d phot=%d elastic=%d",
@@ -305,25 +380,37 @@ void profile_write_netcdf(const char* fname, RMDataFile rm)
   if (ok != NC_NOERR) handle_error(ok);
 
   // Fill arrays for dimensions
-  ok=nc_put_var_float(ncid, vdimid[3], &rm.lon);
+
+  //lon
+  ok=nc_put_var_float(ncid, lon_varid, &rm.lon);
   if (ok != NC_NOERR) handle_error(ok);
 
-  ok=nc_put_var_float(ncid, vdimid[2], &rm.lat);
+  //lat
+  ok=nc_put_var_float(ncid, lat_varid, &rm.lat);
   if (ok != NC_NOERR) handle_error(ok);
 
+  //z-lev
+  std::cerr<<"zmax="<<zmax<<std::endl;
   fval=(float*) malloc(zmax*sizeof(float));
   for (int i=0; i<zmax; i++) fval[i]=float(i+1);
-  ok=nc_put_var_float(ncid, vdimid[1], fval);
+  ok=nc_put_var_float(ncid, z_varid, fval);
+  free(fval);
   if (ok != NC_NOERR) handle_error(ok);
 
-  fval[0]=0; ok=nc_put_var_float(ncid, vdimid[0], fval);
+  //time
+  tval[0]=0; tpos[0]=0;
+  ok=nc_put_var1_float(ncid, t_varid, tpos, tval);
   if (ok != NC_NOERR) handle_error(ok);
-  free(fval);
     
   // Fill arrays for data
+  // because time is unlimited we cannot fill the whole array at once
+  start[0]=0; count[0]=1;
+  start[1]=0; count[1]=zmax;
+  start[2]=0; count[2]=1;
+  start[3]=0; count[3]=1;
   for (int i=0; i<rm.nch; i++) {
     if (rm.ch[i].active==1) {
-      ok=nc_put_var_float(ncid, chnid[i], rm.ch[i].phy);
+      ok=nc_put_vara_float(ncid, chnid[i], start, count, rm.ch[i].phy);
     }
   }
 
