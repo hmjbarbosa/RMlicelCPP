@@ -422,25 +422,6 @@ void phy_debug(RMDataFile rm, int imax)
   }
 }
 
-bool DateLT(date d1, date d2) 
-{
-  if (d1.YY < d2.YY) return(true);
-  if (d1.YY > d2.YY) return(false);
-  if (d1.MM < d2.MM) return(true);
-  if (d1.MM > d2.MM) return(false);
-  if (d1.DD < d2.DD) return(true);
-  if (d1.DD > d2.DD) return(false);
-
-  if (d1.hh < d2.hh) return(true);
-  if (d1.hh > d2.hh) return(false);
-  if (d1.mn < d2.mn) return(true);
-  if (d1.mn > d2.mn) return(false);
-  if (d1.ss < d2.ss) return(true);
-  if (d1.ss > d2.ss) return(false);
-
-  return(false);
-}
-
 /* Compares two profiles for compatibility. This is usually used
    before adding, averaging or merging two profiles. It halts the
    program on different errors.

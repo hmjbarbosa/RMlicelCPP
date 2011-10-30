@@ -9,11 +9,9 @@
 #include <stdio.h> /* all file IO stuff */
 #include <math.h> /* pow() */
 
-//#include <malloc.h>
-//#include <ctype.h>
-//#include <time.h>
-//#include <limits.h>
 #include "iostream"
+
+#include "TimeDate.h"
 
 /*
   1-byte signed int = signed char  = int8_t
@@ -34,15 +32,6 @@
 
 typedef int32_t bin;
 typedef char single;
-
-typedef struct{
-    int YY;
-    int MM;
-    int DD;
-    int hh;
-    int mn;
-    int ss;
-} date;
 
 typedef struct{
     int active; // active (1) non-active (0)
@@ -84,7 +73,6 @@ typedef struct{
 extern void Free_RMDataFile(RMDataFile *rm);
 extern void Init_RMDataFile(RMDataFile *rm);
 extern int file_error(FILE *filep);
-extern bool DateLT(date d1, date d2);
 
 extern void channel_debug(channel ch);
 extern void channel_readerror();

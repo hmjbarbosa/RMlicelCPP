@@ -61,6 +61,7 @@ void profile_add_netcdf(const char* fname, RMDataFile First, RMDataFile toadd)
   int ncid;
 
   size_t len;
+  size_t tdif;
 
   float tval[1];
   size_t tpos[1], start[NDIMS], count[NDIMS];
@@ -80,21 +81,20 @@ void profile_add_netcdf(const char* fname, RMDataFile First, RMDataFile toadd)
   ok=nc_inq_dimlen(ncid, t_dimid, &len);
   if (ok != NC_NOERR) handle_error(ok);
 
-  std::cerr<<len<<"\n";
-
   // get size of vertical
   ok=nc_inq_dimlen(ncid, z_dimid, &zmax);
   if (ok != NC_NOERR) handle_error(ok);
 
   // Fill arrays for data
+  tdif=int(SecDiff(First.start, toadd.start)/60.+0.5);
 
   //time
-  tval[0]=len; tpos[0]=len;
+  tval[0]=tdif; tpos[0]=tdif;
   ok=nc_put_var1_float(ncid, t_varid, tpos, tval);
   if (ok != NC_NOERR) handle_error(ok);
 
   // because time is unlimited we cannot fill the whole array at once
-  start[0]=len; count[0]=1;
+  start[0]=tdif; count[0]=1;
   start[1]=0; count[1]=zmax;
   start[2]=0; count[2]=1;
   start[3]=0; count[3]=1;
@@ -109,6 +109,7 @@ void profile_add_netcdf(const char* fname, RMDataFile First, RMDataFile toadd)
   if (ok != NC_NOERR) handle_error(ok);
 
 }
+
 /*
   Function: profile_write_netcdf
   Description: Writes a RMDataFile as a netcdf file
@@ -124,7 +125,6 @@ void profile_write_netcdf(const char* fname, RMDataFile rm)
   int ncid;
   // netCDF id of dimensions (T, Z, Y, X)
   int dimid[NDIMS];
-  int vdimid[NDIMS];
 
   // temporary string for writing netCDF attributes
   char longstr[256];
@@ -136,6 +136,8 @@ void profile_write_netcdf(const char* fname, RMDataFile rm)
 
   // max number of bins in all channels
   int zmax;
+  // start minute
+  int minute;
 
   /*
    * CREATE EMPTY NETCDF FILE
@@ -171,7 +173,7 @@ void profile_write_netcdf(const char* fname, RMDataFile rm)
   dimid[3]=lon_dimid;
 
   /*
-   * TIME IN SECONDS
+   * TIME IN MINUTES (Grads will not accept a smaller time-step than 1min)
    */
   ok=nc_def_var(ncid, "time", NC_FLOAT, 1, &t_dimid, &t_varid);
   if (ok != NC_NOERR) handle_error(ok);
@@ -183,8 +185,13 @@ void profile_write_netcdf(const char* fname, RMDataFile rm)
   if (ok != NC_NOERR) handle_error(ok);
 
   // now we start at full minutes
-  sprintf(longstr,"minutes since %04d-%02d-%02d %02d:%02d:00 -4:00",
-          rm.start.YY, rm.start.MM, rm.start.DD, rm.start.hh, rm.start.mn);
+  if (rm.start.ss<30)
+    minute = rm.start.mn;
+  else
+    minute = rm.start.mn+1;
+
+  sprintf(longstr,"minutes since %04d-%02d-%02d %02d:%02d:00 %s",
+          rm.start.YY, rm.start.MM, rm.start.DD, rm.start.hh, minute, UTC);
   ok=nc_put_att_text(ncid, t_varid, "units",strlen(longstr),longstr);
   if (ok != NC_NOERR) handle_error(ok);
 
@@ -235,11 +242,6 @@ void profile_write_netcdf(const char* fname, RMDataFile rm)
 
   ok=nc_put_att_text(ncid, lon_varid, "units", 12, "degrees_east");
   if (ok != NC_NOERR) handle_error(ok);
-
-  vdimid[0]=t_varid;
-  vdimid[1]=z_varid;
-  vdimid[2]=lat_varid;
-  vdimid[3]=lon_varid;
 
   /*
    * GENERAL SITE INFORMATION
@@ -390,7 +392,6 @@ void profile_write_netcdf(const char* fname, RMDataFile rm)
   if (ok != NC_NOERR) handle_error(ok);
 
   //z-lev
-  std::cerr<<"zmax="<<zmax<<std::endl;
   fval=(float*) malloc(zmax*sizeof(float));
   for (int i=0; i<zmax; i++) fval[i]=float(i+1);
   ok=nc_put_var_float(ncid, z_varid, fval);

@@ -1,6 +1,6 @@
 CC=g++
-CFLAGS=-c -Wall -O1
-LFLAGS=-Wall -O1
+CFLAGS=-c -Wall -O0 -g
+LFLAGS=-Wall -O0 -g
 
 PROGS=\
 	dataread \
@@ -11,25 +11,28 @@ PROGS=\
 
 all	:	$(PROGS)
 
-rm2bin	:	rm2bin.cpp RMlicelUSP.o
-	$(CC) $(LFLAGS) -o rm2bin rm2bin.cpp RMlicelUSP.o
+rm2bin	:	rm2bin.cpp TimeDate.o RMlicelUSP.o
+	$(CC) $(LFLAGS) -o rm2bin rm2bin.cpp TimeDate.o RMlicelUSP.o
 
-rm2csv	:	rm2csv.cpp RMlicelUSP.o
-	$(CC) $(LFLAGS) -o rm2csv rm2csv.cpp  RMlicelUSP.o
+rm2csv	:	rm2csv.cpp TimeDate.o RMlicelUSP.o
+	$(CC) $(LFLAGS) -o rm2csv rm2csv.cpp  TimeDate.o RMlicelUSP.o
 
-rm2dat	:	rm2dat.cpp RMlicelUSP.o
-	$(CC) $(LFLAGS) -o rm2dat rm2dat.cpp  RMlicelUSP.o
+rm2dat	:	rm2dat.cpp TimeDate.o RMlicelUSP.o
+	$(CC) $(LFLAGS) -o rm2dat rm2dat.cpp  TimeDate.o RMlicelUSP.o
 
-dataread	:	dataread.cpp RMlicelUSP.o RMnetcdfUSP.o
-	$(CC) $(LFLAGS) -lnetcdf -o dataread dataread.cpp RMlicelUSP.o RMnetcdfUSP.o
+dataread	:	dataread.cpp TimeDate.o RMlicelUSP.o RMnetcdfUSP.o
+	$(CC) $(LFLAGS) -lnetcdf -o dataread dataread.cpp TimeDate.o RMlicelUSP.o RMnetcdfUSP.o
 
-rm2nc	:	rm2nc.cpp RMlicelUSP.o RMnetcdfUSP.o
-	$(CC) $(LFLAGS) -lnetcdf -o rm2nc rm2nc.cpp RMlicelUSP.o RMnetcdfUSP.o
+rm2nc	:	rm2nc.cpp TimeDate.o RMlicelUSP.o RMnetcdfUSP.o
+	$(CC) $(LFLAGS) -lnetcdf -o rm2nc rm2nc.cpp TimeDate.o RMlicelUSP.o RMnetcdfUSP.o
 
-RMlicelUSP.o	:	RMlicelUSP.cpp
+TimeDate.o	:	TimeDate.cpp
+	$(CC) $(CFLAGS) TimeDate.cpp
+
+RMlicelUSP.o	:	RMlicelUSP.cpp TimeDate.o
 	$(CC) $(CFLAGS) RMlicelUSP.cpp
 
-RMnetcdfUSP.o	:	RMnetcdfUSP.cpp
+RMnetcdfUSP.o	:	RMnetcdfUSP.cpp RMlicelUSP.o TimeDate.o
 	$(CC) $(CFLAGS) RMnetcdfUSP.cpp
 
 clean	:	
