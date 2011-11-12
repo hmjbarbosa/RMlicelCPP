@@ -1,8 +1,12 @@
 #include "RMnetcdfUSP.h"
 
+// ID for time as dimension or variable
 int t_dimid, t_varid;
+// ID for Z as dimension or variable
 int z_dimid, z_varid;
+// ID for lat as dimension or variable
 int lat_dimid, lat_varid;
+// ID for lon as dimension or variable
 int lon_dimid, lon_varid;
 
 // netCDF id of channels
@@ -60,12 +64,21 @@ void profile_add_netcdf(const char* fname, RMDataFile First, RMDataFile toadd)
   // netCDF id of file
   int ncid;
 
-  size_t len;
+  // number of bins in vertical
+  size_t zmax;
+  // number of times so far
+  size_t tmax;
+  // difference in minutes from start to current profile
   size_t tdif;
 
+  // for filling time data
   float tval[1];
-  size_t tpos[1], start[NDIMS], count[NDIMS];
-  size_t zmax;
+  size_t tpos[1];
+  size_t tcount[1];
+
+  // for filling channel data
+  size_t chpos[NDIMS];
+  size_t chcount[NDIMS];
 
   /* ************** RM DATA FILE **********************************   */
   /* ************** CHECKS ****************************************   */
@@ -78,15 +91,15 @@ void profile_add_netcdf(const char* fname, RMDataFile First, RMDataFile toadd)
   if (ok != NC_NOERR) handle_error(ok);
 
   // get number of 'times' current in this file
-  ok=nc_inq_dimlen(ncid, t_dimid, &len);
+  ok=nc_inq_dimlen(ncid, t_dimid, &tmax);
   if (ok != NC_NOERR) handle_error(ok);
 
   // get size of vertical
   ok=nc_inq_dimlen(ncid, z_dimid, &zmax);
   if (ok != NC_NOERR) handle_error(ok);
 
-  // Fill arrays for data
-  tdif=int(SecDiff(First.start, toadd.start)/60.+0.5);
+  // Fill time info
+  tdif=int(SecDiff(First.end, toadd.end)/60.+0.5);
 
   //time
   tval[0]=tdif; tpos[0]=tdif;
@@ -94,13 +107,13 @@ void profile_add_netcdf(const char* fname, RMDataFile First, RMDataFile toadd)
   if (ok != NC_NOERR) handle_error(ok);
 
   // because time is unlimited we cannot fill the whole array at once
-  start[0]=tdif; count[0]=1;
-  start[1]=0; count[1]=zmax;
-  start[2]=0; count[2]=1;
-  start[3]=0; count[3]=1;
+  chpos[0]=tdif; chcount[0]=1;
+  chpos[1]=0; chcount[1]=zmax;
+  chpos[2]=0; chcount[2]=1;
+  chpos[3]=0; chcount[3]=1;
   for (int i=0; i<toadd.nch; i++) {
     if (toadd.ch[i].active==1) {
-      ok=nc_put_vara_float(ncid, chnid[i], start, count, toadd.ch[i].phy);
+      ok=nc_put_vara_float(ncid, chnid[i], chpos, chcount, toadd.ch[i].phy);
     }
   }
 
@@ -132,7 +145,7 @@ void profile_write_netcdf(const char* fname, RMDataFile rm)
   // long arrays
   float *fval;
   float tval[1];
-  size_t tpos[1], start[NDIMS], count[NDIMS];
+  size_t tpos[1], chpos[NDIMS], chcount[NDIMS];
 
   // max number of bins in all channels
   int zmax;
@@ -185,13 +198,14 @@ void profile_write_netcdf(const char* fname, RMDataFile rm)
   if (ok != NC_NOERR) handle_error(ok);
 
   // now we start at full minutes
-  if (rm.start.ss<30)
-    minute = rm.start.mn;
+  // now we save the end time, because the filename is associated with THAT time
+  if (rm.end.ss<30)
+    minute = rm.end.mn;
   else
-    minute = rm.start.mn+1;
+    minute = rm.end.mn+1;
 
-  sprintf(longstr,"minutes since %04d-%02d-%02d %02d:%02d:00 %s",
-          rm.start.YY, rm.start.MM, rm.start.DD, rm.start.hh, minute, UTC);
+  sprintf(longstr,"minutes since %04d-%02d-%02d %02d:%02d:00 %+02d:00",
+          rm.end.YY, rm.end.MM, rm.end.DD, rm.end.hh, minute, UTC);
   ok=nc_put_att_text(ncid, t_varid, "units",strlen(longstr),longstr);
   if (ok != NC_NOERR) handle_error(ok);
 
@@ -405,13 +419,13 @@ void profile_write_netcdf(const char* fname, RMDataFile rm)
     
   // Fill arrays for data
   // because time is unlimited we cannot fill the whole array at once
-  start[0]=0; count[0]=1;
-  start[1]=0; count[1]=zmax;
-  start[2]=0; count[2]=1;
-  start[3]=0; count[3]=1;
+  chpos[0]=0; chcount[0]=1;
+  chpos[1]=0; chcount[1]=zmax;
+  chpos[2]=0; chcount[2]=1;
+  chpos[3]=0; chcount[3]=1;
   for (int i=0; i<rm.nch; i++) {
     if (rm.ch[i].active==1) {
-      ok=nc_put_vara_float(ncid, chnid[i], start, count, rm.ch[i].phy);
+      ok=nc_put_vara_float(ncid, chnid[i], chpos, chcount, rm.ch[i].phy);
     }
   }
 

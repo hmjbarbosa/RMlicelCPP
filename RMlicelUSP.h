@@ -55,6 +55,7 @@ typedef struct{
     char site[80]; // site name 
     date start; // date
     date end; // date
+    double jdstart, jdend; // julian date (UTC)
     int alt; // altitude (m)
     float lon; // longitute (deg)
     float lat; // latitude (deg)

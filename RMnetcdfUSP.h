@@ -11,7 +11,6 @@
 
 #define NDIMS 4 // t, z, lat, lon
 #define NCHANNELS 5 // max number of channels in a file
-#define UTC "-4:00" // local time zone
 
 extern void handle_error(int status);
 extern void profile_write_netcdf(const char* fname, RMDataFile rm);

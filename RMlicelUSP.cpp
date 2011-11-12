@@ -18,18 +18,11 @@ void Init_RMDataFile(RMDataFile *rm)
 {
   strcpy(rm->file,"-999");
   strcpy(rm->site,"-999");
-  rm->start.YY=-999;
-  rm->start.MM=-999;
-  rm->start.DD=-999;
-  rm->start.hh=-999;
-  rm->start.mn=-999;
-  rm->start.ss=-999;
-  rm->end.YY=-999;
-  rm->end.MM=-999;
-  rm->end.DD=-999;
-  rm->end.hh=-999;
-  rm->end.mn=-999;
-  rm->end.ss=-999;
+  rm->start.YY=-999; rm->start.MM=-999; rm->start.DD=-999;
+  rm->start.hh=-999; rm->start.mn=-999; rm->start.ss=-999;
+  rm->end.YY=-999; rm->end.MM=-999; rm->end.DD=-999;
+  rm->end.hh=-999; rm->end.mn=-999; rm->end.ss=-999;
+  rm->jdstart=-999; rm->jdend=-999;
   rm->alt=-999;
   rm->lon=-999.;
   rm->lat=-999.;
@@ -203,6 +196,10 @@ void header_read(FILE *fp, RMDataFile *rm)
   rm->lat=atof(lat);
   rm->T0=atof(T0);
   rm->P0=atof(P0);
+
+  // convert dates to julian day taking into account the time zone
+  Date2JD(rm->start, &rm->jdstart); rm->jdstart-=UTC/24.;
+  Date2JD(rm->end, &rm->jdend); rm->jdend-=UTC/24.;
 
   // Line 3
   n=fscanf(fp,"%7d %4d %7d %4d %2d\n",

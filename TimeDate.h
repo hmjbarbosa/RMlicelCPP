@@ -20,6 +20,12 @@ typedef struct{
 
 #define secinday 86400
 
+#define USEUTC true
+#define UTC -4 // local time zone
+
+#define jd2010 2455197.5
+#define jd1900 2415020.5
+
 // less-than comparison of two dates
 extern bool DateLT(date d1, date d2);
 
