@@ -69,16 +69,18 @@ void profile_add_netcdf(const char* fname, RMDataFile First, RMDataFile toadd)
   // number of times so far
   size_t tmax;
   // difference in minutes from start to current profile
-  size_t tdif;
+  int tdif;
 
   // for filling time data
   float tval[1];
   size_t tpos[1];
-  size_t tcount[1];
 
   // for filling channel data
   size_t chpos[NDIMS];
   size_t chcount[NDIMS];
+
+  // temporary string for writing netCDF attributes
+  char longstr[256];
 
   /* ************** RM DATA FILE **********************************   */
   /* ************** CHECKS ****************************************   */
@@ -90,31 +92,59 @@ void profile_add_netcdf(const char* fname, RMDataFile First, RMDataFile toadd)
   ok=nc_open(fname, NC_WRITE, &ncid);
   if (ok != NC_NOERR) handle_error(ok);
 
-  // get number of 'times' current in this file
-  ok=nc_inq_dimlen(ncid, t_dimid, &tmax);
-  if (ok != NC_NOERR) handle_error(ok);
-
   // get size of vertical
   ok=nc_inq_dimlen(ncid, z_dimid, &zmax);
   if (ok != NC_NOERR) handle_error(ok);
 
   // Fill time info
-  tdif=int(SecDiff(First.end, toadd.end)/60.+0.5);
+  tdif=floor(SecDiff(First.end, toadd.end)/60.+0.5);
+  if (tdif<0) {
+    std::cerr << "First file must be the earliest!\n";
+    exit(1);
+  }
 
-  //time
-  tval[0]=tdif; tpos[0]=tdif;
+  tval[0]=tdif;
+  tpos[0]=tdif;
   ok=nc_put_var1_float(ncid, t_varid, tpos, tval);
   if (ok != NC_NOERR) handle_error(ok);
 
   // because time is unlimited we cannot fill the whole array at once
   chpos[0]=tdif; chcount[0]=1;
-  chpos[1]=0; chcount[1]=zmax;
-  chpos[2]=0; chcount[2]=1;
-  chpos[3]=0; chcount[3]=1;
+  chpos[1]=0;    chcount[1]=zmax;
+  chpos[2]=0;    chcount[2]=1;
+  chpos[3]=0;    chcount[3]=1;
   for (int i=0; i<toadd.nch; i++) {
     if (toadd.ch[i].active==1) {
       ok=nc_put_vara_float(ncid, chnid[i], chpos, chcount, toadd.ch[i].phy);
     }
+  }
+
+  // get number of 'times' current in this file
+  ok=nc_inq_dimlen(ncid, t_dimid, &tmax);
+  if (ok != NC_NOERR) handle_error(ok);
+
+  // if there are missing times, fill them
+  // no need to test first (0th) and last (tmax-th) because
+  // they are obviously correct
+  for (size_t i=1; i<tmax-1; i++) {
+    nc_get_var1_float(ncid, t_varid, &i, tval);
+    if (tval[0]==-999.) {
+      tval[0]=i;
+      nc_put_var1_float(ncid,t_varid, &i, tval);
+    }
+  }
+
+  // if last file, update attributes
+  if (tpos[0] == tmax-1) {
+    ok=nc_redef(ncid);
+    if (ok != NC_NOERR) handle_error(ok);
+
+    sprintf(longstr,"%s",Date2nc(toadd.end).c_str());
+    ok=nc_put_att_text(ncid, NC_GLOBAL, "end_time",strlen(longstr),longstr);
+    if (ok != NC_NOERR) handle_error(ok);
+
+    ok=nc_enddef(ncid);
+    if (ok != NC_NOERR) handle_error(ok);
   }
 
   // CLOSE netcdf FILE
@@ -150,7 +180,9 @@ void profile_write_netcdf(const char* fname, RMDataFile rm)
   // max number of bins in all channels
   int zmax;
   // start minute
-  int minute;
+  //  int minute;
+  // a date
+  date adate;
 
   /*
    * CREATE EMPTY NETCDF FILE
@@ -199,14 +231,13 @@ void profile_write_netcdf(const char* fname, RMDataFile rm)
 
   // now we start at full minutes
   // now we save the end time, because the filename is associated with THAT time
-  if (rm.end.ss<30)
-    minute = rm.end.mn;
-  else
-    minute = rm.end.mn+1;
-
-  sprintf(longstr,"minutes since %04d-%02d-%02d %02d:%02d:00 %+02d:00",
-          rm.end.YY, rm.end.MM, rm.end.DD, rm.end.hh, minute, UTC);
+  RoundMinutes(rm.end, &adate);
+  sprintf(longstr,"minutes since %s",Date2nc(adate).c_str());
   ok=nc_put_att_text(ncid, t_varid, "units",strlen(longstr),longstr);
+  if (ok != NC_NOERR) handle_error(ok);
+
+  tval[0]=-999.;
+  ok=nc_put_att_float(ncid, t_varid, "_FillValue", NC_FLOAT, 1, tval);
   if (ok != NC_NOERR) handle_error(ok);
 
   /*
@@ -222,6 +253,10 @@ void profile_write_netcdf(const char* fname, RMDataFile rm)
   if (ok != NC_NOERR) handle_error(ok);
 
   ok=nc_put_att_text(ncid, z_varid, "units", 5, "level");
+  if (ok != NC_NOERR) handle_error(ok);
+
+  tval[0]=-999.;
+  ok=nc_put_att_float(ncid, z_varid, "_FillValue", NC_FLOAT, 1, tval);
   if (ok != NC_NOERR) handle_error(ok);
 
   ok=nc_put_att_text(ncid, z_varid, "positive", 2, "up");
@@ -242,6 +277,10 @@ void profile_write_netcdf(const char* fname, RMDataFile rm)
   ok=nc_put_att_text(ncid, lat_varid, "units", 13, "degrees_north");
   if (ok != NC_NOERR) handle_error(ok);
 
+  tval[0]=-999.;
+  ok=nc_put_att_float(ncid, lat_varid, "_FillValue", NC_FLOAT, 1, tval);
+  if (ok != NC_NOERR) handle_error(ok);
+
   /*
    * LONGITUDE
    */
@@ -255,6 +294,10 @@ void profile_write_netcdf(const char* fname, RMDataFile rm)
   if (ok != NC_NOERR) handle_error(ok);
 
   ok=nc_put_att_text(ncid, lon_varid, "units", 12, "degrees_east");
+  if (ok != NC_NOERR) handle_error(ok);
+
+  tval[0]=-999.;
+  ok=nc_put_att_float(ncid, lon_varid, "_FillValue", NC_FLOAT, 1, tval);
   if (ok != NC_NOERR) handle_error(ok);
 
   /*
@@ -282,23 +325,21 @@ void profile_write_netcdf(const char* fname, RMDataFile rm)
   ok=nc_put_att_text(ncid, NC_GLOBAL, "site_char", strlen(rm.site), rm.site);
   if (ok != NC_NOERR) handle_error(ok);
 
-  sprintf(longstr,"%04d-%02d-%02d %02d:%02d:%02d -4:00",
-          rm.start.YY, rm.start.MM, rm.start.DD, rm.start.hh, rm.start.mn, rm.start.ss);
+  sprintf(longstr,"%s",Date2nc(rm.start).c_str());
   ok=nc_put_att_text(ncid, NC_GLOBAL, "start_time",strlen(longstr),longstr);
   if (ok != NC_NOERR) handle_error(ok);
 
-  sprintf(longstr,"%04d-%02d-%02d %02d:%02d:%02d -4:00",
-          rm.end.YY, rm.end.MM, rm.end.DD, rm.end.hh, rm.end.mn, rm.end.ss);
+  sprintf(longstr,"%s",Date2nc(rm.end).c_str());
   ok=nc_put_att_text(ncid, NC_GLOBAL, "end_time",strlen(longstr),longstr);
   if (ok != NC_NOERR) handle_error(ok);
 
   ok=nc_put_att_int(ncid, NC_GLOBAL, "alt_meters", NC_INT, 1, &rm.alt);
   if (ok != NC_NOERR) handle_error(ok);
 
-  ok=nc_put_att_float(ncid, NC_GLOBAL, "lon_deg", NC_INT, 1, &rm.lon);
+  ok=nc_put_att_float(ncid, NC_GLOBAL, "lon_deg", NC_FLOAT, 1, &rm.lon);
   if (ok != NC_NOERR) handle_error(ok);
 
-  ok=nc_put_att_float(ncid, NC_GLOBAL, "lat_deg", NC_INT, 1, &rm.lat);
+  ok=nc_put_att_float(ncid, NC_GLOBAL, "lat_deg", NC_FLOAT, 1, &rm.lat);
   if (ok != NC_NOERR) handle_error(ok);
 
   ok=nc_put_att_int(ncid, NC_GLOBAL, "zen_deg", NC_INT, 1, &rm.zen);
@@ -307,10 +348,10 @@ void profile_write_netcdf(const char* fname, RMDataFile rm)
   ok=nc_put_att_int(ncid, NC_GLOBAL, "idum", NC_INT, 1, &rm.idum);
   if (ok != NC_NOERR) handle_error(ok);
 
-  ok=nc_put_att_float(ncid, NC_GLOBAL, "T0_degC", NC_INT, 1, &rm.T0);
+  ok=nc_put_att_float(ncid, NC_GLOBAL, "T0_degC", NC_FLOAT, 1, &rm.T0);
   if (ok != NC_NOERR) handle_error(ok);
 
-  ok=nc_put_att_float(ncid, NC_GLOBAL, "P0_mbar", NC_INT, 1, &rm.P0);
+  ok=nc_put_att_float(ncid, NC_GLOBAL, "P0_mbar", NC_FLOAT, 1, &rm.P0);
   if (ok != NC_NOERR) handle_error(ok);
 
   ok=nc_put_att_int(ncid, NC_GLOBAL, "nshoots_n", NC_INT, 1, &rm.nshoots);
@@ -348,6 +389,10 @@ void profile_write_netcdf(const char* fname, RMDataFile rm)
         ok=nc_put_att_text(ncid, chnid[i], "units", 3, "MHz");
       else
         ok=nc_put_att_text(ncid, chnid[i], "units", 2, "mV");
+      if (ok != NC_NOERR) handle_error(ok);
+
+      tval[0]=-999.;
+      ok=nc_put_att_float(ncid, chnid[i], "_FillValue", NC_FLOAT, 1, tval);
       if (ok != NC_NOERR) handle_error(ok);
 
       ok=nc_put_att_text(ncid, chnid[i], "C_format", 4, "%.4f");

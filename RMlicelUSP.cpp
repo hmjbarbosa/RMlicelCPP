@@ -18,11 +18,8 @@ void Init_RMDataFile(RMDataFile *rm)
 {
   strcpy(rm->file,"-999");
   strcpy(rm->site,"-999");
-  rm->start.YY=-999; rm->start.MM=-999; rm->start.DD=-999;
-  rm->start.hh=-999; rm->start.mn=-999; rm->start.ss=-999;
-  rm->end.YY=-999; rm->end.MM=-999; rm->end.DD=-999;
-  rm->end.hh=-999; rm->end.mn=-999; rm->end.ss=-999;
-  rm->jdstart=-999; rm->jdend=-999;
+  ResetDate(&rm->start);
+  ResetDate(&rm->end);
   rm->alt=-999;
   rm->lon=-999.;
   rm->lat=-999.;
@@ -149,7 +146,7 @@ void header_read(FILE *fp, RMDataFile *rm)
   char lon[6];
   char T0[4];
   char P0[6];  
-  int n;
+  int n, YY, MM, DD, hh, mn, ss;
 
   // Line 1
   n=fscanf(fp,"%13s\n", rm->file);
@@ -158,13 +155,19 @@ void header_read(FILE *fp, RMDataFile *rm)
   // Line 2
   n=fscanf(fp,"%s",rm->site);
   if (n!=1) header_read_error();
-  n=fscanf(fp,"%2d/%2d/%4d",&rm->start.DD,&rm->start.MM,&rm->start.YY);
+  n=fscanf(fp,"%2d/%2d/%4d",&DD,&MM,&YY);
   if (n!=3) header_read_error();
-  n=fscanf(fp,"%2d:%2d:%2d",&rm->start.hh,&rm->start.mn,&rm->start.ss);
+  n=fscanf(fp,"%2d:%2d:%2d",&hh,&mn,&ss);
   if (n!=3) header_read_error();
-  n=fscanf(fp,"%2d/%2d/%4d",&rm->end.DD,  &rm->end.MM,  &rm->end.YY);
+
+  InitDateYMD(&rm->start, YY,MM,DD,hh,mn,ss, UTC);
+
+  n=fscanf(fp,"%2d/%2d/%4d",&DD,&MM,&YY);
   if (n!=3) header_read_error();
-  n=fscanf(fp,"%2d:%2d:%2d",&rm->end.hh,  &rm->end.mn,  &rm->end.ss);
+  n=fscanf(fp,"%2d:%2d:%2d",&hh,&mn,&ss);
+
+  InitDateYMD(&rm->end, YY,MM,DD,hh,mn,ss, UTC);
+
   if (n!=3) header_read_error();
   n=fscanf(fp,"%d",&rm->alt);
   if (n!=1) header_read_error();
@@ -198,8 +201,10 @@ void header_read(FILE *fp, RMDataFile *rm)
   rm->P0=atof(P0);
 
   // convert dates to julian day taking into account the time zone
-  Date2JD(rm->start, &rm->jdstart); rm->jdstart-=UTC/24.;
-  Date2JD(rm->end, &rm->jdend); rm->jdend-=UTC/24.;
+  //rm->start.utc = UTC;
+  //rm->end.utc = UTC;
+  //Date2JD(rm->start, &rm->jdstart); rm->jdstart-=UTC/24.;
+  //Date2JD(rm->end, &rm->jdend); rm->jdend-=UTC/24.;
 
   // Line 3
   n=fscanf(fp,"%7d %4d %7d %4d %2d\n",
@@ -223,10 +228,10 @@ void header_printf(FILE *fp, RMDataFile rm, const char* beg, const char* sep)
   // Line 2
   fprintf(fp,"%1s",beg);
   fprintf(fp,"%s%1s",rm.site,sep);
-  fprintf(fp,"%02d/%02d/%04d%1s",rm.start.DD,rm.start.MM,rm.start.YY,sep);
-  fprintf(fp,"%02d:%02d:%02d%1s",rm.start.hh,rm.start.mn,rm.start.ss,sep);
-  fprintf(fp,"%02d/%02d/%04d%1s",rm.end.DD,rm.end.MM,rm.end.YY,sep);
-  fprintf(fp,"%02d:%02d:%02d%1s",rm.end.hh,rm.end.mn,rm.end.ss,sep);
+  fprintf(fp,"%s%1s",DMY2String(rm.start,'/').c_str(),sep);
+  fprintf(fp,"%s%1s",Time2String(rm.start).c_str(),sep);
+  fprintf(fp,"%s%1s",DMY2String(rm.end,'/').c_str(),sep);
+  fprintf(fp,"%s%1s",Time2String(rm.end).c_str(),sep);
   fprintf(fp,"%04d%1s",rm.alt,sep);
   fprintf(fp,"%06.1f%1s",rm.lon,sep);
   fprintf(fp,"%06.1f%1s",rm.lat,sep);
@@ -254,10 +259,8 @@ void header_printf(FILE *fp, RMDataFile rm, const char* beg, const char* sep)
 void header_debug(RMDataFile rm) 
 {
   fprintf(stderr,"====== FILE: %s %s\n",rm.file, rm.site);
-  fprintf(stderr,"start: %02d/%02d/%02d %02d:%02d:%02d\n",
-          rm.start.DD, rm.start.MM, rm.start.YY, rm.start.hh, rm.start.mn, rm.start.ss);
-  fprintf(stderr,"end: %02d/%02d/%02d %02d:%02d:%02d\n",
-          rm.end.DD, rm.end.MM, rm.end.YY, rm.end.hh, rm.end.mn, rm.end.ss);
+  fprintf(stderr,"start: %s\n",Date2nc(rm.start).c_str());
+  fprintf(stderr,"end: %s\n",Date2nc(rm.end).c_str());
   fprintf(stderr,"altitude (m): %d\n",rm.alt);
   fprintf(stderr,"position (lat/lon): %f %f\n",rm.lat,rm.lon);
   fprintf(stderr,"zenith: %d \n",rm.zen);
@@ -557,8 +560,8 @@ void profile_add (RMDataFile *acum, RMDataFile toadd)
   /* ************** SUMS   ****************************************   */
 
   // update start/end dates
-  if (DateLT(toadd.start, acum->start)) acum->start=toadd.start;
-  if (DateLT(acum->end,toadd.end)) acum->end=toadd.end;
+  if (toadd.start.jd < acum->start.jd) acum->start=toadd.start;
+  if (toadd.end.jd   > acum->end.jd  ) acum->end=toadd.end;
 
   // Number of files added
   acum->idum++;
