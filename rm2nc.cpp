@@ -9,6 +9,7 @@ int main (int argc, char *argv[])
 {
   RMDataFile XX;
   char fnc[256];
+  int err;
   
   if (argc<2) {
     printf("Enter a file name!\n");
@@ -21,11 +22,12 @@ int main (int argc, char *argv[])
 
     // Init, Read, Print some data 
     Init_RMDataFile(&XX);
-    profile_read(argv[i], &XX);
-    profile_printf(stdout, XX, 10, "", " ; ", " ; ");
+    err=profile_read(argv[i], &XX);
+    //profile_printf(stdout, XX, 10, "", " ; ", " ; ");
 
     // Write netcdf
-    profile_write_netcdf(fnc, XX);
+    if (!err)
+      profile_write_netcdf(fnc, XX);
 
     // destroy RM data file
     Free_RMDataFile(&XX);

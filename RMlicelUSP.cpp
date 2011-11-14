@@ -609,7 +609,7 @@ void profile_add (RMDataFile *acum, RMDataFile toadd)
   Author: hbarbosa
   Date: 17 Aug 2011
  */
-void profile_read (const char* fname, RMDataFile *rm) 
+int profile_read (const char* fname, RMDataFile *rm) 
 {
   FILE *fp; // file pointer
   int nread; // amount of data read
@@ -643,7 +643,10 @@ void profile_read (const char* fname, RMDataFile *rm)
       if(nread<(sizeof(bin)*rm->ch[i].ndata)) {
         if(file_error(fp)!=0) {
           fprintf(stderr,"\nblock %d corrupt",i+1);
-          exit(0);
+          fprintf(stderr,"file: %s\n",fname);
+          Init_RMDataFile(rm);
+          return(1);
+          //exit(0);
         }
       }
       // convert data to physical units
@@ -659,12 +662,17 @@ void profile_read (const char* fname, RMDataFile *rm)
       if(fgets(szBuffer,90,fp)==NULL) {
         if(file_error(fp)!=0) {
           fprintf(stderr,"\nmarker %d corrupt\n",i+1);
-          exit(0);
+          fprintf(stderr,"file: %s\n",fname);
+          Init_RMDataFile(rm);
+          return(2);
+          //exit(0);
         }
       }
 
     }// is chanel active?
   }// chanel read
+
+  return (0);
 }
 
 void profile_debug(RMDataFile rm) 
