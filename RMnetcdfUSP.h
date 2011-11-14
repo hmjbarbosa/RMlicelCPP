@@ -7,7 +7,7 @@
 #include "netcdf.h"
 #include "RMlicelUSP.h"
 
-#define version "29oct11"
+#define version "14nov11"
 
 #define NDIMS 4 // t, z, lat, lon
 #define NCHANNELS 5 // max number of channels in a file

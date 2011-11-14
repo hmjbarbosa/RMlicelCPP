@@ -42,7 +42,7 @@ extern void InitDateYMD(date *d1, int YY, int MM, int DD,
                          int hh, int mn, int ss, float utc);
 
 // initialize with a actual julian date
-extern void InitDateJD(date *d1, double jd);
+extern void InitDateJD(date *d1, double jd, float utc);
 
 // less-than comparison of two dates
 extern bool DateLT(date d1, date d2);

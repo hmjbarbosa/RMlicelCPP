@@ -218,7 +218,8 @@ void header_read(FILE *fp, RMDataFile *rm)
   Author: hbarbosa
   Date: 30 may 2011
  */
-void header_printf(FILE *fp, RMDataFile rm, const char* beg, const char* sep) 
+void header_printf(FILE *fp, RMDataFile rm, 
+                   const char* beg, const char* sep) 
 {
   // line 1
   fprintf(fp,"%1s",beg);

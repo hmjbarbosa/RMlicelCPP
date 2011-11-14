@@ -28,9 +28,12 @@
   8-byte real = double
  */
 
-//typedef int32_t bin;
-
+// For compilation with ROOT
+#ifndef __CINT__
 typedef int32_t bin;
+#else
+typedef Int_t bin;
+#endif /* __CINT__ */
 typedef char single;
 
 typedef struct{
@@ -76,7 +79,7 @@ extern void Init_RMDataFile(RMDataFile *rm);
 extern int file_error(FILE *filep);
 
 extern void channel_debug(channel ch);
-extern void channel_readerror();
+extern void channel_read_error();
 extern void channel_read  (FILE *fp, channel*ch);
 extern void channel_printf(FILE *fp, channel ch, const char* beg, const char* sep);
 
@@ -84,7 +87,7 @@ extern void header_debug(RMDataFile rm);
 extern void header_read_error();
 extern void header_read  (FILE *fp, RMDataFile*rm);
 extern void header_printf(FILE *fp, RMDataFile rm, 
-                          const char* beg, const char* sep, const char* sep2);
+                          const char* beg, const char* sep);
 
 extern void raw_debug(RMDataFile rm, int imax);
 extern void raw_write(FILE *fp, RMDataFile rm);
