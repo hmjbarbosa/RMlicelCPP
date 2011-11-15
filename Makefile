@@ -7,9 +7,13 @@ PROGS=\
 	rm2bin \
 	rm2csv \
 	rm2dat \
-	rm2nc
+	rm2nc \
+	debug
 
 all	:	$(PROGS)
+
+debug	:	debug.cpp TimeDate.o RMlicelUSP.o
+	$(CC) $(LFLAGS) -o debug debug.cpp TimeDate.o RMlicelUSP.o
 
 rm2bin	:	rm2bin.cpp TimeDate.o RMlicelUSP.o
 	$(CC) $(LFLAGS) -o rm2bin rm2bin.cpp TimeDate.o RMlicelUSP.o
@@ -39,7 +43,7 @@ clean	:
 	rm -f *.o *~ 
 
 clean-all	:	
-	rm -f *.o *~ $(PROGS)
+	rm -f *.o *~ $(PROGS) *_cpp.d *.so
 
 check	: $(PROGS)
 	@echo -n "rm2dat :: dat conversion: "

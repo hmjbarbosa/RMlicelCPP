@@ -49,28 +49,31 @@ void channel_read_error() {
 void channel_read(FILE *fp, channel *ch) 
 {
   int n;
-  n=fscanf(fp,"%1d",&ch->active);
+  n=fscanf(fp,"%d",&ch->active);
   if (n!=1) channel_read_error();
-  n=fscanf(fp,"%1d",&ch->photons);
+  n=fscanf(fp,"%d",&ch->photons);
   if (n!=1) channel_read_error();
-  n=fscanf(fp,"%1d",&ch->elastic);
+  n=fscanf(fp,"%d",&ch->elastic);
   if (n!=1) channel_read_error();
-  n=fscanf(fp,"%5d 1",&ch->ndata);
+  n=fscanf(fp,"%d 1",&ch->ndata);
   if (n!=1) channel_read_error();
-  n=fscanf(fp,"%4d",&ch->pmtv);
+  n=fscanf(fp,"%d",&ch->pmtv);
   if (n!=1) channel_read_error();
-  n=fscanf(fp,"%4f",&ch->binw);
+  n=fscanf(fp,"%f",&ch->binw);
   if (n!=1) channel_read_error();
   n=fscanf(fp,"%5d.%1c 0 0 00 000 ",&ch->wlen,&ch->pol); 
   if (n!=2) channel_read_error();
-  n=fscanf(fp,"%2d",&ch->bits); 
+  n=fscanf(fp,"%d",&ch->bits); 
   if (n!=1) channel_read_error();
-  n=fscanf(fp,"%6d",&ch->nshoots); 
+  n=fscanf(fp,"%d",&ch->nshoots); 
   if (n!=1) channel_read_error();
-  n=fscanf(fp,"%6f",&ch->discr);
+  n=fscanf(fp,"%f",&ch->discr);
   if (n!=1) channel_read_error();
-  n=fscanf(fp,"%3s\n",ch->tr);
+  n=fscanf(fp,"%s",ch->tr);
   if (n!=1) channel_read_error();
+  // jump 18 blanks... don't know why, but in some files
+  // fscanf() for \r\n\r\n is not finding the correct position
+  n=fseek(fp,18,SEEK_CUR);
 }
 
 /*
@@ -129,6 +132,27 @@ void channel_debug(channel ch)
   if (!ch.photons) fprintf(stderr,"discr= %f\n",ch.discr);
 }
 
+void channel_debug_phy(channel ch) 
+{
+  for (int k=0; k<ch.ndata; k++) {
+    fprintf(stderr,"bin=%d",k);
+    for (int i=k; i<ch.ndata && i<k+20; i++)
+      fprintf(stderr," %g",ch.phy[i]);
+    k+=19;
+    fprintf(stderr,"\n"); 
+  }
+}
+
+void channel_debug_raw(channel ch) 
+{
+  for (int k=0; k<ch.ndata; k++) {
+    fprintf(stderr,"bin=%d",k);
+    for (int i=k; i<ch.ndata && i<k+20; i++)
+      fprintf(stderr," %d",ch.raw[i]);
+    k+=19; fprintf(stderr,"\n"); 
+  }
+}
+
 /*
   Function: Read header Line
   Description: reads 3 lines of header info from stream
@@ -139,6 +163,11 @@ void header_read_error() {
   fprintf(stderr,"fscanf error while reading header!\n");
   exit(-1);
 }
+// RM10C0320.283                                                                
+// Manaus 03/12/2010 20:27:30 03/12/2010 20:28:30 0100 -060.0 -003.1 -90 00 30.0 1013.0
+// 0000599 0010 0000000 0010 02                                                 
+// 1 0 1 16380 1 0990 7.50 00355.o 0 0 00 000 12 000599 0.500 BT0               
+// 1 1 1 16380 1 0990 7.50 00355.o 0 0 00 000 00 000599 3.1746 BC0              
 
 void header_read(FILE *fp, RMDataFile *rm) 
 {
@@ -149,7 +178,7 @@ void header_read(FILE *fp, RMDataFile *rm)
   int n, YY, MM, DD, hh, mn, ss;
 
   // Line 1
-  n=fscanf(fp,"%13s\n", rm->file);
+  n=fscanf(fp,"%s\r\n", rm->file);
   if (n!=1) header_read_error();
   
   // Line 2
@@ -183,7 +212,7 @@ void header_read(FILE *fp, RMDataFile *rm)
   if (n!=1) header_read_error();
   n=fscanf(fp,"%s",P0);
   if (n!=1) header_read_error();
-  n=fscanf(fp,"\n");
+  n=fscanf(fp,"\r\n");
 
   // Depending on windows configuration, data file may have numbers
   // separated by comma instead of dot
@@ -207,9 +236,13 @@ void header_read(FILE *fp, RMDataFile *rm)
   //Date2JD(rm->end, &rm->jdend); rm->jdend-=UTC/24.;
 
   // Line 3
-  n=fscanf(fp,"%7d %4d %7d %4d %2d\n",
-         &rm->nshoots, &rm->nhz, &rm->nshoots2, &rm->nhz2,&rm->nch);
+  //n=fscanf(fp,"%7d %4d %7d %4d %2d",
+  n=fscanf(fp,"%d %d %d %d %d",
+           &rm->nshoots, &rm->nhz, &rm->nshoots2, 
+           &rm->nhz2, &rm->nch);
   if (n!=5) header_read_error();
+
+  n=fscanf(fp,"\r\n");
 }
 
 /*
@@ -609,7 +642,7 @@ void profile_add (RMDataFile *acum, RMDataFile toadd)
   Author: hbarbosa
   Date: 17 Aug 2011
  */
-int profile_read (const char* fname, RMDataFile *rm) 
+int profile_read (const char* fname, RMDataFile *rm, bool debug) 
 {
   FILE *fp; // file pointer
   int nread; // amount of data read
@@ -619,10 +652,15 @@ int profile_read (const char* fname, RMDataFile *rm)
   Init_RMDataFile(rm);
   
   // OPEN DATA FILE
-  fp=fopen(fname,"r");
+  //15nov11 - we should open explicitly as binary
+  fp=fopen(fname,"rb");
 
   // READ THE FIRST 3 LINES
   header_read(fp, rm);
+  if (debug) {
+    header_debug(*rm);
+    fprintf(stderr,"pos after header: %ld\n",ftell(fp));
+  }
 
   // ALLOCATE MEMORY FOR HOLDING CHANNELS
   rm->ch=(channel*) malloc(rm->nch*sizeof(channel));
@@ -630,8 +668,12 @@ int profile_read (const char* fname, RMDataFile *rm)
   // READ LINES DESCRIBING CHANNELS
   for (int i=0; i<rm->nch; i++) {
     channel_read(fp, &rm->ch[i]);
+    if (debug) {
+      channel_debug(rm->ch[i]);
+      fprintf(stderr,"pos after channel: %ld\n",ftell(fp));
+    }
   }
-
+  //exit(1);
   // READ ACTUAL DATA (IN BINARY FORMAT)
   for (int i=0; i<rm->nch; i++) {
     if (rm->ch[i].active!=0) {
@@ -639,7 +681,22 @@ int profile_read (const char* fname, RMDataFile *rm)
       rm->ch[i].phy = (float *) malloc(sizeof(float)*rm->ch[i].ndata);
       
       // read from file and check amount of data read
-      nread=fread(rm->ch[i].raw,sizeof(bin),rm->ch[i].ndata,fp);
+      if (debug) {
+        nread=0;
+        fprintf(stderr,"pos before raw: %ld\n",ftell(fp));        
+        for (int k=0; k<rm->ch[i].ndata; k++) {
+          fread(&rm->ch[i].raw[k],sizeof(bin),1,fp);
+          nread++;
+        }
+        fprintf(stderr,"pos after raw: %ld\n",ftell(fp));        
+      } else {
+        nread=fread(rm->ch[i].raw,sizeof(bin),rm->ch[i].ndata,fp);
+      }
+      if (debug) {
+        channel_debug_raw(rm->ch[i]);
+        fprintf(stderr,"\n -------- channel: : %d \n", i);
+        fprintf(stderr,"\n amount of data read: %d \n", nread);
+      }
       if(nread<(sizeof(bin)*rm->ch[i].ndata)) {
         if(file_error(fp)!=0) {
           fprintf(stderr,"\nblock %d corrupt",i+1);
@@ -657,6 +714,8 @@ int profile_read (const char* fname, RMDataFile *rm)
       
       for (int j=0; j<rm->ch[i].ndata; j++) 
         rm->ch[i].phy[j] = (float) rm->ch[i].raw[j] / dScale;
+
+      //if (debug) channel_debug_phy(rm->ch[i]);
 
       // read end of line
       if(fgets(szBuffer,90,fp)==NULL) {
