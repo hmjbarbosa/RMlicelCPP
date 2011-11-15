@@ -17,17 +17,18 @@ int main (int argc, char *argv[])
   }
   
   for (int i=1; i<argc; i++) {
-    // Open output file
-    sprintf(fnc,"%s.nc",argv[i]);
-
     // Init, Read, Print some data 
     Init_RMDataFile(&XX);
     err=profile_read(argv[i], &XX);
     //profile_printf(stdout, XX, 10, "", " ; ", " ; ");
 
     // Write netcdf
-    if (!err)
+    if (!err) {
+      sprintf(fnc,"RM_%s_%02dh%02d.nc",YMD2String(XX.end,'_').c_str(), 
+              XX.end.hh, XX.end.mn);
+
       profile_write_netcdf(fnc, XX);
+    }
 
     // destroy RM data file
     Free_RMDataFile(&XX);

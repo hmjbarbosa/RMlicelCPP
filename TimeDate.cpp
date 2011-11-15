@@ -134,10 +134,10 @@ std::string DMY2String(date d1, char sep)
   Author: hbarbosa
   Date: 30 oct 2011
  */
-std::string Time2String(date d1) 
+std::string Time2String(date d1,char sep) 
 {
   char strdate[8];
-  sprintf(strdate,"%02d:%02d:%02d",d1.hh,d1.mn,d1.ss);
+  sprintf(strdate,"%02d%1c%02d%1c%02d",d1.hh,sep,d1.mn,sep,d1.ss);
   return(strdate);
 }
 

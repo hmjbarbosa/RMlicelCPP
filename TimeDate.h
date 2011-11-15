@@ -52,11 +52,11 @@ extern bool DateLT(date d1, date d2);
 extern std::string Date2nc(date d1);
 
 // date to string
-extern std::string YMD2String(date d1, char sep);
-extern std::string DMY2String(date d1, char sep);
+extern std::string YMD2String(date d1, char sep='/');
+extern std::string DMY2String(date d1, char sep='/');
 
 // time to string
-extern std::string Time2String(date d1); 
+extern std::string Time2String(date d1, char sep=':'); 
 
 // date/time to julian days
 extern void Date2JD(date d1, double *jd);
