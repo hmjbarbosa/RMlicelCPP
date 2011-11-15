@@ -71,9 +71,10 @@ void channel_read(FILE *fp, channel *ch)
   if (n!=1) channel_read_error();
   n=fscanf(fp,"%s",ch->tr);
   if (n!=1) channel_read_error();
-  // jump 18 blanks... don't know why, but in some files
-  // fscanf() for \r\n\r\n is not finding the correct position
-  n=fseek(fp,18,SEEK_CUR);
+
+  //n=fscanf(fp,"\r\n");
+  fscanf(fp,"%*[^\n]"); fscanf(fp,"%*c");
+  //fprintf(stderr,"fim channel: %ld\n",ftell(fp));
 }
 
 /*
@@ -178,8 +179,11 @@ void header_read(FILE *fp, RMDataFile *rm)
   int n, YY, MM, DD, hh, mn, ss;
 
   // Line 1
-  n=fscanf(fp,"%s\r\n", rm->file);
+  n=fscanf(fp,"%s", rm->file);
   if (n!=1) header_read_error();
+  //n=fscanf(fp,"\r\n");
+  fscanf(fp,"%*[^\n]"); fscanf(fp,"%*c");
+  //fprintf(stderr,"fim head1: %ld\n",ftell(fp));
   
   // Line 2
   n=fscanf(fp,"%s",rm->site);
@@ -212,7 +216,9 @@ void header_read(FILE *fp, RMDataFile *rm)
   if (n!=1) header_read_error();
   n=fscanf(fp,"%s",P0);
   if (n!=1) header_read_error();
-  n=fscanf(fp,"\r\n");
+  //n=fscanf(fp,"\r\n");
+  fscanf(fp,"%*[^\n]"); fscanf(fp,"%*c");
+  //fprintf(stderr,"fim head2: %ld\n",ftell(fp));
 
   // Depending on windows configuration, data file may have numbers
   // separated by comma instead of dot
@@ -229,20 +235,14 @@ void header_read(FILE *fp, RMDataFile *rm)
   rm->T0=atof(T0);
   rm->P0=atof(P0);
 
-  // convert dates to julian day taking into account the time zone
-  //rm->start.utc = UTC;
-  //rm->end.utc = UTC;
-  //Date2JD(rm->start, &rm->jdstart); rm->jdstart-=UTC/24.;
-  //Date2JD(rm->end, &rm->jdend); rm->jdend-=UTC/24.;
-
   // Line 3
-  //n=fscanf(fp,"%7d %4d %7d %4d %2d",
   n=fscanf(fp,"%d %d %d %d %d",
-           &rm->nshoots, &rm->nhz, &rm->nshoots2, 
-           &rm->nhz2, &rm->nch);
+           &rm->nshoots, &rm->nhz, &rm->nshoots2, &rm->nhz2, &rm->nch);
   if (n!=5) header_read_error();
 
-  n=fscanf(fp,"\r\n");
+  //n=fscanf(fp,"\r\n");
+  fscanf(fp,"%*[^\n]"); fscanf(fp,"%*c");
+  //fprintf(stderr,"fim head3: %ld\n",ftell(fp));
 }
 
 /*
@@ -654,12 +654,13 @@ int profile_read (const char* fname, RMDataFile *rm, bool debug)
   // OPEN DATA FILE
   //15nov11 - we should open explicitly as binary
   fp=fopen(fname,"rb");
+  //fprintf(stderr,"pos after open: %ld\n",ftell(fp));
 
   // READ THE FIRST 3 LINES
   header_read(fp, rm);
   if (debug) {
     header_debug(*rm);
-    fprintf(stderr,"pos after header: %ld\n",ftell(fp));
+    //fprintf(stderr,"pos after header: %ld\n",ftell(fp));
   }
 
   // ALLOCATE MEMORY FOR HOLDING CHANNELS
@@ -670,10 +671,14 @@ int profile_read (const char* fname, RMDataFile *rm, bool debug)
     channel_read(fp, &rm->ch[i]);
     if (debug) {
       channel_debug(rm->ch[i]);
-      fprintf(stderr,"pos after channel: %ld\n",ftell(fp));
+      //fprintf(stderr,"pos after channel: %ld\n",ftell(fp));
     }
   }
-  //exit(1);
+
+  // after all channels there is an extra empty line
+  fscanf(fp,"%*[^\n]"); fscanf(fp,"%*c");
+  //fprintf(stderr,"fim all channels: %ld\n",ftell(fp));
+
   // READ ACTUAL DATA (IN BINARY FORMAT)
   for (int i=0; i<rm->nch; i++) {
     if (rm->ch[i].active!=0) {
@@ -683,12 +688,12 @@ int profile_read (const char* fname, RMDataFile *rm, bool debug)
       // read from file and check amount of data read
       if (debug) {
         nread=0;
-        fprintf(stderr,"pos before raw: %ld\n",ftell(fp));        
+        //fprintf(stderr,"pos before raw: %ld\n",ftell(fp));        
         for (int k=0; k<rm->ch[i].ndata; k++) {
           fread(&rm->ch[i].raw[k],sizeof(bin),1,fp);
           nread++;
         }
-        fprintf(stderr,"pos after raw: %ld\n",ftell(fp));        
+        //fprintf(stderr,"pos after raw: %ld\n",ftell(fp));        
       } else {
         nread=fread(rm->ch[i].raw,sizeof(bin),rm->ch[i].ndata,fp);
       }
@@ -703,7 +708,6 @@ int profile_read (const char* fname, RMDataFile *rm, bool debug)
           fprintf(stderr,"file: %s\n",fname);
           Init_RMDataFile(rm);
           return(1);
-          //exit(0);
         }
       }
       // convert data to physical units
@@ -724,7 +728,6 @@ int profile_read (const char* fname, RMDataFile *rm, bool debug)
           fprintf(stderr,"file: %s\n",fname);
           Init_RMDataFile(rm);
           return(2);
-          //exit(0);
         }
       }
 
