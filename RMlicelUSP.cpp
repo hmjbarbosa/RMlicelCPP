@@ -645,7 +645,7 @@ void profile_add (RMDataFile *acum, RMDataFile toadd)
 int profile_read (const char* fname, RMDataFile *rm, bool debug) 
 {
   FILE *fp; // file pointer
-  int nread; // amount of data read
+  size_t nread; // amount of data read
   float dScale; // conversion between raw and physical data
   char szBuffer[90]; // dummy buffer
   
@@ -700,7 +700,7 @@ int profile_read (const char* fname, RMDataFile *rm, bool debug)
       if (debug) {
         channel_debug_raw(rm->ch[i]);
         fprintf(stderr,"\n -------- channel: : %d \n", i);
-        fprintf(stderr,"\n amount of data read: %d \n", nread);
+        fprintf(stderr,"\n amount of data read: %d \n", (int) nread);
       }
       if(nread<(sizeof(bin)*rm->ch[i].ndata)) {
         if(file_error(fp)!=0) {
