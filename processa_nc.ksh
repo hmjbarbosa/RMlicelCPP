@@ -13,7 +13,7 @@
 HOME=/home/hbarbosa/Programs/RMlicelUSP
 
 LIDAR=/media/work/EMBRAPA/lidar
-#LIDAR=/lfa-server/lidar
+#LIDAR=/lfa-data/lidar
 erasefirst='no'
 
 DATA=$LIDAR/data
@@ -21,13 +21,13 @@ OUT=$LIDAR/level1
 
 cd $DATA
 echo "Searching for RM directories like YY/MM/DD/RM..."
-for daypath in `find */*/* -type d` ; do
+for daypath in `find 11/7/21 -type d` ; do
     echo -n "   day: $daypath "
     mkdir -p $OUT/$daypath
 
-    yy=`echo "${daypath}" | awk -F/ '{print $1}'`
-    mm=`echo "${daypath}" | awk -F/ '{print $2}'`
-    dd=`echo "${daypath}" | awk -F/ '{print $3}'`
+    yy=`echo "${daypath}" | awk -F/ '{print $1}'`;yy=`printf "%02d" $yy`
+    mm=`echo "${daypath}" | awk -F/ '{print $2}'`;mm=`printf "%02d" $mm`
+    dd=`echo "${daypath}" | awk -F/ '{print $3}'`;dd=`printf "%02d" $dd`
     base=`echo "RM_20${yy}_${mm}_${dd}" `
 
     cd $DATA/$daypath

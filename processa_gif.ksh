@@ -13,7 +13,8 @@
 HOME=/home/hbarbosa/Programs/RMlicelUSP
 
 LIDAR=/media/work/EMBRAPA/lidar
-#LIDAR=/lfa-server/lidar
+#LIDAR=/lfa-data/lidar
+erasefirst='no'
 
 DATA=$LIDAR/level1
 OUT=$LIDAR/gifs
@@ -21,12 +22,12 @@ mkdir -p $OUT
 
 cd $DATA
 echo "Searching for netCDF directories like YY/MM/DD/RM*.nc"
-for daypath in `find 10/10/* -type d` ; do
+for daypath in `find 11/7/* -type d` ; do
     echo "   day: $daypath "
 
-    yy=`echo "${daypath}" | awk -F/ '{print $1}'`
-    mm=`echo "${daypath}" | awk -F/ '{print $2}'`
-    dd=`echo "${daypath}" | awk -F/ '{print $3}'`
+    yy=`echo "${daypath}" | awk -F/ '{print $1}'`;yy=`printf "%02d" $yy`
+    mm=`echo "${daypath}" | awk -F/ '{print $2}'`;mm=`printf "%02d" $mm`
+    dd=`echo "${daypath}" | awk -F/ '{print $3}'`;dd=`printf "%02d" $dd`
     base=`echo "RM_20${yy}_${mm}_${dd}" `
 
     if [[ $mm == "01" ]] ; then mon="jan" ; fi
@@ -68,10 +69,15 @@ tdef time $minute linear ${itime}z${dd}${mon}${yy} 1mn
 EOF
 
     # Creates the image
-    cd $HOME
-    grads -blxc "run rmday2gif ${DATA}/${daypath}/${base}.ctl"
-    mv ${DATA}/${daypath}/${base}.png ${OUT}/
+    if [[ $erasefirst == "yes" ]] ; then
+        rm -f $OUT/${base}.png
+    fi
 
+    if [ ! -e $OUT/${base}.png ] ; then
+        cd $HOME
+        grads -blxc "run rmday2gif ${DATA}/${daypath}/${base}.ctl"
+        mv ${DATA}/${daypath}/${base}.png ${OUT}/
+    fi
 done
 
 #fim
