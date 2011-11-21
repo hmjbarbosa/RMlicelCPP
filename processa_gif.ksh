@@ -12,9 +12,9 @@
 #
 HOME=/home/hbarbosa/Programs/RMlicelUSP
 
-LIDAR=/media/work/EMBRAPA/lidar
-#LIDAR=/lfa-data/lidar
-erasefirst='no'
+#LIDAR=/media/work/EMBRAPA/lidar
+LIDAR=/lfa-data/lidar
+erasefirst='yes'
 
 DATA=$LIDAR/level1
 OUT=$LIDAR/gifs
@@ -22,7 +22,7 @@ mkdir -p $OUT
 
 cd $DATA
 echo "Searching for netCDF directories like YY/MM/DD/RM*.nc"
-for daypath in `find 11/7/* -type d` ; do
+for daypath in `find */*/* -type d` ; do
     echo "   day: $daypath "
 
     yy=`echo "${daypath}" | awk -F/ '{print $1}'`;yy=`printf "%02d" $yy`

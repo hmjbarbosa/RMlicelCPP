@@ -5,7 +5,7 @@ reinit
 
 * get time limits
 'set t 1 last '
-'q time'; d1=subwrd(result,3); d1=substr(d1,7,9)
+'q time'; d1=subwrd(result,3); d1=substr(d1,strlen(d1)-8,9)
 
 * get number of vertical bins
 'q ctlinfo'; lin=sublin(result,7); zmax=subwrd(lin,2)
@@ -23,11 +23,11 @@ say 'calculating sigma(bg)'
 * arbitrarily divide by 1.e5
 'set z 1 2000'
 say 'calculating RCS'
-'rcs=maskout(ch355an-bg(z=1),ch355an-bg(z=1)-3*sig(z=1))*lev*lev*7.5*7.5/1e5'
+'rcs=maskout(ch355an-bg(z=1),ch355an-bg(z=1)-3*sig(z=1))*lev*lev*7.5*7.5'
 
 * plot
 say 'plotting'
-'palete.gs'
+'palete2'
 'clear'
 'set grads off'
 'set parea 1 9.7 0.8 7.4'
@@ -37,19 +37,22 @@ say 'plotting'
 'set xlopts 1 1 0.17'; 
 'set tlsupp month'
 
+ncores=138
+max=400.e5
 k=0; ccol='1 '; clev=''
-while(k<100)
-  ccol=ccol' '101+k
-  clev=clev' 'k*2
+while(k<ncores)
+  ccol=ccol' '237-k
+  clev=clev' 'k*max/ncores
   k=k+1
 endwhile
-ccol=ccol'  1'
-clev=clev' 'k*2
+ccol='1 'ccol'  2 '
+clev='0 'clev' 'k*max/ncores
 'set clevs 'clev
 'set ccols 'ccol
+say clev
 
-'d rcs'
-'cbarn10 1 1 10.1'
+'d smth9(rcs)'
+'cbarn10 1 1 9.9'
 
 * labels
 'set string 1 c 1 90'
@@ -58,7 +61,7 @@ clev=clev' 'k*2
 'set string 1 c 1 0 '
 'draw string 5.35 0.25 `0 Local Time (UTC-4)'
 'set strsiz 0.24 '
-'draw string 5.35 8.2 `0 Range and BG corrected signal [a.u. x 10`a5`n]'
+'draw string 5.35 8.2 `0 Range and BG corrected signal [a.u.]'
 'set strsiz 0.22 '
 'draw string 5.35 7.7 `0 Elastic 355nm/Analog - 'd1
 

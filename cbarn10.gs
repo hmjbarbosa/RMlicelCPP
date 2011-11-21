@@ -139,6 +139,9 @@ if(sf='');sf=1.0;endif
     rec = sublin(shdinfo,num+2)
     col = subwrd(rec,1)
     hi = subwrd(rec,3)
+    if (num=cnum-1)
+      hi = subwrd(rec,2)
+    endif
     if (vert) 
       yt = yb + ywid
     else 
@@ -194,15 +197,17 @@ if(sf='');sf=1.0;endif
     endif
 
 *   Put numbers under each segment of the color key
+    step=math_nint((cnum-1)/10)
     if (num < cnum)
+      hi = math_format("%7.2e",hi)
       if (vert) 
         xp=xr+stroff
-        if (math_mod(num,10)=0)
+        if (math_fmod(num,step)=0 | num=cnum-1)
           'draw string 'xp' 'yt' 'hi
         endif
       else
         yp=yb-stroff
-        if (math_mod(num,10)=0)
+        if (math_fmod(num,step)=0 | num=cnum-1)
           'draw string 'xr' 'yp' 'hi
         endif
       endif
