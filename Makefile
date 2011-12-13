@@ -50,32 +50,36 @@ check	: $(PROGS)
 	@./rm2dat RM1120200.012; TMP=`md5sum RM1120200.012.dat`; \
 	if test "$$TMP" = "08c6f9cf5fd4c0748b5c74159ffbe796  RM1120200.012.dat" ; then \
 		echo ok;\
+		rm -f RM1120200.012.dat;\
 	else\
 		echo FAIL;\
-	fi; rm -f RM1120200.012.dat; 
+	fi; 
 	@echo -n "rm2csv :: csv conversion: "
 	@./rm2csv RM1120200.012; TMP=`md5sum RM1120200.012.csv`; \
 	if test "$$TMP" = "24a4e279077b5dacb8c74674404aded9  RM1120200.012.csv" ; then \
 		echo ok;\
+		rm -f RM1120200.012.csv;\
 	else\
 		echo FAIL;\
-	fi; rm -f RM1120200.012.csv; 
+	fi; 
 	@echo -n "rm2bin :: Averaging one file: "
 	@rm -f teste; ./rm2bin teste RM1120200.012; \
 	TMP=`diff teste RM1120200.012`; \
 	if test "x$$TMP" = "x" ; then \
 		echo ok;\
+		rm -f teste;\
 	else\
 		echo FAIL;\
-	fi; rm -f teste;
+	fi; 
 	@echo -n "rm2bin :: Averaging multiple files: "
 	@rm -f teste; ./rm2bin teste RM10C1315.???; \
 	TMP=`md5sum teste`; \
 	if test "$$TMP" = "ab0a01b7f8fda2abbcd7132208680c27  teste" ; then \
 		echo ok;\
+		rm -f teste;\
 	else\
 		echo FAIL;\
-	fi; rm -f teste;
+	fi; 
 	@echo "rm2bin + rm2csv:: Averaging - hardcore testing: "
 	@rm -f teste; \
 	./rm2bin teste RM10C1315.162 RM10C1315.172; \

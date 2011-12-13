@@ -97,7 +97,8 @@ void profile_add_netcdf(const char* fname, RMDataFile First, RMDataFile toadd)
   if (ok != NC_NOERR) handle_error(ok);
 
   // Fill time info
-  tdif=floor(SecDiff(First.end, toadd.end)/60.+0.5);
+  //tdif=floor(SecDiff(First.end, toadd.end)/60.+0.5);
+  tdif=toadd.end.MinDiff(First.end);
   if (tdif<0) {
     std::cerr << "First file must be the earliest!\n";
     exit(1);
@@ -139,7 +140,7 @@ void profile_add_netcdf(const char* fname, RMDataFile First, RMDataFile toadd)
     ok=nc_redef(ncid);
     if (ok != NC_NOERR) handle_error(ok);
 
-    sprintf(longstr,"%s",Date2nc(toadd.end).c_str());
+    sprintf(longstr,"%s",toadd.end.write2nc().c_str());
     ok=nc_put_att_text(ncid, NC_GLOBAL, "end_time",strlen(longstr),longstr);
     if (ok != NC_NOERR) handle_error(ok);
 
@@ -182,7 +183,8 @@ void profile_write_netcdf(const char* fname, RMDataFile rm)
   // start minute
   //  int minute;
   // a date
-  date adate;
+  //  date adate;
+  RM_Date adate;
 
   /*
    * CREATE EMPTY NETCDF FILE
@@ -231,8 +233,10 @@ void profile_write_netcdf(const char* fname, RMDataFile rm)
 
   // now we start at full minutes
   // now we save the end time, because the filename is associated with THAT time
-  RoundMinutes(rm.end, &adate);
-  sprintf(longstr,"minutes since %s",Date2nc(adate).c_str());
+  //RoundMinutes(rm.end, &adate);
+  adate=RM_Date(rm.end);
+  adate.RoundMinutes();
+  sprintf(longstr,"minutes since %s",adate.write2nc().c_str());
   ok=nc_put_att_text(ncid, t_varid, "units",strlen(longstr),longstr);
   if (ok != NC_NOERR) handle_error(ok);
 
@@ -325,11 +329,11 @@ void profile_write_netcdf(const char* fname, RMDataFile rm)
   ok=nc_put_att_text(ncid, NC_GLOBAL, "site_char", strlen(rm.site), rm.site);
   if (ok != NC_NOERR) handle_error(ok);
 
-  sprintf(longstr,"%s",Date2nc(rm.start).c_str());
+  sprintf(longstr,"%s",rm.start.write2nc().c_str());
   ok=nc_put_att_text(ncid, NC_GLOBAL, "start_time",strlen(longstr),longstr);
   if (ok != NC_NOERR) handle_error(ok);
 
-  sprintf(longstr,"%s",Date2nc(rm.end).c_str());
+  sprintf(longstr,"%s",rm.end.write2nc().c_str());
   ok=nc_put_att_text(ncid, NC_GLOBAL, "end_time",strlen(longstr),longstr);
   if (ok != NC_NOERR) handle_error(ok);
 

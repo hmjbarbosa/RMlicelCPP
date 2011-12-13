@@ -5,8 +5,9 @@ reinit
 
 * get time limits
 'set t 1 last '
-'q time'; d1=subwrd(result,3); d1=substr(d1,7,9)
-
+'q time'; d1=subwrd(result,3); d1=substr(d1,strlen(d1)-8,9)
+say d1
+exit
 * get number of vertical bins
 'q ctlinfo'; lin=sublin(result,7); zmax=subwrd(lin,2)
 zmin=zmax-500
@@ -31,7 +32,7 @@ say 'plotting'
 'clear'
 'set grads off'
 'set parea 1 9.7 0.8 7.4'
-'set gxout grfill'
+'set gxout shaded'
 'set yaxis 0 15 1'
 'set ylopts 1 1 0.17';  
 'set xlopts 1 1 0.17'; 

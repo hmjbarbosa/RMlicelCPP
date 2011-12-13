@@ -24,8 +24,8 @@ int main (int argc, char *argv[])
 
     // Write netcdf
     if (!err) {
-      sprintf(fnc,"RM_%s_%02dh%02d.nc",YMD2String(XX.end,'_').c_str(), 
-              XX.end.hh, XX.end.mn);
+      sprintf(fnc,"RM_%s_%02dh%02d.nc",XX.end.write2YMD('_').c_str(), 
+              XX.end.GetHour(), XX.end.GetMin());
 
       profile_write_netcdf(fnc, XX);
     }

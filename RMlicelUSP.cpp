@@ -8,18 +8,25 @@ void Free_RMDataFile(RMDataFile *rm)
       free(rm->ch[i].phy);
     }
     free(rm->ch);
-  } else {
-    fprintf(stderr,"ERROR: trying to deallocate a NULL structure!\n");
-    exit(1);
   }
+  //if (rm->start!=NULL) free(rm->start);
+  //if (rm->end!=NULL) free(rm->end);
+//else {
+//    fprintf(stderr,"ERROR: trying to deallocate a NULL structure!\n");
+//    exit(1);
+//  }
 }
 
 void Init_RMDataFile(RMDataFile *rm) 
 {
   strcpy(rm->file,"-999");
   strcpy(rm->site,"-999");
-  ResetDate(&rm->start);
-  ResetDate(&rm->end);
+  //ResetDate(&rm->start);
+  //ResetDate(&rm->end);
+  //rm->start=NULL;
+  //rm->end=NULL;
+  rm->start.Nullify();
+  rm->end.Nullify();
   rm->alt=-999;
   rm->lon=-999.;
   rm->lat=-999.;
@@ -73,7 +80,7 @@ void channel_read(FILE *fp, channel *ch)
   if (n!=1) channel_read_error();
 
   //n=fscanf(fp,"\r\n");
-  fscanf(fp,"%*[^\n]"); fscanf(fp,"%*c");
+  n=fscanf(fp,"%*[^\n]"); n=fscanf(fp,"%*c");
   //fprintf(stderr,"fim channel: %ld\n",ftell(fp));
 }
 
@@ -182,7 +189,7 @@ void header_read(FILE *fp, RMDataFile *rm)
   n=fscanf(fp,"%s", rm->file);
   if (n!=1) header_read_error();
   //n=fscanf(fp,"\r\n");
-  fscanf(fp,"%*[^\n]"); fscanf(fp,"%*c");
+  n=fscanf(fp,"%*[^\n]"); n=fscanf(fp,"%*c");
   //fprintf(stderr,"fim head1: %ld\n",ftell(fp));
   
   // Line 2
@@ -193,13 +200,15 @@ void header_read(FILE *fp, RMDataFile *rm)
   n=fscanf(fp,"%2d:%2d:%2d",&hh,&mn,&ss);
   if (n!=3) header_read_error();
 
-  InitDateYMD(&rm->start, YY,MM,DD,hh,mn,ss, UTC);
+  //InitDateYMD(&rm->start, YY,MM,DD,hh,mn,ss, UTC);
+  rm->start = RM_Date(YY,MM,DD,hh,mn,ss, UTC);
 
   n=fscanf(fp,"%2d/%2d/%4d",&DD,&MM,&YY);
   if (n!=3) header_read_error();
   n=fscanf(fp,"%2d:%2d:%2d",&hh,&mn,&ss);
 
-  InitDateYMD(&rm->end, YY,MM,DD,hh,mn,ss, UTC);
+  //InitDateYMD(&rm->end, YY,MM,DD,hh,mn,ss, UTC);
+  rm->end = RM_Date(YY,MM,DD,hh,mn,ss, UTC);
 
   if (n!=3) header_read_error();
   n=fscanf(fp,"%d",&rm->alt);
@@ -217,7 +226,7 @@ void header_read(FILE *fp, RMDataFile *rm)
   n=fscanf(fp,"%s",P0);
   if (n!=1) header_read_error();
   //n=fscanf(fp,"\r\n");
-  fscanf(fp,"%*[^\n]"); fscanf(fp,"%*c");
+  n=fscanf(fp,"%*[^\n]"); n=fscanf(fp,"%*c");
   //fprintf(stderr,"fim head2: %ld\n",ftell(fp));
 
   // Depending on windows configuration, data file may have numbers
@@ -241,7 +250,7 @@ void header_read(FILE *fp, RMDataFile *rm)
   if (n!=5) header_read_error();
 
   //n=fscanf(fp,"\r\n");
-  fscanf(fp,"%*[^\n]"); fscanf(fp,"%*c");
+  n=fscanf(fp,"%*[^\n]"); n=fscanf(fp,"%*c");
   //fprintf(stderr,"fim head3: %ld\n",ftell(fp));
 }
 
@@ -262,10 +271,10 @@ void header_printf(FILE *fp, RMDataFile rm,
   // Line 2
   fprintf(fp,"%1s",beg);
   fprintf(fp,"%s%1s",rm.site,sep);
-  fprintf(fp,"%s%1s",DMY2String(rm.start,'/').c_str(),sep);
-  fprintf(fp,"%s%1s",Time2String(rm.start).c_str(),sep);
-  fprintf(fp,"%s%1s",DMY2String(rm.end,'/').c_str(),sep);
-  fprintf(fp,"%s%1s",Time2String(rm.end).c_str(),sep);
+  fprintf(fp,"%s%1s",rm.start.write2DMY('/').c_str(),sep);
+  fprintf(fp,"%s%1s",rm.start.write2hms().c_str(),sep);
+  fprintf(fp,"%s%1s",rm.end.write2DMY('/').c_str(),sep);
+  fprintf(fp,"%s%1s",rm.end.write2hms().c_str(),sep);
   fprintf(fp,"%04d%1s",rm.alt,sep);
   fprintf(fp,"%06.1f%1s",rm.lon,sep);
   fprintf(fp,"%06.1f%1s",rm.lat,sep);
@@ -293,8 +302,8 @@ void header_printf(FILE *fp, RMDataFile rm,
 void header_debug(RMDataFile rm) 
 {
   fprintf(stderr,"====== FILE: %s %s\n",rm.file, rm.site);
-  fprintf(stderr,"start: %s\n",Date2nc(rm.start).c_str());
-  fprintf(stderr,"end: %s\n",Date2nc(rm.end).c_str());
+  fprintf(stderr,"start: %s\n",rm.start.write2nc().c_str());
+  fprintf(stderr,"end: %s\n",rm.end.write2nc().c_str());
   fprintf(stderr,"altitude (m): %d\n",rm.alt);
   fprintf(stderr,"position (lat/lon): %f %f\n",rm.lat,rm.lon);
   fprintf(stderr,"zenith: %d \n",rm.zen);
@@ -594,8 +603,15 @@ void profile_add (RMDataFile *acum, RMDataFile toadd)
   /* ************** SUMS   ****************************************   */
 
   // update start/end dates
-  if (toadd.start.jd < acum->start.jd) acum->start=toadd.start;
-  if (toadd.end.jd   > acum->end.jd  ) acum->end=toadd.end;
+  //if (toadd.start.jd < acum->start.jd) acum->start=toadd.start;
+  //if (toadd.end.jd   > acum->end.jd  ) acum->end=toadd.end;
+
+  if (toadd.start < acum->start) {
+    acum->start = RM_Date(toadd.start);
+  }
+  if (toadd.end > acum->end ) {
+    acum->end = RM_Date(toadd.end);
+  }
 
   // Number of files added
   acum->idum++;
@@ -648,6 +664,7 @@ int profile_read (const char* fname, RMDataFile *rm, bool debug)
   size_t nread; // amount of data read
   float dScale; // conversion between raw and physical data
   char szBuffer[90]; // dummy buffer
+  int n;
   
   Init_RMDataFile(rm);
   
@@ -676,7 +693,7 @@ int profile_read (const char* fname, RMDataFile *rm, bool debug)
   }
 
   // after all channels there is an extra empty line
-  fscanf(fp,"%*[^\n]"); fscanf(fp,"%*c");
+  n=fscanf(fp,"%*[^\n]"); n=fscanf(fp,"%*c");
   //fprintf(stderr,"fim all channels: %ld\n",ftell(fp));
 
   // READ ACTUAL DATA (IN BINARY FORMAT)
@@ -690,7 +707,7 @@ int profile_read (const char* fname, RMDataFile *rm, bool debug)
         nread=0;
         //fprintf(stderr,"pos before raw: %ld\n",ftell(fp));        
         for (int k=0; k<rm->ch[i].ndata; k++) {
-          fread(&rm->ch[i].raw[k],sizeof(bin),1,fp);
+          n=fread(&rm->ch[i].raw[k],sizeof(bin),1,fp);
           nread++;
         }
         //fprintf(stderr,"pos after raw: %ld\n",ftell(fp));        

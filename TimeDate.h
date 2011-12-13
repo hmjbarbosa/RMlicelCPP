@@ -10,63 +10,81 @@
 
 #include "iostream"
 
-typedef struct{
-    int YY;
-    int MM;
-    int DD;
-    int hh;
-    int mn;
-    int ss;
-    double jd;
-    float utc;
-} date;
-
 #define secinday 86400
 #define mininday 1440
 #define hourinday 24
-
-//#define USEUTC true
-#define UTC -4 // local time zone
-
 #define jd2010 2455197.5
 #define jd1900 2415020.5
 
-// initialize date with -999
-extern void ResetDate(date *d1);
+class RM_Date {
 
-// round date d1 to the nearest full minute and save it to d2
-extern void RoundMinutes(date d1, date *d2); 
+ private:
+  int yy;
+  int mm;
+  int dd;
+  int hh;
+  int mn;
+  int ss;
+  double jd;
+  float utc;
+  
+ protected:
+  virtual void CalcJD();
+  virtual void CalcDate();
 
-// initialize with a actual date
-extern void InitDateYMD(date *d1, int YY, int MM, int DD, 
-                         int hh, int mn, int ss, float utc);
+ public:
 
-// initialize with a actual julian date
-extern void InitDateJD(date *d1, double jd, float utc);
+  RM_Date();
+  // initialize with an object
+  RM_Date(const RM_Date &date);
+  // initialize with a date
+  RM_Date(const int year, const int mon, const int day,
+          const int hour, const int min, const int sec,
+          const float futc);
+  // initialize with a julian date
+  RM_Date(const double julday, const float futc);
 
-// less-than comparison of two dates
-extern bool DateLT(date d1, date d2);
+  // operator overloading
+  RM_Date &operator=(const RM_Date &rhs);
+  bool operator<(const RM_Date &rhs);
+  bool operator>(const RM_Date &rhs);
+  bool operator==(const RM_Date &rhs);
 
-// write date/time in netcdf format
-// YYYY-MM-DD hh:mm:ss UTC
-extern std::string Date2nc(date d1);
+  // destructor
+  virtual ~RM_Date();
+  
+  // plain get functions
+  virtual int GetYear();
+  virtual int GetMonth();
+  virtual int GetDay();
+  virtual int GetHour();
+  virtual int GetMin();
+  virtual int GetSec();
+  virtual float GetUTC();
+  virtual double GetJD();
 
-// date to string
-extern std::string YMD2String(date d1, char sep='/');
-extern std::string DMY2String(date d1, char sep='/');
+  // initialize date with -999
+  virtual void Nullify();
 
-// time to string
-extern std::string Time2String(date d1, char sep=':'); 
+  // round date d1 to the nearest full minute and save it to d2
+  virtual void RoundMinutes(); 
 
-// date/time to julian days
-extern void Date2JD(date d1, double *jd);
-// julian days to date/time
-extern void JD2Date(date *d1, double jd);
+  // write date/time in netcdf format
+  // YYYY-MM-DD hh:mm:ss UTC
+  virtual std::string write2nc();
 
-// time difference between two dates
-extern int SecDiff(date d1, date d2);
-extern int MinDiff(date d1, date d2);
-extern int HourDiff(date d1, date d2);
-extern int DayDiff(date d1, date d2);
+  // date to string
+  virtual std::string write2YMD(const char sep='/');
+  virtual std::string write2DMY(const char sep='/');
+
+  // time to string
+  virtual std::string write2hms(const char sep=':'); 
+
+  // time difference between two dates
+  virtual int SecDiff (const RM_Date &rhs);
+  virtual int MinDiff (const RM_Date &rhs);
+  virtual int HourDiff(const RM_Date &rhs);
+  virtual int DayDiff (const RM_Date &rhs);
+};
 
 #endif /* _TIMEDATE_H */

@@ -13,6 +13,8 @@
 
 #include "TimeDate.h"
 
+#define UTC -4 // local time zone
+
 /*
   1-byte signed int = signed char  = int8_t
   2-byte signed int = signed short = int16_t
@@ -56,9 +58,8 @@ typedef struct{
 typedef struct{
     char file[80]; // file name as written in header
     char site[80]; // site name 
-    date start; // date
-    date end; // date
-    double jdstart, jdend; // julian date (UTC)
+    RM_Date start; // date
+    RM_Date end; // date
     int alt; // altitude (m)
     float lon; // longitute (deg)
     float lat; // latitude (deg)
