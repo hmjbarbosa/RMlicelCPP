@@ -101,7 +101,7 @@ extern void phy_printf(FILE *fp, RMDataFile rm, int imax, const char* sep);
 
 extern void check_profiles (RMDataFile A, RMDataFile B);
 extern void profile_debug(RMDataFile rm);
-extern int profile_read (const char* fname, RMDataFile *rm, bool debug = false);
+extern int profile_read (const char* fname, RMDataFile *rm, bool debug = false, bool noraw = false);
 extern void profile_add (RMDataFile *acum, RMDataFile toadd);
 extern void profile_write(FILE *fp, RMDataFile rm);
 extern void profile_printf(FILE *fp, RMDataFile rm, int imax, 

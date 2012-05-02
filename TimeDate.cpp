@@ -23,14 +23,15 @@ RM_Date::RM_Date()
  */
 RM_Date::RM_Date(const RM_Date &date)
 {
-  yy = date.yy;
-  mm = date.mm;
-  dd = date.dd;
-  hh = date.hh;
-  mn = date.mn;
-  ss = date.ss;
-  jd = date.jd;
-  utc = date.utc;
+  this->yy  = date.yy;
+  this->mm  = date.mm;
+  this->dd  = date.dd;
+  this->hh  = date.hh;
+  this->mn  = date.mn;
+  this->ss  = date.ss;
+  this->jd  = date.jd;
+  this->secd= date.secd;
+  this->utc = date.utc;
 }
 
 //______________________________________________________________________________
@@ -42,17 +43,17 @@ RM_Date::RM_Date(const RM_Date &date)
  */
 RM_Date::RM_Date(const int year, const int mon, const int day,
                  const int hour, const int min, const int sec, 
-                 const float futc)
+                 const float utc)
 {
-  yy = year;
-  mm = mon;
-  dd = day;
-  hh = hour;
-  mn = min;
-  ss = sec;
-  utc = futc;
+  this->yy = year;
+  this->mm = mon;
+  this->dd = day;
+  this->hh = hour;
+  this->mn = min;
+  this->ss = sec;
+  this->utc = utc;
 
-  CalcJD();
+  this->CalcJD();
 }
 
 //______________________________________________________________________________
@@ -62,70 +63,13 @@ RM_Date::RM_Date(const int year, const int mon, const int day,
   Author: hbarbosa
   Date: 12 nov 2011
  */
-RM_Date::RM_Date(const double julday, const float futc)
+RM_Date::RM_Date(const double jd, const int secd, const float utc)
 {
-  utc = futc;
-  jd = julday;
+  this->utc = utc;
+  this->jd  = jd;
+  this->secd= secd;
 
-  CalcDate();
-}
-
-//______________________________________________________________________________
-/*
-  Function: RM_Date operator = 
-  Description: 
-  Author: hbarbosa
-  Date: 12 dec 2011
- */
-RM_Date& RM_Date::operator=(const RM_Date &rhs)
-{
-  if (this != &rhs) {
-    yy = rhs.yy;
-    mm = rhs.mm;
-    dd = rhs.dd;
-    hh = rhs.hh;
-    mn = rhs.mn;
-    ss = rhs.ss;
-    jd = rhs.jd;
-    utc = rhs.utc;
-  }
-  return *this;
-}
-
-//______________________________________________________________________________
-/*
-  Function: RM_Date operator <
-  Description: 
-  Author: hbarbosa
-  Date: 12 dec 2011
- */
-bool RM_Date::operator<(const RM_Date &rhs)
-{
-  return(this->jd < rhs.jd);
-}
-
-//______________________________________________________________________________
-/*
-  Function: RM_Date operator >
-  Description: 
-  Author: hbarbosa
-  Date: 12 dec 2011
- */
-bool RM_Date::operator>(const RM_Date &rhs)
-{
-  return(this->jd > rhs.jd);
-}
-
-//______________________________________________________________________________
-/*
-  Function: RM_Date operator ==
-  Description: 
-  Author: hbarbosa
-  Date: 12 dec 2011
- */
-bool RM_Date::operator==(const RM_Date &rhs)
-{
-  return(this->jd == rhs.jd);
+  this->CalcDate();
 }
 
 //______________________________________________________________________________
@@ -142,19 +86,26 @@ RM_Date::~RM_Date()
 
 //______________________________________________________________________________
 /*
-  Function: simple get functions
-  Description: return specific values
+  Function: RM_Date operator = 
+  Description: 
   Author: hbarbosa
   Date: 12 dec 2011
-*/
-int RM_Date::GetYear() { return (yy); }
-int RM_Date::GetMonth(){ return (mm); }
-int RM_Date::GetDay()  { return (dd); }
-int RM_Date::GetHour() { return (hh); }
-int RM_Date::GetMin()  { return (mn); }
-int RM_Date::GetSec()  { return (ss); }
-float RM_Date::GetUTC()  { return (utc); }
-double RM_Date::GetJD()   { return (jd); }
+ */
+RM_Date& RM_Date::operator=(const RM_Date &rhs)
+{
+  if (this != &rhs) {
+    yy  = rhs.yy;
+    mm  = rhs.mm;
+    dd  = rhs.dd;
+    hh  = rhs.hh;
+    mn  = rhs.mn;
+    ss  = rhs.ss;
+    jd  = rhs.jd;
+    secd= rhs.secd;
+    utc = rhs.utc;
+  }
+  return *this;
+}
 
 //______________________________________________________________________________
 /*
@@ -165,14 +116,15 @@ double RM_Date::GetJD()   { return (jd); }
 */
 void RM_Date::Nullify()
 {
-  yy=-999;
-  mm=-999;
-  dd=-999;
-  hh=-999;
-  mn=-999;
-  ss=-999;
-  jd=-999.;
-  utc=-999.;
+  yy  = -999;
+  mm  = -999;
+  dd  = -999;
+  hh  = -999;
+  mn  = -999;
+  ss  = -999;
+  jd  = -999.;
+  secd= -999;
+  utc = -999.;
 }
 
 //______________________________________________________________________________
@@ -184,8 +136,24 @@ void RM_Date::Nullify()
  */
 void RM_Date::RoundMinutes()
 {
-  jd = double(floor(jd*double(mininday)+0.5))/double(mininday);
+  /*
+  std::cerr<< this->write2nc() <<std::endl;
+  printf("%17.8f\n",jd);
+  printf("%17.8f\n",             secd*1.);
+  printf("%17.8f\n",             secd/double(secinmin));
+  printf("%17.8f\n",             secd/double(secinmin)+double(0.5));
+  printf("%17.8f\n",       floor(secd/double(secinmin)+double(0.5)));
+  printf("%17.8f\n",double(floor(secd/double(secinmin)+double(0.5))));
+  printf("%17.8f\n",double(floor(secd/double(secinmin)+double(0.5)))*double(secinmin));
+  */
+  secd = double(floor(secd/double(secinmin)+0.5))*double(secinmin);
+  // it is always in the same day, except if it rounds up to 24hs
+  if (secd>=secinday) { secd-=secinday; jd+=1; }
+
   CalcDate();
+
+  //std::cerr<< this->write2nc() <<std::endl;
+
 }
 
 
@@ -257,13 +225,16 @@ void RM_Date::CalcJD()
 
    long int jd12h;
 
-   double 
-     hour = hh+(mn+(ss/60.))/60.;
+//   double 
+//     hour = hh+(mn+(ss/60.))/60.;
 
    long int
      lday   = (long) dd,
      lmonth = (long) mm,
      lyear  = (long) yy;
+   //std::cerr << "lyear = " << lyear << std::endl;
+
+   secd = hh*secinhour+mn*secinmin+ss;
 
    // Adjust BC years
    if ( lyear < 0 ) lyear++;
@@ -274,7 +245,7 @@ void RM_Date::CalcJD()
      3L * ((lyear + 4900L + (lmonth - 14L) / 12L) / 100L) / 4L;
 
    // julian day is integer at noon (half day through)
-   jd = (double) jd12h - 0.5 + hour / 24.0;
+   jd = (double) jd12h - 0.5;// + hour / 24.0;
 }
 
 //______________________________________________________________________________
@@ -289,25 +260,37 @@ void RM_Date::CalcDate()
   double hour, min, sec;
   long int jd12h;
   long int t1, t2, yr, mo;
-  int n=0;
+//  int n=0;
+//
+//  sec=60.;
+//  while (sec>59.5 && n++<10) {
+//    hour=(jd+0.5-floor(jd+0.5))*24.; 
+//    hh=floor(hour); // round to smaller
+//
+//    min=(hour-floor(hour))*60.;      
+//    mn=floor(min); // round to smaller
+//    
+//    sec=(min-floor(min))*60.;        
+//    ss=floor(sec+0.5); // round to nearest because there is nothing
+//                           // smaller than seconds
+//
+//    // round errors in the math above could lead to seconds between
+//    // 59.5 and 60.0, which will round up to 60, while it should be 0s
+//    // +1min
+//    if (ss==60) jd=jd+0.0001/secinday;
+//  }
 
-  sec=60.;
-  while (sec>59.5 && n++<10) {
-    hour=(jd+0.5-floor(jd+0.5))*24.; 
-    hh=floor(hour); // round to smaller
+  // correct for fractional day outside range [0, 0)
+  while(secd>=secinday) { secd-=secinday; jd+=1; }
+  while(secd<0.)        { secd+=secinday; jd-=1; }
 
-    min=(hour-floor(hour))*60.;      
-    mn=floor(min); // round to smaller
-    
-    sec=(min-floor(min))*60.;        
-    ss=floor(sec+0.5); // round to nearest because there is nothing
-                           // smaller than seconds
+  // get hms from seconds in day
+  sec=double(secd);                        ss=floor( fmod(sec,  (double) secinmin)  +0.5);
+  min=(sec-double(ss))/double(secinmin);   mn=floor( fmod(min,  (double) mininhour) +0.5);
+  hour=(min-double(mn))/double(mininhour); hh=floor( fmod(hour, (double) hourinday) +0.5);
 
-    // round errors in the math above could lead to seconds between
-    // 59.5 and 60.0, which will round up to 60, while it should be 0s
-    // +1min
-    if (ss==60) jd=jd+0.0001/secinday;
-  }
+  //printf("sec= %27.18f min=%27.18f hour=%27.18f\n",sec,min,hour);
+  //printf("ss= %d %d %d\n",ss, mn, hh);
 
   //d1->jd = jd;
   jd12h = floor(jd+0.5);
@@ -322,7 +305,7 @@ void RM_Date::CalcDate()
   t1 = mo / 11L;
   mm = (int) ( mo + 2L - 12L * t1 );
   yy = (int) ( 100L * ( t2 - 49L ) + yr + t1 );
-  
+
   // Correct for BC years
   if ( yy <= 0 )
     yy -= 1;
@@ -338,7 +321,7 @@ void RM_Date::CalcDate()
  */
 int RM_Date::SecDiff(const RM_Date &rhs)
 {
-  return(floor((jd-rhs.jd)*secinday+0.5));
+  return(floor((jd-rhs.jd)*secinday+(secd-rhs.secd)+0.5));
 }
 
 //______________________________________________________________________________
@@ -350,7 +333,7 @@ int RM_Date::SecDiff(const RM_Date &rhs)
  */
 int RM_Date::MinDiff(const RM_Date &rhs)
 {
-  return(floor((jd-rhs.jd)*mininday+0.5));
+  return(floor((jd-rhs.jd)*mininday+(secd-rhs.secd)/secinmin+0.5));
 }
 
 //______________________________________________________________________________
@@ -362,7 +345,7 @@ int RM_Date::MinDiff(const RM_Date &rhs)
  */
 int RM_Date::HourDiff(const RM_Date &rhs)
 {
-  return(floor((jd-rhs.jd)*hourinday+0.5));
+  return(floor((jd-rhs.jd)*hourinday+(secd-rhs.secd)/secinhour+0.5));
 }
 
 //______________________________________________________________________________
@@ -374,6 +357,6 @@ int RM_Date::HourDiff(const RM_Date &rhs)
  */
 int RM_Date::DayDiff(const RM_Date &rhs)
 {
-  return(floor((jd-rhs.jd))+0.5);
+  return(floor((jd-rhs.jd)+(secd-rhs.secd)/secinday+0.5));
 }
 

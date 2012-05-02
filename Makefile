@@ -1,6 +1,7 @@
 CC=g++
-CFLAGS=-c -Wall -O0 -g
-LFLAGS=-Wall -O0 -g
+CHECK=-fbounds-check -fcheck-new -Wextra -ftrapv -fstack-check
+CFLAGS=-c -Wall -O0 -g $(CHECK)
+LFLAGS=-Wall -O0 -g $(CHECK)
 
 PROGS=\
 	dataread \
@@ -8,12 +9,16 @@ PROGS=\
 	rm2csv \
 	rm2dat \
 	rm2nc \
-	debug
+	debug \
+	rm2name
 
 all	:	$(PROGS)
 
 debug	:	debug.cpp TimeDate.o RMlicelUSP.o
 	$(CC) $(LFLAGS) -o debug debug.cpp TimeDate.o RMlicelUSP.o
+
+rm2name	:	rm2name.cpp TimeDate.o RMlicelUSP.o
+	$(CC) $(LFLAGS) -o rm2name rm2name.cpp TimeDate.o RMlicelUSP.o
 
 rm2bin	:	rm2bin.cpp TimeDate.o RMlicelUSP.o
 	$(CC) $(LFLAGS) -o rm2bin rm2bin.cpp TimeDate.o RMlicelUSP.o

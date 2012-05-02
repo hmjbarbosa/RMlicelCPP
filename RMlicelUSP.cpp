@@ -658,7 +658,7 @@ void profile_add (RMDataFile *acum, RMDataFile toadd)
   Author: hbarbosa
   Date: 17 Aug 2011
  */
-int profile_read (const char* fname, RMDataFile *rm, bool debug) 
+int profile_read (const char* fname, RMDataFile *rm, bool debug, bool noraw) 
 {
   FILE *fp; // file pointer
   size_t nread; // amount of data read
@@ -679,6 +679,8 @@ int profile_read (const char* fname, RMDataFile *rm, bool debug)
     header_debug(*rm);
     //fprintf(stderr,"pos after header: %ld\n",ftell(fp));
   }
+  
+  if (noraw) return 0;
 
   // ALLOCATE MEMORY FOR HOLDING CHANNELS
   rm->ch=(channel*) malloc(rm->nch*sizeof(channel));

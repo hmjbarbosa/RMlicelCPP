@@ -42,14 +42,21 @@ int main (int argc, char *argv[])
     }
   }
 
+  std::cerr << argv[1]  << std::endl;
+
   // Open output file
   fout=fopen(argv[1],"w");
+  if (fout==NULL) {
+    perror("Failed to open output file");
+    exit(1);
+  }
 
   // Write averaged data
   profile_write(fout, XAve);
 
   // Close output file
   fclose(fout);
+
   Free_RMDataFile(&XAve);
 
   return 0;
