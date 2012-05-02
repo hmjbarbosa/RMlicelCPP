@@ -21,7 +21,7 @@ OUT=$LIDAR/level1
 
 cd $DATA
 echo "Searching for RM directories like YY/MM/DD/RM..."
-for daypath in `find 11/7/21 -type d` ; do
+for daypath in `find */*/* -type d` ; do
     echo -n "   day: $daypath "
     mkdir -p $OUT/$daypath
 
