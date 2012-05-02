@@ -1,8 +1,21 @@
+% function [head, phy, raw] = profile_read(fname, dbin, dtime)
+%
+% Reads a Raymetrics/Licel data file applying: (1) an analog
+% displacement, given by an integer number of bins 'dbin', and (2) a
+% dead time correction assumed to be of like S/(1-S*dtime). Data can
+% be output in both physical or raw units.
+%
+% head: Is a matlab structure which contains all information in the
+%       file header. It has two extra fields: the
+%       matlab-julian-day-number of the initial and final time.
+%
+% phy: Is a matrix with vertical bins as rows, and channels as
+%      columns. Values are in physical units.
+%
+% raw: Is a matrix with vertical bins as rows, and channels as
+%      columns. Values are in raw units.
+%
 function [head, phy, raw] = profile_read(fname, dbin, dtime)
-%%function [head, varargout] = profile_read(fname, dbin, dtime)
-%% Reads a Raymetrics Licel lidar data file
-
-%nout=max(nargout,1)-1;
 
 if ~exist('dbin','var') dbin=10; end
 if ~exist('dtime','var') dtime=0.004; end
@@ -29,6 +42,8 @@ head.nhz=fscanf(fp,'%d',[1,1]);
 head.nshoots2=fscanf(fp,'%d',[1,1]);
 head.nhz2=fscanf(fp,'%d',[1,1]);
 head.nch=fscanf(fp,'%d',[1,1]);
+head.jdi=datenum([head.datei(3:-1:1) head.houri]);
+head.jdf=datenum([head.datef(3:-1:1) head.hourf]);
 
 %% READ CHANNEL LINES
 for i = 1:head.nch
@@ -82,15 +97,8 @@ for ch = 1:head.nch
   end
   
   % copy to final destination
-  %com=sprintf('raw%d=tmpraw;',ch); eval(com);
-  %com=sprintf('phy%d=tmpphy;',ch); eval(com);
-  %if (ch<=nout) varargout{ch}=tmpphy; end
-  %if (ch+head.nch<=nout) varargout{ch+head.nch}=tmpraw; end
   phy(1:nz, ch) = tmpphy;
   raw(1:nz, ch) = tmpraw;
-
-  %varargout{ch}=tmpphy;
-  %varargout{ch+head.nch}=tmpraw;
 end
 
 %% CLOSE FILE
