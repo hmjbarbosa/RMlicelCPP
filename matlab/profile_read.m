@@ -10,7 +10,7 @@
 % 
 %    dbin: delay, in number of bins, between analog and PC channels
 %
-%   dtime: dead time (in us) for a correction like like S/(1-S*dtime)
+%   dtime: dead time (in sec) for a correction like like S/(1-S*dtime)
 %
 %     ach: read only channel number 'ach', instead of all channels
 %
@@ -87,7 +87,6 @@ for ch = 1:head.nch
   trash=fread(fp,2,'schar'); 
 
   %% READ RAW CHANNELS
-  %raw(1:nz,ch)=fread(fp,nz,'int32');
   tmpraw=fread(fp,nz,'int32');
   
   if (ch==ach | allch)
