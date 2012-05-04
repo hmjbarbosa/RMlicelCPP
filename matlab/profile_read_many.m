@@ -97,8 +97,12 @@ if ~exist('dtime','var') dtime=0; end
 if ~exist('ach','var') allch=true; else allch=false; end 
 
 %% READ EACH FILE
+['READING ' num2str(nfile) ' files']
 for nf=1:nfile
-
+  if mod(nf, floor(nfile/10))==0
+    ['file= ' num2str(nf) '/' num2str(nfile)]
+  end
+  
   % read file 
   if allch
     [head(nf), tmpphy, tmpraw]=profile_read(list{nf}, dbin, dtime);
