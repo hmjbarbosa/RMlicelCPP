@@ -1,37 +1,83 @@
 %% ERASE MEMORY
-clear; 
+clear all; 
+['analysis started @ ' datestr(clock)]
 
-filelist = dir('data/11/2/04/RM*');
-nfile = size(filelist);
+%% CREATE FILE LIST
+datadir='../../Raymetrics_data/11/9/06';
+filelist=dirpath(datadir,'RM*');
 
-myclock=clock; myclock(4:6)
-for nf=1:nfile
-  % open file keeping only head and each channel in physical units
-  % correct anlog delay (10 bins)
-  % correct dead-time (0.004 us)
-  [head, phy(:,nf,1)]=profile_read2(['data/11/2/04/' filelist(nf).name], 10, 0.004,1);
-
-  % save profile time-stamp
-  jd(nf)=datenum([head.datei(3:-1:1) head.houri]);
+nfile = numel(filelist);
+if (nfile < 1)
+  error('No file found!');
 end
-myclock=clock; myclock(4:6)
+['[1/8] directory listing finished @ ' datestr(clock)]
 
-%for i=1:head.ndata(1)
-%  rcs(nf,i,:)=phy2(nf,i,:)*(7.5*i)^21:nz,1:nt;
-%end
+%% READ EACH FILE
+[heads, chphy]=profile_read_many(filelist, 10, 0.004);
 
-  % suaviza pra nao fazer isso em cima dos buracos 
-  % abaixo de 3sgima
-%  phy3=smooth_region(phy2, 3, 400, 7, 800, 15);
+%% create time vector
+for nf=1:nfile  
+  jd(nf)=heads(nf).jdf;
+  if (nf==1)
+    jd1(nf)=1;
+  else
+    jd1(nf)=floor(1+(jd(nf)-jd(1))*24*60+0.5);
+  end  
+end
+clear tmp;
+['[2/8] data reading finished @ ' datestr(clock)]
 
-  % remove o BG  calculado dos ultimos 500 bins
-  % valores menores que (bg+3*std) são zerados
-%  [phy4, bg, std] = remove_bg(phy3, 500, 3);
+%% SMOOTH IN THE VERTICAL
+for ch=1:heads(1).nch
+  if (ch==5)
+    chphy(ch).vsmooth = ...
+        smooth_region( chphy(ch).data , 5, 150, 10, 300, 15);
+  else
+    chphy(ch).vsmooth = ...
+        smooth_region( chphy(ch).data , 3, 400, 7, 800, 15);
+  end
+end
+['[3/8] vertical smoothing finished @ ' datestr(clock)]
 
-  %% cola o signal analogico ao PC
-  %% os valores zerados nao entram na conta pois sao menores que a resolucao
-%  N2=glue(phy4(:,3), phy4(:,4), head);
-%  H2O=phy4(:,4)';
+%% SMOOTH OVER TIME
+% running average of 5 minutes (+-2min)
+for ch=1:heads(1).nch
+  chphy(ch).tsmooth = smooth_time( chphy(ch).vsmooth , 2 );
+end
+['[4/8] time smoothing finished @ ' datestr(clock)]
+
+%% REMOVE BACK GROUND NOISE
+% average noise and stdev are calculated from last 500 bins
+% values below (bg+3*std) become zero
+for ch=1:heads(1).nch
+  chphy(ch).cs = remove_bg(chphy(ch).tsmooth, 500, 3);
+end
+['[5/8] bg noise finished @ ' datestr(clock)]
+
+
+%% COMPUTE RANGE CORRECTED SIGNAL
+for i=1:heads(1).ndata(1)
+  zh(i)=(7.5*i);
+  zh2(i)=(7.5*i)^2;
+end
+for ch=1:heads(1).nch
+  for nt=1:nfile
+    chphy(ch).rcs(:,nt)=chphy(ch).cs(:,nt).*zh2(:);
+  end
+end
+['[6/8] RCS finished @ ' datestr(clock)]
+
+%% GLUE ANALOG+PC
+H2O=chphy(5).cs;
+N2=glue(chphy(3).cs, chphy(4).cs, heads(1));
+['[7/8] Glueing finished @ ' datestr(clock)]
+
+H2O=H2O(1:1000, :);
+N2=N2(1:1000, :);
+mixr=0.7e3*H2O./N2;
+
+analise_plot;
+['[8/8] Plotting finished @ ' datestr(clock)]
 
 %
 %

@@ -8,7 +8,7 @@ title([datestr(jd(1)) ' to ' datestr(jd(nfile))]);
 grid on;
 
 figure(1)
-[C1, h1]=gplot(channel(1).phy(1:1000,:));
+[C1, h1]=gplot(chphy(1).data(1:1000,:));
 title([datestr(jd(1)) ' to ' datestr(jd(nfile))]);
 grid on;
 
