@@ -1,7 +1,7 @@
 CC=g++
-CHECK=-fbounds-check -fcheck-new -Wextra -ftrapv -fstack-check
-CFLAGS=-c -Wall -O0 -g $(CHECK)
-LFLAGS=-Wall -O0 -g $(CHECK)
+CHECK=-fbounds-check -fcheck-new -Wextra -ftrapv -fstack-check -static
+CFLAGS=-c -Wall -O0 -g $(CHECK) 
+LFLAGS=-Wall -O0 -g $(CHECK) 
 
 PROGS=\
 	dataread \
@@ -30,10 +30,10 @@ rm2dat	:	rm2dat.cpp TimeDate.o RMlicelUSP.o
 	$(CC) $(LFLAGS) -o rm2dat rm2dat.cpp  TimeDate.o RMlicelUSP.o
 
 dataread	:	dataread.cpp TimeDate.o RMlicelUSP.o RMnetcdfUSP.o
-	$(CC) $(LFLAGS) -lnetcdf -o dataread dataread.cpp TimeDate.o RMlicelUSP.o RMnetcdfUSP.o
+	$(CC) $(LFLAGS) -o dataread dataread.cpp TimeDate.o RMlicelUSP.o RMnetcdfUSP.o -lnetcdf -lhdf5 -lhdf5_hl -lcurl -pthread
 
 rm2nc	:	rm2nc.cpp TimeDate.o RMlicelUSP.o RMnetcdfUSP.o
-	$(CC) $(LFLAGS) -lnetcdf -o rm2nc rm2nc.cpp TimeDate.o RMlicelUSP.o RMnetcdfUSP.o
+	$(CC) $(LFLAGS) -o rm2nc rm2nc.cpp TimeDate.o RMlicelUSP.o RMnetcdfUSP.o -lnetcdf -lhdf5 -lhdf5_hl -lcurl -pthread
 
 TimeDate.o	:	TimeDate.cpp
 	$(CC) $(CFLAGS) TimeDate.cpp

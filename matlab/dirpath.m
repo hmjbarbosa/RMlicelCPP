@@ -37,6 +37,6 @@ if numel(files)>0
     list{i}=fullfile(direc,files{i});
   end
 else
-  list=cell(1);
+  list=cell(0);
 end
 %

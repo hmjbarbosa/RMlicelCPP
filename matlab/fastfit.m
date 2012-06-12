@@ -31,7 +31,7 @@
 %    SPAN=2*nside+1 to evaluate the running mean values in the
 %    above equations.
 %
-function [fval, a, b, sa, sb, chi2red, ndf] = fastfit(Y, X)
+function [a, b, fval, sa, sb, chi2red, ndf] = fastfit(X, Y)
 
 % size of Y
 [ny1, ny2] = size(Y);

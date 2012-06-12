@@ -2,20 +2,20 @@
 clear all; 
 ['analysis started @ ' datestr(clock)]
 
-%% CREATE FILE LIST
-datadir='../../Raymetrics_data/11/9/06';
-filelist=dirpath(datadir,'RM*');
+%% READ FILE WITH DATES
+idx=7;
+dias=importdata('dias.txt');
+jdi=datenum(dias.data(idx,3),dias.data(idx,2),dias.data(idx,1),0, 0, 0);
+jdi=jdi+dias.data(idx,4)/24.;
+jdf=datenum(dias.data(idx,3),dias.data(idx,2),dias.data(idx,1),0, 0, 0);
+jdf=jdf+dias.data(idx,5)/24.;
 
-nfile = numel(filelist);
-if (nfile < 1)
-  error('No file found!');
-end
-['[1/8] directory listing finished @ ' datestr(clock)]
+%% READ TIME SLICE
+datadir='../../Raymetrics_data';
+[heads, chphy]=profile_read_dates(datadir, jdi, jdf, 10, 0.004);
 
-%% READ EACH FILE
-[heads, chphy]=profile_read_many(filelist, 10, 0.004);
-
-%% create time vector
+%% CREATE TIME VECTOR
+nfile=numel(heads);
 for nf=1:nfile  
   jd(nf)=heads(nf).jdf;
   if (nf==1)
@@ -31,10 +31,12 @@ clear tmp;
 for ch=1:heads(1).nch
   if (ch==5)
     chphy(ch).vsmooth = ...
-        smooth_region( chphy(ch).data , 5, 150, 10, 300, 15);
+        smooth_region( chphy(ch).data , 3, 150, 7, 300, 10);
+%        smooth_region( chphy(ch).data , 3, 150, 3, 300, 15);
   else
     chphy(ch).vsmooth = ...
-        smooth_region( chphy(ch).data , 3, 400, 7, 800, 15);
+        smooth_region( chphy(ch).data , 3, 400, 7, 800, 10);
+%        smooth_region( chphy(ch).data , 3, 150, 3, 300, 15);
   end
 end
 ['[3/8] vertical smoothing finished @ ' datestr(clock)]
@@ -42,7 +44,8 @@ end
 %% SMOOTH OVER TIME
 % running average of 5 minutes (+-2min)
 for ch=1:heads(1).nch
-  chphy(ch).tsmooth = smooth_time( chphy(ch).vsmooth , 2 );
+  chphy(ch).tsmooth = smooth_time( chphy(ch).vsmooth , 5 );
+%  chphy(ch).tsmooth = smooth_time( chphy(ch).data , 4 );
 end
 ['[4/8] time smoothing finished @ ' datestr(clock)]
 
@@ -51,6 +54,7 @@ end
 % values below (bg+3*std) become zero
 for ch=1:heads(1).nch
   chphy(ch).cs = remove_bg(chphy(ch).tsmooth, 500, 3);
+%  chphy(ch).cs = remove_bg(chphy(ch).data, 500, 3);
 end
 ['[5/8] bg noise finished @ ' datestr(clock)]
 
@@ -72,8 +76,8 @@ H2O=chphy(5).cs;
 N2=glue(chphy(3).cs, chphy(4).cs, heads(1));
 ['[7/8] Glueing finished @ ' datestr(clock)]
 
-H2O=H2O(1:1000, :);
-N2=N2(1:1000, :);
+H2O=H2O(1:1200, :);
+N2=N2(1:1200, :);
 mixr=0.7e3*H2O./N2;
 
 analise_plot;

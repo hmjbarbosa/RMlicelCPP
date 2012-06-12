@@ -99,7 +99,7 @@ if ~exist('ach','var') allch=true; else allch=false; end
 %% READ EACH FILE
 ['READING ' num2str(nfile) ' files']
 for nf=1:nfile
-  if mod(nf, floor(nfile/10))==0
+  if (mod(nf, floor(nfile/10))==0 & nfile>1000)
     ['file= ' num2str(nf) '/' num2str(nfile)]
   end
   

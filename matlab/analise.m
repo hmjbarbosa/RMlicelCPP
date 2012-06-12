@@ -4,12 +4,12 @@ clear all;
 
 %% CREATE FILE LIST
 %datadir='data/11/11/04';Glueing
-datadir='./data/11/9/01';
+datadir='../../Raymetrics_data/11/7/13';
 %datadir='/media/work/data/EMBRAPA/lidar/data/11/8/12';
 %f1 = dirpath(datadir,'RM*');
 %f2 = dirpath(datadir,'RM*');
 %filelist={f1{:} f2{:}};
-filelist=dirpath(datadir,'RM*');
+filelist=dirpath(datadir,'RM1171302.5*');
 
 nfile = numel(filelist);
 if (nfile < 1)
@@ -45,24 +45,24 @@ end
 clear tmp;
 ['[2/8] data reading finished @ ' datestr(clock)]
 
-%% SMOOTH IN THE VERTICAL
-for ch=1:head.nch
-  if (ch==5)
-    channel(ch).phy2 = ...
-        smooth_region( channel(ch).phy , 5, 150, 10, 300, 15);
-  else
-    channel(ch).phy2 = ...
-        smooth_region( channel(ch).phy , 3, 400, 7, 800, 15);
-  end
-end
-['[3/8] vertical smoothing finished @ ' datestr(clock)]
-
 %% SMOOTH OVER TIME
 % running average of 5 minutes (+-2min)
 for ch=1:head.nch
-  channel(ch).phy = smooth_time( channel(ch).phy2 , 2 );
+  channel(ch).phy2 = smooth_time( channel(ch).phy , 2 );
 end
 ['[4/8] time smoothing finished @ ' datestr(clock)]
+
+%% SMOOTH IN THE VERTICAL
+for ch=1:head.nch
+  if (ch==5)
+    channel(ch).phy = ...
+        smooth_region( channel(ch).phy2 , 5, 150, 10, 300, 1);
+  else
+    channel(ch).phy = ...
+        smooth_region( channel(ch).phy2 , 1, 400, 7, 800, 15);
+  end
+end
+['[3/8] vertical smoothing finished @ ' datestr(clock)]
 
 %% REMOVE BACK GROUND NOISE
 % average noise and stdev are calculated from last 500 bins
@@ -91,11 +91,19 @@ H2O=channel(5).phy2;
 N2=glue(channel(3).phy2, channel(4).phy2, head);
 ['[7/8] Glueing finished @ ' datestr(clock)]
 
-H2O=H2O(1:1000, :);
-N2=N2(1:1000, :);
+n1=320;
+n2=450;
+H2O=H2O(n1:n2, :);
+N2=N2(n1:n2, :);
 mixr=0.7e3*H2O./N2;
 
-analise_plot;
+figure(1)
+plot(N2,zh(n1:n2),'-o',H2O*100,zh(n1:n2),'-v');
+figure(2)
+plot(mixr,zh(n1:n2));
+figure(1)
+
+%analise_plot;
 ['[8/8] Plotting finished @ ' datestr(clock)]
 
 %

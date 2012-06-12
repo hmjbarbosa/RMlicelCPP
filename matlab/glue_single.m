@@ -39,11 +39,15 @@ if (idxmax-idxmin<10)
 end
 
 % Do a linear fit between both channels
-[cfun, gof]=fit(analog(maskout),photon(maskout),'poly1');
+if exist('toplot','var')
+  [cfun]=fit(analog(maskout),photon(maskout),'poly1');
+end
+[a, b]=fastfit(analog(maskout),photon(maskout));
 
 % glue vectors
 ig=floor((idxmax+idxmin)/2);
-glued(1:ig)=cfun(analog(1:ig));
+% glued(1:ig)=cfun(analog(1:ig));
+glued(1:ig)=bsxfun(@plus, bsxfun(@times,analog(1:ig),a), b);
 glued(ig+1:n)=photon(ig+1:n);
 glued=glued';
 
