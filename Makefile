@@ -1,5 +1,5 @@
 CC=g++
-CHECK=-fbounds-check -fcheck-new -Wextra -ftrapv -fstack-check -static
+CHECK=-fbounds-check -fcheck-new -Wextra -ftrapv -fstack-check 
 CFLAGS=-c -Wall -O0 -g $(CHECK) 
 LFLAGS=-Wall -O0 -g $(CHECK) 
 
@@ -16,6 +16,9 @@ all	:	$(PROGS)
 
 debug	:	debug.cpp TimeDate.o RMlicelUSP.o
 	$(CC) $(LFLAGS) -o debug debug.cpp TimeDate.o RMlicelUSP.o
+
+rm2glue	:	rm2glue.cpp TimeDate.o RMlicelUSP.o
+	$(CC) $(LFLAGS) -o rm2glue rm2glue.cpp TimeDate.o RMlicelUSP.o
 
 rm2name	:	rm2name.cpp TimeDate.o RMlicelUSP.o
 	$(CC) $(LFLAGS) -o rm2name rm2name.cpp TimeDate.o RMlicelUSP.o

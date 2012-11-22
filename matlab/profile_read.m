@@ -34,7 +34,6 @@ if ~exist('dbin','var') dbin=0; end
 if ~exist('dtime','var') dtime=0; end
 % if ach not requested, return all channels
 if ~exist('ach','var') ach=0; allch=true; else allch=false; end 
-
 %% OPEN FILE
 fp=fopen(fname,'r');
 

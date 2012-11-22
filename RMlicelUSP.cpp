@@ -652,6 +652,99 @@ void profile_add (RMDataFile *acum, RMDataFile toadd)
 
 } // end subroutine
 
+void profile_glue (RMDataFile *glue) 
+{
+  float dScale; // conversion between raw and physical data
+  float sumx, sumx2, sumxy, sumy, ngood;
+  float resol;
+  int k1, k2, ian, ipc;
+  int ndata;
+  int bglim=5;
+  int bglen=500;
+  float pclim=7.;
+  float anlim=5.;
+  float nan=-9999.;
+  float a,b;
+
+  /* ************** RM DATA FILE **********************************   */
+  /* ************** SUMS   ****************************************   */
+  ndata=glue->ch[0].ndata;
+
+  // LOOP TROUGH CHANNELS
+  for (int i=0; i<glue->nch; i++) {
+
+    // calculate BG and STD from last channels
+    sumx=0.; sumx2=0.; 
+    for (int k=ndata-bglen; k<ndata; k++) {
+      sumx +=glue->ch[i].phy[k];
+      sumx2+=glue->ch[i].phy[k]*glue->ch[i].phy[k];
+    }
+    sumx=sumx/bglen;
+    sumx2=sumx2/bglen;
+    sumx2=sqrt(sumx2-sumx*sumx);
+    
+    // remove BG if above noise
+    for (int k=0; k<ndata; k++) {
+      if (glue->ch[i].phy[k] > sumx + bglim*sumx2)
+        glue->ch[i].phy[k] = glue->ch[i].phy[k] - sumx;
+      else
+        glue->ch[i].phy[k] = nan;
+    }
+    
+    // Search if there is another channel in the same wavelenght (i.e. to be glued)
+    for (int j=i+1; j<glue->nch; j++) {
+
+      // If same wavelenght, then glue both
+      if (glue->ch[i].wlen == glue->ch[j].wlen) {
+        
+        // check who is AN and who is PC
+        if (glue->ch[i].photons) {
+          ipc=i; ian=j;
+        } else
+          ipc=j; ian=i;
+          
+        // analog resolution
+        resol=glue->ch[ian].discr/pow(2,glue->ch[ian].bits);
+
+        // fitting
+        sumx=0.; sumx2=0.; sumxy=0.; sumy=0.; ngood=0;
+        k1=ndata; k2=0;
+        for (int k=0; k<ndata; k++) {
+          if (glue->ch[ian].phy[k] > anlim*resol && glue->ch[ipc].phy[k] < pclim &&
+              glue->ch[ipc].phy[k] > 0.) {
+            ngood++;
+            if (k<k1) k1=k;
+            if (k>k2) k2=k;
+            sumx+=glue->ch[ian].phy[k];
+            sumx2+=glue->ch[ian].phy[k]*glue->ch[ian].phy[k];
+            sumxy+=glue->ch[ian].phy[k]*glue->ch[ipc].phy[k];
+            sumy+=glue->ch[ipc].phy[k];
+          }
+        }
+        sumx/=ngood;
+        sumx2/=ngood;
+        sumxy/=ngood;
+        sumy/=ngood;
+
+        a=(sumxy - sumx*sumy)/(sumx2-sumx*sumx);
+        b=sumy - a*sumx;
+
+        // convert back from physical units
+        if (!glue->ch[i].photons)
+          dScale = glue->ch[j].nshoots/20.;
+        else 
+          dScale = glue->ch[i].nshoots/20.;
+
+        // fake raw data
+        for (int j=0; j<glue->ch[i].ndata; j++) 
+          glue->ch[i].raw[j] = (int) glue->ch[i].phy[j] * dScale;
+          
+      } // end of glue
+    } // end search
+  } // end channel loop
+
+} // end subroutine
+
 /*
   Function: read_single_file
   Description: read one lidar file and store all data inside a RMDataFile variable

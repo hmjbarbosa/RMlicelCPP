@@ -8,6 +8,8 @@ name=path_name(n-10:n);
 
 date(1)=sscanf(name(1:2),'%d');
 date(1)=date(1)+2000;
+% need to add error handling. the routines breaks if the input name
+% is not in the format above.
 date(3:6)=sscanf(name(4:11),'%02d%02d.%02d%1d');
 
 if (name(3)=='A')

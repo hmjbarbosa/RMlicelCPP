@@ -1,4 +1,4 @@
-function [head, chphy, chraw] = ... 
+function [nfile, head, chphy, chraw] = ... 
     profile_read_dates(basedir, datei, datef, dbin, dtime, ach)
 
 timei=datevec(datei)
@@ -17,16 +17,19 @@ if (timef(3)>timei(3))
   d2=sprintf('%s/%02d/%d/%02d',basedir,timef(1)-2000,timef(2),timef(3));
   f2=dirpath(d2,'RM*');
   ff={f1{:},f2{:}};
-  ['aqui']
 else
   ff=f1;
 end
 
 nfile=numel(ff);
 if (nfile < 1)
-  error('No files found!');
+%  error('No files found!');
+  ['No files found!'];
+  head=[]; chphy=[]; chraw=[];
+  return
 end
 j=0;
+filelist={};
 for i=1:nfile
   jd=datenum(RMname2date(ff{i}));
   if (jd>=jdi & jd<=jdf)
@@ -34,8 +37,12 @@ for i=1:nfile
     filelist{j}=ff{i};
   end
 end
-if (j < 1)
-  error('No file found in the time interval!');
+nfile=numel(filelist);
+if (nfile < 1)
+%  error('No file found in the time interval!');
+  ['No file found in the time interval!'];
+  head=[]; chphy=[]; chraw=[];
+  return
 end
 
 % if dbin not given, displace by zero

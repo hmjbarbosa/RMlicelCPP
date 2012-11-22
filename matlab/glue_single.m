@@ -19,18 +19,29 @@ resol=header.discr(3)/2^header.bits(3);
 % proportional: below 7MHZ and above 5*resolution
 mask=(analog>5*resol) & (analog>0.) & (analog~=NaN) & ...
      (photon<7.)      & (photon>0.) & (photon~=NaN);
-maskout=excludedata(analog,photon,'indices',mask);
+%mask=(idx>1000) & (idx<1500.);
 
-% limits of fit region
-idxmin=min(idx(maskout));
-idxmax=max(idx(maskout));
+% limits of fit region. result of min() or max() is an array with the
+% corresponding values for each column
+idxmin=min(idx(mask));
+idxmax=max(idx(mask));
 if exist('toplot','var')
   {idxmin idxmax idxmax-idxmin}
 end
-% check if there is something different from NaN
+
+% check if there was something different from NaN
+% in this case, the size of max/min vectors should be larger than one
 if ~(numel(idxmin) & numel(idxmax))
   glued(1:n)=NaN;
   return;
+end
+% take only a continuous mask, with no 0s in between
+for i=idxmin:idxmax
+  if ~mask(i)
+    mask(i:idxmax)=0;
+    idxmax=i-1;
+    break;
+  end
 end
 % check if there is enough points
 if (idxmax-idxmin<10)
@@ -40,9 +51,9 @@ end
 
 % Do a linear fit between both channels
 if exist('toplot','var')
-  [cfun]=fit(analog(maskout),photon(maskout),'poly1');
+  [cfun]=fit(analog(mask),photon(mask),'poly1');
 end
-[a, b]=fastfit(analog(maskout),photon(maskout));
+[a, b]=fastfit(analog(mask),photon(mask));
 
 % glue vectors
 ig=floor((idxmax+idxmin)/2);
@@ -53,7 +64,7 @@ glued=glued';
 
 % Plot glue function 
 if exist('toplot','var')
-  plot(cfun,'m',analog(maskout), photon(maskout),'o');
+  plot(cfun,'m',analog(mask), photon(mask),'o');
   title('Linear fit for glueing');
   xlabel('Analog (mV)');
   ylabel('PC (MHz)');
@@ -62,13 +73,15 @@ if exist('toplot','var')
   pause;
 
   % Plot glued and PC
-  semilogy(idx(1:1000),photon(1:1000),'r');
+  semilogy(idx(1:3000),photon(1:3000),'r');
   hold on;
-  semilogy(idx(1:1000),cfun(analog(1:1000)),'b');
-  semilogy(idx(maskout),photon(maskout),'.g');
-  legend('Uncorrected PC','Scaled Analog','fit region');
+  semilogy(idx(1:3000),glued(1:3000),'b');
+  semilogy(idx(mask),photon(mask),'.g');
+  semilogy(idx(1:3000),analog(1:3000),'.m');
+  legend('Uncorrected PC','Scaled Analog','fit region','analog');
+  xlabel('#bins');
+  ylabel('PC (MHz)');
   hold off;
-  pause
 end
 
 %
