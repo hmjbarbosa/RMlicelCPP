@@ -71,48 +71,55 @@ check	: $(PROGS)
 		echo FAIL;\
 	fi; 
 	@echo -n "rm2bin :: Averaging one file: "
-	@rm -f teste; ./rm2bin teste RM1120200.012; \
-	TMP=`diff teste RM1120200.012`; \
+	@rm -f teste1; ./rm2bin teste1 RM1120200.012; \
+	TMP=`diff teste1 RM1120200.012`; \
 	if test "x$$TMP" = "x" ; then \
 		echo ok;\
-		rm -f teste;\
+		rm -f teste1;\
 	else\
 		echo FAIL;\
 	fi; 
 	@echo -n "rm2bin :: Averaging multiple files: "
-	@rm -f teste; ./rm2bin teste RM10C1315.???; \
-	TMP=`md5sum teste`; \
+	@rm -f teste2; ./rm2bin teste2 RM10C1315.???; \
+	TMP=`md5sum teste2`; \
 	if test "$$TMP" = "ab0a01b7f8fda2abbcd7132208680c27  teste" ; then \
 		echo ok;\
-		rm -f teste;\
+		rm -f teste2;\
 	else\
 		echo FAIL;\
-	fi; 
+	fi;
 	@echo "rm2bin + rm2csv:: Averaging - hardcore testing: "
-	@rm -f teste; \
-	./rm2bin teste RM10C1315.162 RM10C1315.172; \
-	./rm2csv teste RM10C1315.162 RM10C1315.172; \
-	nbin=`head -n 4 teste.csv | tail -n 1 | sed s/\;/\\\n/g | head -n 4 | tail -n 1`; \
-	nbin=`echo $$nbin + 9| bc`; part=$$((nbin/10)); \
-	echo $$nbin $$part; \
-	j=2; while [ $$j -le 6 ] ; do \
-		echo -n "averaging column $$((j-1))... "; \
-		i=9; while [ $$i -le $$nbin ] ; do \
-			A=`head -n $$i RM10C1315.162.csv | tail -n 1 | sed s/\;/\\\n/g | head -n $$j | tail -n 1`; \
-			B=`head -n $$i RM10C1315.172.csv | tail -n 1 | sed s/\;/\\\n/g | head -n $$j | tail -n 1`; \
-			C=`head -n $$i teste.csv         | tail -n 1 | sed s/\;/\\\n/g | head -n $$j | tail -n 1`; \
+	@rm -f teste3; \
+	./rm2bin teste3 RM10C1315.162 RM10C1315.172; \
+	./rm2csv teste3 RM10C1315.162 RM10C1315.172; \
+	nbin=`head -n 4 teste3.csv | tail -n 1 | sed s/\;/\\\n/g | head -n 4 | tail -n 1`; \
+	nbin=`echo $$nbin + 9| bc`; P=$$((nbin/100)); \
+	echo "number of lines: $$((nbin-9))"; \
+	i=0; while read -r linA<&3 && read -r linB<&4 && read -r linC<&5; do \
+		i=$$((i+1)); \
+		if [ $$i -gt 8 ] ; then \
+			A=`echo $$linA | sed s/\;/+/g | bc`; \
+			B=`echo $$linB | sed s/\;/+/g | bc`; \
+			C=`echo $$linC | sed s/\;/+/g | bc`; \
 			if [ `echo \($$A+$$B\)/2 - $$C \> 0.0001 | bc` -eq 1 ] ; then \
-				echo "error averaging line #$$i of column #$$j"; \
+				echo "error averaging line #$$i "; \
 				echo $$A + $$B / 2 != $$C ; \
+				j=2; while [ $$j -le 6 ] ; do \
+                    A=`echo $$linA | sed s/\;/\\\n/g | head -n $$j | tail -n 1`; \
+                    B=`echo $$linB | sed s/\;/\\\n/g | head -n $$j | tail -n 1`; \
+                    C=`echo $$linC | sed s/\;/\\\n/g | head -n $$j | tail -n 1`; \
+					if [ `echo \($$A+$$B\)/2 - $$C \> 0.0001 | bc` -eq 1 ] ; then \
+						echo "error averaging line #$$i of column #$$j"; \
+						echo $$A + $$B / 2 != $$C ; \
+					fi; \
+					j=$$((j+1)); \
+				done; \
 			fi; \
-			if [ `echo $$i % $$part | bc` -eq 0 ] ; then \
-				echo -n "$$i...";\
-			fi;\
-			i=$$((i+1)); \
-		done; \
-		echo "ok"; \
-		j=$$((j+1)); \
-	done; \
-	rm -f teste teste.csv RM10C1315.162.csv RM10C1315.172.csv;
+		fi;\
+		if [ `echo $$i % $$P | bc` -eq 0 ] ; then \
+			echo -n "$$i...";\
+		fi;\
+	done 3<"RM10C1315.162.csv" 4<"RM10C1315.172.csv" 5<"teste3.csv"; \
+	rm -f teste3 teste3.csv RM10C1315.162.csv RM10C1315.172.csv;
 
 #

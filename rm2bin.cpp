@@ -42,8 +42,6 @@ int main (int argc, char *argv[])
     }
   }
 
-  std::cerr << argv[1]  << std::endl;
-
   // Open output file
   fout=fopen(argv[1],"w");
   if (fout==NULL) {
