@@ -16,9 +16,6 @@ PROGS=\
 
 all	:	$(PROGS)
 
-rm2glue	:	rm2glue.cpp TimeDate.o RMlicelUSP.o
-	$(CC) $(LFLAGS) -o rm2glue rm2glue.cpp TimeDate.o RMlicelUSP.o
-
 rm2name	:	rm2name.cpp TimeDate.o RMlicelUSP.o
 	$(CC) $(LFLAGS) -o rm2name rm2name.cpp TimeDate.o RMlicelUSP.o
 
@@ -40,10 +37,10 @@ rm2nc	:	rm2nc.cpp TimeDate.o RMlicelUSP.o RMnetcdfUSP.o
 TimeDate.o	:	TimeDate.cpp
 	$(CC) $(CFLAGS) TimeDate.cpp
 
-RMlicelUSP.o	:	RMlicelUSP.cpp TimeDate.o
+RMlicelUSP.o	:	RMlicelUSP.cpp TimeDate.o 
 	$(CC) $(CFLAGS) RMlicelUSP.cpp
 
-RMnetcdfUSP.o	:	RMnetcdfUSP.cpp RMlicelUSP.o TimeDate.o
+RMnetcdfUSP.o	:	RMnetcdfUSP.cpp RMlicelUSP.o TimeDate.o 
 	$(CC) $(CFLAGS) RMnetcdfUSP.cpp
 
 clean	:	

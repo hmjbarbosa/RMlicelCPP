@@ -12,6 +12,7 @@
 #include "iostream"
 
 #include "TimeDate.h"
+#include "mylidar.h"
 
 #define UTC -4 // local time zone
 

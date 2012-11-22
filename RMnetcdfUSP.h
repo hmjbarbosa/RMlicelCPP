@@ -7,10 +7,10 @@
 #include "netcdf.h"
 #include "RMlicelUSP.h"
 
-#define version "14nov11"
+#define version "22nov12"
 
 #define NDIMS 4 // t, z, lat, lon
-#define NCHANNELS 5 // max number of channels in a file
+#define NCHANNELS 100 // max number of channels in a file
 
 extern void handle_error(int status);
 extern void profile_write_netcdf(const char* fname, RMDataFile rm);

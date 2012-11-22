@@ -307,15 +307,13 @@ void profile_write_netcdf(const char* fname, RMDataFile rm)
   /*
    * GENERAL SITE INFORMATION
    */
-  sprintf(longstr,"LIDAR data from AEROCLIMA project");
-  ok=nc_put_att_text(ncid, NC_GLOBAL, "title",strlen(longstr),longstr);
+  ok=nc_put_att_text(ncid, NC_GLOBAL, "title",strlen(title),title);
   if (ok != NC_NOERR) handle_error(ok);
 
-  sprintf(longstr,"Dr. Henrique M. J. Barbosa (hbarbosa@if.usp.br)");
-  ok=nc_put_att_text(ncid, NC_GLOBAL, "contact",strlen(longstr),longstr);
+  ok=nc_put_att_text(ncid, NC_GLOBAL, "contact",strlen(contact),contact);
   if (ok != NC_NOERR) handle_error(ok);
 
-  sprintf(longstr,"Converted from original raymetrics format by rm2nc v.%s",version);
+  sprintf(longstr,"Converted from original format by rm2nc v.%s",version);
   ok=nc_put_att_text(ncid, NC_GLOBAL, "history",strlen(longstr),longstr);
   if (ok != NC_NOERR) handle_error(ok);
 

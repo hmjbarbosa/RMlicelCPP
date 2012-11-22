@@ -20,6 +20,7 @@
 int main (int argc, char *argv[]) 
 {
   RMDataFile XX1, XX;
+  char fdat[256];
 
   if (argc<3) {
     printf("Usage: \n");
@@ -40,14 +41,15 @@ int main (int argc, char *argv[])
       Init_RMDataFile(&XX1);
       profile_read(argv[i], &XX1);
       // Init NC file and write first data
-      profile_write_netcdf(argv[1], XX1);
+      sprintf(fdat,"%s.nc",argv[1]);
+      profile_write_netcdf(fdat, XX1);
 
     } else {
       // Read other files 
       Init_RMDataFile(&XX);
       profile_read(argv[i], &XX);
       // re-open netcdf and add a new profile
-      profile_add_netcdf(argv[1], XX1, XX);
+      profile_add_netcdf(fdat, XX1, XX);
       // Release memory
       Free_RMDataFile(&XX);
     }

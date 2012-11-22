@@ -9,22 +9,14 @@ void Free_RMDataFile(RMDataFile *rm)
     }
     free(rm->ch);
   }
-  //if (rm->start!=NULL) free(rm->start);
-  //if (rm->end!=NULL) free(rm->end);
-//else {
-//    fprintf(stderr,"ERROR: trying to deallocate a NULL structure!\n");
-//    exit(1);
-//  }
+  rm->start.Nullify();
+  rm->end.Nullify();
 }
 
 void Init_RMDataFile(RMDataFile *rm) 
 {
   strcpy(rm->file,"-999");
   strcpy(rm->site,"-999");
-  //ResetDate(&rm->start);
-  //ResetDate(&rm->end);
-  //rm->start=NULL;
-  //rm->end=NULL;
   rm->start.Nullify();
   rm->end.Nullify();
   rm->alt=-999;
@@ -643,118 +635,11 @@ void profile_add (RMDataFile *acum, RMDataFile toadd)
     if (!acum->ch[i].photons)
       dScale = acum->ch[i].nshoots*pow(2,acum->ch[i].bits)/(acum->ch[i].discr*1.e3);
     else 
-      dScale = acum->ch[i].nshoots/20.;
+      dScale = acum->ch[i].nshoots/PCsampling;
     
     for (int j=0; j<acum->ch[i].ndata; j++) 
       acum->ch[i].phy[j] = (float) acum->ch[i].raw[j] / dScale;
 
-  } // end channel loop
-
-} // end subroutine
-
-void profile_glue (RMDataFile *glue) 
-{
-  float dScale; // conversion between raw and physical data
-  float resol;  // resolution of analog channel
-  float sumx, sumx2, sumxy, sumy, ngood;
-  int k1, k2, ian, ipc;
-  int ndata;
-  float a,b;
-
-  /* ************** DEFINITION OF CONSTANTS ***********************   */
-  // Number of standard deviation for Noise > BG
-  // Values below average-bg + bglim*stdev-bg will be set to NaN
-  int bglim=5;
-  // Number of bins used for the calculation of backgroung noise
-  // The code will use only the last bglen bins 
-  int bglen=500;
-  // Photon count limit in Mhz
-  // Only values with PC < pclim will be used for glueing
-  float pclim=7.;
-  // Analog limit in units of resolution
-  // Only values above anlim*resolution will be used for glueing
-  float anlim=5.;
-  // Definition of Not-a-number
-  float nan=-9999.;
-
-  /* ************** RM DATA FILE **********************************   */
-  /* ************** SUMS   ****************************************   */
-  ndata=glue->ch[0].ndata;
-
-  // LOOP TROUGH CHANNELS
-  for (int i=0; i<glue->nch; i++) {
-
-    // for each channel, calculate average BG and STD of BG
-    sumx=0.; sumx2=0.; 
-    for (int k=ndata-bglen; k<ndata; k++) {
-      sumx +=glue->ch[i].phy[k];
-      sumx2+=glue->ch[i].phy[k]*glue->ch[i].phy[k];
-    }
-    sumx=sumx/bglen; // average signal = BG
-    sumx2=sumx2/bglen; // average of signal^2
-    sumx2=sqrt(sumx2-sumx*sumx); // standard deviation of signal = STD-BG
-    
-    // remove BG if above noise
-    // values below noise will be set to NaN
-    for (int k=0; k<ndata; k++) {
-      if (glue->ch[i].phy[k] > sumx + bglim*sumx2)
-        glue->ch[i].phy[k] = glue->ch[i].phy[k] - sumx;
-      else
-        glue->ch[i].phy[k] = nan;
-    }
-    
-    // Search if there is another channel in the same wavelenght
-    // (i.e. to be glued)
-    for (int j=i+1; j<glue->nch; j++) {
-
-      // If same wavelenght, then glue both
-      if (glue->ch[i].wlen == glue->ch[j].wlen) {
-        
-        // check who is AN and who is PC
-        if (glue->ch[i].photons) {
-          ipc=i; ian=j;
-        } else
-          ipc=j; ian=i;
-          
-        // analog resolution
-        resol=glue->ch[ian].discr/pow(2,glue->ch[ian].bits);
-
-        // fitting
-        sumx=0.; sumx2=0.; sumxy=0.; sumy=0.; ngood=0;
-        k1=ndata; k2=0;
-        for (int k=0; k<ndata; k++) {
-          if (glue->ch[ian].phy[k] > anlim*resol && 
-	      glue->ch[ipc].phy[k] < pclim &&
-              glue->ch[ipc].phy[k] > 0.) {
-            ngood++;
-            if (k<k1) k1=k;
-            if (k>k2) k2=k;
-            sumx+=glue->ch[ian].phy[k];
-            sumx2+=glue->ch[ian].phy[k]*glue->ch[ian].phy[k];
-            sumxy+=glue->ch[ian].phy[k]*glue->ch[ipc].phy[k];
-            sumy+=glue->ch[ipc].phy[k];
-          }
-        }
-        sumx/=ngood;
-        sumx2/=ngood;
-        sumxy/=ngood;
-        sumy/=ngood;
-
-        a=(sumxy - sumx*sumy)/(sumx2-sumx*sumx);
-        b=sumy - a*sumx;
-
-        // convert back from physical units
-        if (!glue->ch[i].photons)
-          dScale = glue->ch[j].nshoots/20.;
-        else 
-          dScale = glue->ch[i].nshoots/20.;
-
-        // fake raw data
-        for (int j=0; j<glue->ch[i].ndata; j++) 
-          glue->ch[i].raw[j] = (int) glue->ch[i].phy[j] * dScale;
-          
-      } // end of glue
-    } // end search
   } // end channel loop
 
 } // end subroutine
@@ -840,7 +725,7 @@ int profile_read (const char* fname, RMDataFile *rm, bool debug, bool noraw)
       if (!rm->ch[i].photons)
         dScale = rm->ch[i].nshoots*pow(2,rm->ch[i].bits)/(rm->ch[i].discr*1.e3);
       else 
-        dScale = rm->ch[i].nshoots/20.;
+        dScale = rm->ch[i].nshoots/PCsampling;
       
       for (int j=0; j<rm->ch[i].ndata; j++) 
         rm->ch[i].phy[j] = (float) rm->ch[i].raw[j] / dScale;
