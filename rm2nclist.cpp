@@ -5,6 +5,17 @@
   PROGRAM: licel data read
   AUTHOR: hbarbosa
   DATE: May, 2011
+
+  USE:
+     rm2nclist <output> <file1> [<file2> ... ]
+
+  INTENT:
+     Convert a list of binary Raymetrics/Licel files into a single
+     netcdf file. The new file will be <output>.nc. Data are converted
+     to physical units. netCDF complies with COARDS conventions
+     besides including fields such as contact and history. The output
+     format could be used easily with standard scientific software
+     such as grads, matlab, etc.
  */
 int main (int argc, char *argv[]) 
 {

@@ -3,19 +3,18 @@ CHECK=-fbounds-check -fcheck-new -Wextra -ftrapv -fstack-check
 CFLAGS=-c -Wall -O0 -g $(CHECK) 
 LFLAGS=-Wall -O0 -g $(CHECK) 
 
+NETCDF=-lnetcdf 
+#-lhdf5 -lhdf5_hl -lcurl -pthread
+
 PROGS=\
-	dataread \
+	rm2nclist \
 	rm2bin \
 	rm2csv \
 	rm2dat \
 	rm2nc \
-	debug \
 	rm2name
 
 all	:	$(PROGS)
-
-debug	:	debug.cpp TimeDate.o RMlicelUSP.o
-	$(CC) $(LFLAGS) -o debug debug.cpp TimeDate.o RMlicelUSP.o
 
 rm2glue	:	rm2glue.cpp TimeDate.o RMlicelUSP.o
 	$(CC) $(LFLAGS) -o rm2glue rm2glue.cpp TimeDate.o RMlicelUSP.o
@@ -32,11 +31,11 @@ rm2csv	:	rm2csv.cpp TimeDate.o RMlicelUSP.o
 rm2dat	:	rm2dat.cpp TimeDate.o RMlicelUSP.o
 	$(CC) $(LFLAGS) -o rm2dat rm2dat.cpp  TimeDate.o RMlicelUSP.o
 
-dataread	:	dataread.cpp TimeDate.o RMlicelUSP.o RMnetcdfUSP.o
-	$(CC) $(LFLAGS) -o dataread dataread.cpp TimeDate.o RMlicelUSP.o RMnetcdfUSP.o -lnetcdf -lhdf5 -lhdf5_hl -lcurl -pthread
+rm2nclist	:	rm2nclist.cpp TimeDate.o RMlicelUSP.o RMnetcdfUSP.o
+	$(CC) $(LFLAGS) $(NETCDF) -o rm2nclist rm2nclist.cpp TimeDate.o RMlicelUSP.o RMnetcdfUSP.o 
 
 rm2nc	:	rm2nc.cpp TimeDate.o RMlicelUSP.o RMnetcdfUSP.o
-	$(CC) $(LFLAGS) -o rm2nc rm2nc.cpp TimeDate.o RMlicelUSP.o RMnetcdfUSP.o -lnetcdf -lhdf5 -lhdf5_hl -lcurl -pthread
+	$(CC) $(LFLAGS) $(NETCDF) -o rm2nc rm2nc.cpp TimeDate.o RMlicelUSP.o RMnetcdfUSP.o 
 
 TimeDate.o	:	TimeDate.cpp
 	$(CC) $(CFLAGS) TimeDate.cpp
@@ -82,7 +81,7 @@ check	: $(PROGS)
 	@echo -n "rm2bin :: Averaging multiple files: "
 	@rm -f teste2; ./rm2bin teste2 RM10C1315.???; \
 	TMP=`md5sum teste2`; \
-	if test "$$TMP" = "ab0a01b7f8fda2abbcd7132208680c27  teste" ; then \
+	if test "$$TMP" = "bd4c03d7a4c479a95320035e1e7c3590  teste2" ; then \
 		echo ok;\
 		rm -f teste2;\
 	else\
@@ -93,21 +92,21 @@ check	: $(PROGS)
 	./rm2bin teste3 RM10C1315.162 RM10C1315.172; \
 	./rm2csv teste3 RM10C1315.162 RM10C1315.172; \
 	nbin=`head -n 4 teste3.csv | tail -n 1 | sed s/\;/\\\n/g | head -n 4 | tail -n 1`; \
-	nbin=`echo $$nbin + 9| bc`; P=$$((nbin/100)); \
-	echo "number of lines: $$((nbin-9))"; \
-	i=0; while read -r linA<&3 && read -r linB<&4 && read -r linC<&5; do \
+	nbin=`echo $$nbin + 0 | bc`; P=$$((nbin/25)); \
+	echo "|0%                 100%| "; \
+	i=0; ok=0; while read -r linA<&3 && read -r linB<&4 && read -r linC<&5; do \
 		i=$$((i+1)); \
 		if [ $$i -gt 8 ] ; then \
 			A=`echo $$linA | sed s/\;/+/g | bc`; \
 			B=`echo $$linB | sed s/\;/+/g | bc`; \
 			C=`echo $$linC | sed s/\;/+/g | bc`; \
 			if [ `echo \($$A+$$B\)/2 - $$C \> 0.0001 | bc` -eq 1 ] ; then \
-				echo "error averaging line #$$i "; \
+				ok=1; echo "error averaging line #$$i "; \
 				echo $$A + $$B / 2 != $$C ; \
 				j=2; while [ $$j -le 6 ] ; do \
-                    A=`echo $$linA | sed s/\;/\\\n/g | head -n $$j | tail -n 1`; \
-                    B=`echo $$linB | sed s/\;/\\\n/g | head -n $$j | tail -n 1`; \
-                    C=`echo $$linC | sed s/\;/\\\n/g | head -n $$j | tail -n 1`; \
+					A=`echo $$linA | sed s/\;/\\\n/g | head -n $$j | tail -n 1`; \
+					B=`echo $$linB | sed s/\;/\\\n/g | head -n $$j | tail -n 1`; \
+					C=`echo $$linC | sed s/\;/\\\n/g | head -n $$j | tail -n 1`; \
 					if [ `echo \($$A+$$B\)/2 - $$C \> 0.0001 | bc` -eq 1 ] ; then \
 						echo "error averaging line #$$i of column #$$j"; \
 						echo $$A + $$B / 2 != $$C ; \
@@ -116,10 +115,12 @@ check	: $(PROGS)
 				done; \
 			fi; \
 		fi;\
-		if [ `echo $$i % $$P | bc` -eq 0 ] ; then \
-			echo -n "$$i...";\
+		if [ `echo $$((i-9)) % $$P | bc` -eq 0 ] ; then \
+			echo -n ".";\
 		fi;\
 	done 3<"RM10C1315.162.csv" 4<"RM10C1315.172.csv" 5<"teste3.csv"; \
-	rm -f teste3 teste3.csv RM10C1315.162.csv RM10C1315.172.csv;
-
+	if [ $$ok ] ; then \
+		echo "ok"; \
+		rm -f teste3 teste3.csv RM10C1315.162.csv RM10C1315.172.csv;\
+	else echo ""; fi; \
 #

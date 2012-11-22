@@ -4,6 +4,16 @@
   PROGRAM: rm2csv
   AUTHOR: hbarbosa
   DATE: May, 2011
+
+  USE:
+     rm2csv <file1> [<file2> ... ]
+
+  INTENT:
+     Convert a list of binary Raymetrics/Licel files into ASCII
+     files. New files are named by adding a ".csv" after each file's
+     name. Data are converted to physical units. All numbers are
+     separated by ";" to be read into a spreadsheet program as a
+     comma-separated-values (CSV) file.
  */
 int main (int argc, char *argv[]) 
 {

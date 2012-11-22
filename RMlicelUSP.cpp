@@ -655,16 +655,27 @@ void profile_add (RMDataFile *acum, RMDataFile toadd)
 void profile_glue (RMDataFile *glue) 
 {
   float dScale; // conversion between raw and physical data
+  float resol;  // resolution of analog channel
   float sumx, sumx2, sumxy, sumy, ngood;
-  float resol;
   int k1, k2, ian, ipc;
   int ndata;
-  int bglim=5;
-  int bglen=500;
-  float pclim=7.;
-  float anlim=5.;
-  float nan=-9999.;
   float a,b;
+
+  /* ************** DEFINITION OF CONSTANTS ***********************   */
+  // Number of standard deviation for Noise > BG
+  // Values below average-bg + bglim*stdev-bg will be set to NaN
+  int bglim=5;
+  // Number of bins used for the calculation of backgroung noise
+  // The code will use only the last bglen bins 
+  int bglen=500;
+  // Photon count limit in Mhz
+  // Only values with PC < pclim will be used for glueing
+  float pclim=7.;
+  // Analog limit in units of resolution
+  // Only values above anlim*resolution will be used for glueing
+  float anlim=5.;
+  // Definition of Not-a-number
+  float nan=-9999.;
 
   /* ************** RM DATA FILE **********************************   */
   /* ************** SUMS   ****************************************   */
@@ -673,17 +684,18 @@ void profile_glue (RMDataFile *glue)
   // LOOP TROUGH CHANNELS
   for (int i=0; i<glue->nch; i++) {
 
-    // calculate BG and STD from last channels
+    // for each channel, calculate average BG and STD of BG
     sumx=0.; sumx2=0.; 
     for (int k=ndata-bglen; k<ndata; k++) {
       sumx +=glue->ch[i].phy[k];
       sumx2+=glue->ch[i].phy[k]*glue->ch[i].phy[k];
     }
-    sumx=sumx/bglen;
-    sumx2=sumx2/bglen;
-    sumx2=sqrt(sumx2-sumx*sumx);
+    sumx=sumx/bglen; // average signal = BG
+    sumx2=sumx2/bglen; // average of signal^2
+    sumx2=sqrt(sumx2-sumx*sumx); // standard deviation of signal = STD-BG
     
     // remove BG if above noise
+    // values below noise will be set to NaN
     for (int k=0; k<ndata; k++) {
       if (glue->ch[i].phy[k] > sumx + bglim*sumx2)
         glue->ch[i].phy[k] = glue->ch[i].phy[k] - sumx;
@@ -691,7 +703,8 @@ void profile_glue (RMDataFile *glue)
         glue->ch[i].phy[k] = nan;
     }
     
-    // Search if there is another channel in the same wavelenght (i.e. to be glued)
+    // Search if there is another channel in the same wavelenght
+    // (i.e. to be glued)
     for (int j=i+1; j<glue->nch; j++) {
 
       // If same wavelenght, then glue both
@@ -710,7 +723,8 @@ void profile_glue (RMDataFile *glue)
         sumx=0.; sumx2=0.; sumxy=0.; sumy=0.; ngood=0;
         k1=ndata; k2=0;
         for (int k=0; k<ndata; k++) {
-          if (glue->ch[ian].phy[k] > anlim*resol && glue->ch[ipc].phy[k] < pclim &&
+          if (glue->ch[ian].phy[k] > anlim*resol && 
+	      glue->ch[ipc].phy[k] < pclim &&
               glue->ch[ipc].phy[k] > 0.) {
             ngood++;
             if (k<k1) k1=k;

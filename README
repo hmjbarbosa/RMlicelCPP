@@ -42,7 +42,7 @@ make clean-all
 ________________________________________________________________________________
 HOW TO USE
 
-rm2csv [input binary files] 
+rm2csv [list of input binary files] 
 
   Convert a list of binary Raymetrics/Licel files into ASCII
   files. New files are named by adding a ".csv" after each file's
@@ -58,7 +58,7 @@ rm2dat [input binary files]
   header line and data is separated by tabs. The output format could
   be used easily with standard plotting utilities such as gnuplot.
 
-rm2nc [input binary files] 
+rm2nc [list of input binary files] 
 
   Convert a list of binary Raymetrics/Licel files into netcdf
   files. New files are named by adding a ".nc" after each file's
@@ -67,15 +67,31 @@ rm2nc [input binary files]
   history. The output format could be used easily with standard
   scientific software such as grads, matlab, etc.
 
-rm2bin [output file] [input binary files] 
+rm2nclist [output file] [list of input binary files] 
 
-  Add a list of files and save the result in a binary Raymetrics/Licel
+  Convert a list of binary Raymetrics/Licel files into a single netcdf
+  file. The new file is will be <output>.nc. Data are converted to
+  physical units. netCDF complies with COARDS conventions besides
+  including fields such as contact and history. The output format
+  could be used easily with standard scientific software such as
+  grads, matlab, etc.
+
+rm2bin [output file] [list of input binary files] 
+
+  Adds a list of files and save the result in a binary Raymetrics/Licel
   file. The new file must not exist. Raw data and number of shoots are
   accumulated; T0 and P0 are averaged; start and end dates are set to
   be the earliest and latest amongst all files respectively, hence
   covering the whole period. All other variables, e.g. altitude,
   repetition rate, channel configuration, must be the same in all
   files.
+
+rm2name [list of input binary files] 
+
+  This is a very simple program that reads a list of Raymetrics/Licel
+  files and, for each file, print a string to the screen with the
+  following format: RM_YYYY-MM-DD_hh:mm. This could be used, for
+  example, in a script that will rename the files.
 
 ________________________________________________________________________________
 ABOUT ME

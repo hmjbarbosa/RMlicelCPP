@@ -4,6 +4,18 @@
   PROGRAM: rm2dat
   AUTHOR: hbarbosa
   DATE: May, 2011
+
+  USE:
+     rm2dat <file1> [<file2> ... ]
+
+  INTENT:
+     Convert a list of binary Raymetrics/Licel files into ASCII
+     files. New files are named by adding a ".dat" after each file's
+     name. Data are converted to physical units. A "# " is added to
+     each header line and data is separated by tabs. The output format
+     could be used easily with standard plotting utilities such as
+     gnuplot.
+
  */
 int main (int argc, char *argv[]) 
 {
