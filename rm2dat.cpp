@@ -35,7 +35,7 @@ int main (int argc, char *argv[])
 
     // Init, Read, Print and destroy RM data file
     Init_RMDataFile(&XX);
-    profile_read(argv[i], &XX);
+    profile_read(argv[i], &XX, true);
     profile_printf(fout, XX, 0, "# ", " ", "\t");
     Free_RMDataFile(&XX);
 

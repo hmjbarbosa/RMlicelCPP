@@ -1,10 +1,10 @@
 CC=g++
 CHECK=-fbounds-check -fcheck-new -Wextra -ftrapv -fstack-check 
-CFLAGS=-c -Wall -O0 -g $(CHECK) 
-LFLAGS=-Wall -O0 -g $(CHECK) 
+CFLAGS=-c -Wall -O0  -g $(CHECK) 
+LFLAGS=-Wall -O0  -g $(CHECK) 
 
-NETCDF=-lnetcdf 
-#-lhdf5 -lhdf5_hl -lcurl -pthread
+NETCDF=-L/usr/lib -lnetcdf 
+# -pthread -static testing.cpp -lnetcdf -lhdf5_hl -lhdf5 -lz  -lm -lcurl -lidn -llber -lldap -lrt -lgssapi_krb5 -lssl -lcrypto -lz -static-libstdc++ -static-libgcc
 
 PROGS=\
 	rm2nclist \
@@ -29,10 +29,10 @@ rm2dat	:	rm2dat.cpp TimeDate.o RMlicelUSP.o
 	$(CC) $(LFLAGS) -o rm2dat rm2dat.cpp  TimeDate.o RMlicelUSP.o
 
 rm2nclist	:	rm2nclist.cpp TimeDate.o RMlicelUSP.o RMnetcdfUSP.o
-	$(CC) $(LFLAGS) $(NETCDF) -o rm2nclist rm2nclist.cpp TimeDate.o RMlicelUSP.o RMnetcdfUSP.o 
+	$(CC) $(LFLAGS) -o rm2nclist rm2nclist.cpp TimeDate.o RMlicelUSP.o RMnetcdfUSP.o $(NETCDF) 
 
 rm2nc	:	rm2nc.cpp TimeDate.o RMlicelUSP.o RMnetcdfUSP.o
-	$(CC) $(LFLAGS) $(NETCDF) -o rm2nc rm2nc.cpp TimeDate.o RMlicelUSP.o RMnetcdfUSP.o 
+	$(CC) $(LFLAGS) -o rm2nc rm2nc.cpp TimeDate.o RMlicelUSP.o RMnetcdfUSP.o $(NETCDF) 
 
 TimeDate.o	:	TimeDate.cpp
 	$(CC) $(CFLAGS) TimeDate.cpp
