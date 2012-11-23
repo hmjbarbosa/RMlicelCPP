@@ -31,12 +31,13 @@ int main (int argc, char *argv[])
   for (int i=1; i<argc; i++) {
     // Init, Read, Print some data 
     Init_RMDataFile(&XX);
-    err=profile_read(argv[i], &XX);
+    err=profile_read(argv[i], &XX, false);
 
     // Write netcdf
     if (!err) {
-      sprintf(fnc,"RM_%s_%02dh%02d.nc",XX.end.write2YMD('_').c_str(), 
-              XX.end.GetHour(), XX.end.GetMin());
+      //sprintf(fnc,"RM_%s_%02dh%02d.nc",XX.end.write2YMD('_').c_str(), 
+      //        XX.end.GetHour(), XX.end.GetMin());
+      sprintf(fnc,"%s.nc",argv[i]);
 
       profile_write_netcdf(fnc, XX);
     }

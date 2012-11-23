@@ -89,7 +89,7 @@ extern void channel_printf(FILE *fp, channel ch, const char* beg, const char* se
 
 extern void header_debug(RMDataFile rm);
 extern void header_read_error();
-extern void header_read  (FILE *fp, RMDataFile*rm);
+extern void header_read  (FILE *fp, RMDataFile*rm, bool debug = false);
 extern void header_printf(FILE *fp, RMDataFile rm, 
                           const char* beg, const char* sep);
 

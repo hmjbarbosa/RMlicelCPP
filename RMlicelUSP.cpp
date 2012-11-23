@@ -171,7 +171,7 @@ void header_read_error() {
 // 1 0 1 16380 1 0990 7.50 00355.o 0 0 00 000 12 000599 0.500 BT0               
 // 1 1 1 16380 1 0990 7.50 00355.o 0 0 00 000 00 000599 3.1746 BC0              
 
-void header_read(FILE *fp, RMDataFile *rm) 
+void header_read(FILE *fp, RMDataFile *rm, bool debug) 
 {
   char lat[6];
   char lon[6];
@@ -179,7 +179,7 @@ void header_read(FILE *fp, RMDataFile *rm)
   char P0[6];  
   int n, YY, MM, DD, hh, mn, ss;
   long int pos;
-  char tmp[10];
+  char tmp[128];
 
   // Line 1
   n=fscanf(fp,"%s", rm->file);
@@ -189,7 +189,6 @@ void header_read(FILE *fp, RMDataFile *rm)
   // Line 2
   n=fscanf(fp,"%s",rm->site);
   if (n!=1) header_read_error();
-
   // some filenames might have an space.
   // keep reading until we find something like ??/??/????
   pos=ftell(fp);
@@ -213,7 +212,6 @@ void header_read(FILE *fp, RMDataFile *rm)
   n=fscanf(fp,"%2d/%2d/%4d",&DD,&MM,&YY);
   if (n!=3) header_read_error();
   n=fscanf(fp,"%2d:%2d:%2d",&hh,&mn,&ss);
-
   rm->end = RM_Date(YY,MM,DD,hh,mn,ss, UTC);
 
   if (n!=3) header_read_error();
@@ -223,15 +221,16 @@ void header_read(FILE *fp, RMDataFile *rm)
   if (n!=1) header_read_error();
   n=fscanf(fp,"%s",lat);
   if (n!=1) header_read_error();
-  n=fscanf(fp,"%d", &rm->zen);
-  if (n!=1) header_read_error();
-  n=fscanf(fp,"%d",&rm->idum);
-  if (n!=1) header_read_error();
-  n=fscanf(fp,"%s",T0);
-  if (n!=1) header_read_error();
-  n=fscanf(fp,"%s",P0);
-  if (n!=1) header_read_error();
-  n=fscanf(fp,"%*[^\n]"); n=fscanf(fp,"%*c");
+
+  // Some old Licel does not include 00, T0 and P0 in this line
+  // So we need to read the rest of the line, and from that try to
+  // read what we want.
+  fgets(tmp, sizeof(tmp), fp);
+  if (debug) fprintf(stderr,"line=%s\n",tmp);
+  n=sscanf(tmp,"%d %d %s %s", &rm->zen, &rm->idum, T0, P0);
+
+  //Because of the fgets() above, the CR+LF are already removed
+  //n=fscanf(fp,"%*[^\n]"); n=fscanf(fp,"%*c");
 
   // Depending on windows configuration, data file may have numbers
   // separated by comma instead of dot
@@ -313,6 +312,8 @@ void header_debug(RMDataFile rm)
   fprintf(stderr,"Reference pressure (mb): %f \n",rm.P0);
   fprintf(stderr,"Num. of shoots= %d\n", rm.nshoots);
   fprintf(stderr,"repetition rate= %d\n", rm.nhz);
+  fprintf(stderr,"Num. of shoots2= %d\n", rm.nshoots2);
+  fprintf(stderr,"repetition rate2= %d\n", rm.nhz2);
   fprintf(stderr,"Num. of channels= %d\n", rm.nch);
 }
 
@@ -605,9 +606,6 @@ void profile_add (RMDataFile *acum, RMDataFile toadd)
   /* ************** SUMS   ****************************************   */
 
   // update start/end dates
-  //if (toadd.start.jd < acum->start.jd) acum->start=toadd.start;
-  //if (toadd.end.jd   > acum->end.jd  ) acum->end=toadd.end;
-
   if (toadd.start < acum->start) {
     acum->start = RM_Date(toadd.start);
   }
@@ -678,7 +676,7 @@ int profile_read (const char* fname, RMDataFile *rm, bool debug, bool noraw)
   }
 
   // READ THE FIRST 3 LINES
-  header_read(fp, rm);
+  header_read(fp, rm, debug);
   if (debug) {
     header_debug(*rm);
     fprintf(stderr,"pos after header: %ld\n",ftell(fp));
@@ -699,29 +697,7 @@ int profile_read (const char* fname, RMDataFile *rm, bool debug, bool noraw)
   }
 
   // after all channels there is an extra empty line
-  //n=fscanf(fp,"%*[^\n]"); n=fscanf(fp,"%*c");
-
-  // measure from end of file, how many data we need to read
-  if (debug) {
-    fprintf(stderr,"antes do ajuste: %ld\n",ftell(fp));
-  }
-
-  fseek(fp, 0, SEEK_END); n=ftell(fp);
-  cerr << "n=" << n << endl;
-  cerr << "s=" << rm->nch << endl;
-  cerr << "s=" << rm->ch[0].ndata << endl;
-  cerr << "s=" << sizeof(dScale) << endl;
-  cerr << "t=" << n + 1 - rm->nch*sizeof(bin)*rm->ch[0].ndata << endl;
-
-  n=n+1-rm->nch*rm->ch[0].ndata*sizeof(bin);
-
-  fseek(fp, n, SEEK_SET);
-
-  if (debug) {
-    fprintf(stderr,"depois do ajuste: %ld\n",ftell(fp));
-  }
-  return 0;
-
+  n=fscanf(fp,"%*[^\n]"); n=fscanf(fp,"%*c");
 
   // READ ACTUAL DATA (IN BINARY FORMAT)
   for (int i=0; i<rm->nch; i++) {
@@ -742,11 +718,11 @@ int profile_read (const char* fname, RMDataFile *rm, bool debug, bool noraw)
         nread=fread(rm->ch[i].raw,sizeof(bin),rm->ch[i].ndata,fp);
       }
       if (debug) {
-        channel_debug_raw(rm->ch[i]);
+        //channel_debug_raw(rm->ch[i]);
         fprintf(stderr,"\n -------- channel: : %d \n", i);
         fprintf(stderr,"\n amount of data read: %d \n", (int) nread);
       }
-      cerr << "aqui\n"<<endl;
+      //      cerr << "aqui\n"<<endl;
       if(nread<(sizeof(bin)*rm->ch[i].ndata)) {
         if(file_error(fp)!=0) {
           fprintf(stderr,"\nblock %d corrupt",i+1);
@@ -755,7 +731,7 @@ int profile_read (const char* fname, RMDataFile *rm, bool debug, bool noraw)
           return(1);
         }
       }
-      cerr << "aqui2\n"<<endl;
+      //      cerr << "aqui2\n"<<endl;
       // convert data to physical units
       if (!rm->ch[i].photons)
         dScale = rm->ch[i].nshoots*pow(2,rm->ch[i].bits)/(rm->ch[i].discr*1.e3);
