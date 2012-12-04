@@ -19,11 +19,11 @@ altbin=7.5*1e-3;
 %  choose altitude range for Rayleigh fit
 % ----------------------------------------
 % 355 nm elastic channel
-xl_scal_1 = round(10/altbin); % km
-xu_scal_1 = round(12/altbin); % km
+xl_scal_1 = round(15/altbin); % km
+xu_scal_1 = round(17/altbin); % km
 % 387 nm Raman channel
-xl_scal_2 = round(10/altbin); % km
-xu_scal_2 = round(12/altbin); % km
+xl_scal_2 = round(15/altbin); % km
+xu_scal_2 = round(17/altbin); % km
 % 407 nm  H_2_O channel 
 xl_scal_3 = round(6/altbin); % km
 xu_scal_3 = round(7/altbin); % km
@@ -39,13 +39,17 @@ meanpr2(1) = mean(pr2(xl_scal_1:xu_scal_1,1));
 meanpr2(2) = mean(pr2(xl_scal_2:xu_scal_2,2)); 
 meanpr2(3) = mean(pr2(xl_scal_3:xu_scal_3,3)); 
 %    
-SigFak(1) = meanpr2(1)/meanRaySig(1);
-SigFak(2) = meanpr2(2)/meanRaySig(2); 
-SigFak(3) = meanpr2(3)/meanRaySig(3);   
-%
-RaySig(1,:) = SigFak(1).*pr2_ray_sig(1,:); 
-RaySig(2,:) = SigFak(2).*pr2_ray_sig(2,:); 
-RaySig(3,:) = SigFak(3).*pr2_ray_sig(3,:); 
+%SigFak(1) = meanpr2(1)/meanRaySig(1);
+%SigFak(2) = meanpr2(2)/meanRaySig(2); 
+%SigFak(3) = meanpr2(3)/meanRaySig(3);   
+%%
+%RaySig(1,:) = SigFak(1).*pr2_ray_sig(1,:); 
+%RaySig(2,:) = SigFak(2).*pr2_ray_sig(2,:); 
+%RaySig(3,:) = SigFak(3).*pr2_ray_sig(3,:); 
+%%
+RaySig(1,:) = pr2_ray_sig(1,:)*meanpr2(1)/meanRaySig(1); 
+RaySig(2,:) = pr2_ray_sig(2,:)*meanpr2(2)/meanRaySig(2); 
+RaySig(3,:) = pr2_ray_sig(3,:)*meanpr2(3)/meanRaySig(3); 
 % ------------
 %  logarithm
 % ------------
@@ -61,7 +65,9 @@ log_pr2 = real(log(pr2));
 % *****************
 %    channel 1
 % *****************
-abst_1=1e-3; 
+%hmjb abst_1=1e-3;
+abst_1=(real(log_pr2(xl_scal_1,1)) - Ray_Fit(1,xl_scal_1)).^2;
+RefBin(1)=xl_scal_1;
 for j=xl_scal_1:xu_scal_1
   diff_1(j) = (real(log_pr2(j,1)) - Ray_Fit(1,j)).^2; 
   if diff_1(j) < abst_1
@@ -72,19 +78,22 @@ end
 % *****************
 %    channel 2
 % *****************
-abst_2=1e-3; 
+%hmjb abst_2=1e-3; 
+abst_2=(real(log_pr2(xl_scal_2,2)) - Ray_Fit(2,xl_scal_2)).^2;
+RefBin(2)=xl_scal_2;
 for j=xl_scal_2:xu_scal_2 
   diff_2(j) = (real(log_pr2(j,2))- Ray_Fit(2,j)).^2;  
   if diff_2(j) < abst_2
     abst_2=diff_2(j);
     RefBin(2)=j; 
-    % else RefBin(2)= RefBin(1)
   end
 end
 % *****************
 %    channel 3
 % *****************
-abst_3=1e-3; 
+%hmjb abst_3=1e-3; 
+abst_3=(real(log_pr2(xl_scal_3,3)) - Ray_Fit(3,xl_scal_3)).^2;
+RefBin(3)=xl_scal_3;
 for j=xl_scal_3:xu_scal_3 
   diff_3(j) = (real(log_pr2(j,3))- Ray_Fit(3,j)).^2;  
   if diff_3(j) < abst_3
@@ -99,7 +108,7 @@ end
 % --------
 rb = 3000;  % plot height
 
-figure(9)
+figure(6)
 % set(gcf,'position',[50,100,1200,800]); % units in pixels! *** 19 " ***
  set(gcf,'position',[50,100,1000,600]); % units in pixels! *** Laptop ***
 %
@@ -140,7 +149,7 @@ figure(9)
 % -------------
 %  log signal
 % -------------
-figure(10)
+figure(7)
 % set(gcf,'position',[50,100,1200,800]); % units in pixels! *** 19 " ***
  set(gcf,'position',[50,100,1000,600]); % units in pixels! *** Laptop ***
 %

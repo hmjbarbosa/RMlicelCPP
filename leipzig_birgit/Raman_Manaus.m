@@ -98,7 +98,7 @@ rbb_a = rb2;
 rbb_p = RefBin(1); 
 rbb_ka = RefBin(2); 
 %
-figure(12) 
+figure(9) 
 %  set(gcf,'position',[50,100,600,800]); % units in pixels! *** 19 " ***
 set(gcf,'position',[50,100,500,600]); % units in pixels! *** Laptop ***
 title(['Embrapa Raman Lidar on ' datum ', ' timex1(1,1:5) ' LT '],'fontsize',[14]) 

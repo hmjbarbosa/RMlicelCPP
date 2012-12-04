@@ -77,8 +77,10 @@ range_corr = alt.*alt;
 % -----------------------------
 %   mean profile of all files
 % -----------------------------
-sum_channel(:,:) = sum(channel(:,:,:),2); 
-mean_channel = sum_channel(:,:)./nfiles;
+%sum_channel(:,:) = sum(channel(:,:,:),2); 
+%mean_channel = sum_channel(:,:)./nfiles;
+%hmjb/bb - 4/dec - to skip over nan values in the end of the profile
+mean_channel = nanmean(channel,2);
 % these files already have BG removed
 % values below BG+3*sigma were transformed into NaN
 mean_bg_corr = mean_channel; % 

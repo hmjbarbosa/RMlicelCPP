@@ -35,7 +35,9 @@ end
 if sonde == 0
   site = 'Amazonas';
   % this is cuiaba
-  radiofile=['./Manaus/83362_081028_00.dat']
+  %radiofile=['./Manaus/83362_081028_00.dat']
+  % manaus, 2011 sep 01 00z
+  radiofile=['./Manaus/82332_110901_00.dat']
   %
   radios(1:6) = num2str(radiofile(16:21)); 
   radios(7:8) = num2str(radiofile(23:24)); 
@@ -58,10 +60,8 @@ if sonde == 0
       altitude(i)=str2num(sondedata(8:14)); % in m 
       temp(i)=273.16 + str2num(sondedata(15:21)); % T in K
       if ~strcmp(sondedata(31:35),'     ')
-        ['aqui1']
         RH(i)=str2num(sondedata(31:35)); % RH in percent
       else
-        ['aqui2' sondedata(31:35)]
         RH(i)=0.;
       end
     else
@@ -98,10 +98,32 @@ if sonde ~= 1
   % --------------------------------------------------------
   % P = rho*R*T, R=287.05 J/kg/K
   % rho = P/T/R = 3.4837e-3 * P / T  
-  beta_ray(1,:) = (2.265e-3).*pres./temp;  % 355 nm !!! factor is in km!!!
-  beta_ray(2,:) = (2.265e-3).*pres./temp*(355/387)^4.085;  % 387 nm
-%hmjb  beta_ray(3,:) = (2.265e-3).*pres./temp*(355/407)^4.085;  % 407 nm
-  beta_ray(3,:) = (4.259e-4).*pres./temp*(355/407)^4.085;  % 407 nm
+  % 0.2um < lambda < 0.5um
+  A=3.01577e-28; % 
+  B=3.55212;
+  C=1.35579;
+  D=0.11563;
+  Ts=288.15; % K
+  Ps=1013.25 % hPa
+  Ns=2.54743e19; % cm^-3
+
+  lambda=0.355; % microns
+  sigmaS=A*(lambda)^(-(B+C*lambda+D/lambda))/(8*pi/3); % cm^2
+  betaS=Ns*sigmaS*10^5; % para ter em km^-1 ao inves de cm^-1
+  beta_ray(1,:) = betaS.*(pres./temp)*Ts/Ps;  % 355 nm !!! factor is in km!!!
+
+  lambda=0.387; % microns
+  sigmaS=A*(lambda)^(-(B+C*lambda+D/lambda))/(8*pi/3); % cm^2
+  betaS=Ns*sigmaS*10^5; % para ter em km^-1 ao inves de cm^-1
+  beta_ray(2,:) = betaS.*(pres./temp)*Ts/Ps;  % 387 nm
+
+  lambda=0.408; % microns
+  sigmaS=A*(lambda)^(-(B+C*lambda+D/lambda))/(8*pi/3); % cm^2
+  betaS=Ns*sigmaS*10^5; % para ter em km^-1 ao inves de cm^-1
+  beta_ray(3,:) = betaS.*(pres./temp)*Ts/Ps;  % 407 nm
+%hmjb  beta_ray(1,:) = (2.265e-3).*pres./temp;  % 355 nm !!! factor is in km!!!
+%hmjb  beta_ray(2,:) = (2.265e-3).*pres./temp*(355/387)^4.085;  % 387 nm
+%hmjb  beta_ray(3,:) = (4.259e-4).*pres./temp*(355/407)^4.085;  % 407 nm
 %  beta_ray(4,:) = (4.259e-4).*pres./temp;  % 532 nm
 %  beta_ray(5,:) = (4.259e-4).*pres./temp*(532/607)^4.085;  % 607 nm
 %  beta_ray(6,:) = (2.582e-5).*pres./temp;  % 1064 nm
@@ -155,16 +177,26 @@ alpha_mol(1,:) = beta_mol(1,:).*xlidar(1);
 alpha_mol(2,:) = beta_mol(2,:).*xlidar(2); 
 alpha_mol(3,:) = beta_mol(3,:).*xlidar(3); 
 % 
-tau=0;
+for j = 1:3
+  for i=1:rbins
+    if i==1
+      tau(j,i) = alpha_mol(j,i)*r_bin; 
+    else
+      tau(j,i) = tau(j,i-1)+alpha_mol(j,i)*r_bin; 
+    end
+  end
+end
+
 for j = 1:3
   %hmjb we should zero tau here, right???
-  tau=0;
+  %tau=0;
   for i=1:rbins
-    tau = tau + alpha_mol(j,i)*r_bin; 
-    zet2(i)= (i*r_bin)*(i*r_bin);
-    ray_signal(j,i)=(1./zet2(i)).*(beta_mol(j,i)*exp(-2.*tau)); 
+    %tau = tau + alpha_mol(j,i)*r_bin; 
+    %hmjb zet2(i)= (i*r_bin)*(i*r_bin);
+    %hmjb ray_signal(j,i)=(1./zet2(i)).*(beta_mol(j,i)*exp(-2.*tau)); 
     % calculate pr2_ray_sig in km-1 
-    pr2_ray_sig(j,i)= ray_signal(j,i)*zet2(i); 
+    %hmjb pr2_ray_sig(j,i)= ray_signal(j,i)*zet2(i); 
+    pr2_ray_sig(j,i)=beta_mol(j,i)*exp(-tau(j,i)-tau(1,i));
   end
 end
 %
@@ -172,7 +204,7 @@ end
 %
 %  Plot
 % -------
-figure(10)
+figure(4)
 set(gcf,'position',[0,100,400,600]); % units in pixels!
 plot(beta_mol(1,:),alt(:)*1e-3,'b'); 
 hold on
@@ -192,7 +224,7 @@ grid on
 hold off
 
 % -------
-figure(11)
+figure(5)
 set(gcf,'position',[200,100,400,600]); % units in pixels!
 %hl1=line(temp,altitude*1e-3,'Color','r');
 plot(temp,altitude*1e-3,'Color','r');

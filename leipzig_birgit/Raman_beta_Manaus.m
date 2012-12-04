@@ -107,7 +107,7 @@ Lidar_Ratio_sm(zet_0:up) = aero_ext_raman(zet_0:up)./beta_raman_sm(zet_0:up);
 %rbbb = size(beta_aerosol);
 rbbr = size(beta_raman_sm(:));
 %
-figure(15)
+figure(10)
 %  set(gcf,'position',[50,100,600,800]); % units in pixels! *** 19 " ***
 set(gcf,'position',[50,100,500,600]); % units in pixels! *** Laptop ***
 title(['Embrapa Raman Lidar on ' datum ', '  ' UTC '],'fontsize',[10]) 
@@ -133,7 +133,7 @@ grid on
 % --------------
   rLR_1 = size(Lidar_Ratio(1,:));
 %  
-  figure(16)
+  figure(11)
   %  set(gcf,'position',[50,100,600,800]); % units in pixels! *** 19 " ***
    set(gcf,'position',[50,100,500,600]); % units in pixels! *** Laptop ***
   
