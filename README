@@ -39,12 +39,16 @@ To clean up everything, including the compiled executables:
 
 make clean-all
 
+If you are running on linux you should try to check the compiled programs
+
+make check
+
 ________________________________________________________________________________
 HOW TO USE
 
 rm2csv [list of input binary files] 
 
-  Convert a list of binary Raymetrics/Licel files into ASCII
+  Converts a list of binary Raymetrics/Licel files into ASCII
   files. New files are named by adding a ".csv" after each file's
   name. Data are converted to physical units. All numbers are
   separated by ";" to be read into a spreadsheet program as a
@@ -52,7 +56,7 @@ rm2csv [list of input binary files]
 
 rm2dat [input binary files] 
 
-  Convert a list of binary Raymetrics/Licel files into ASCII
+  Converts a list of binary Raymetrics/Licel files into ASCII
   files. New files are named by adding a ".dat" after each file's
   name. Data are converted to physical units. A "# " is added to each
   header line and data is separated by tabs. The output format could
@@ -60,7 +64,7 @@ rm2dat [input binary files]
 
 rm2nc [list of input binary files] 
 
-  Convert a list of binary Raymetrics/Licel files into netcdf
+  Converts a list of binary Raymetrics/Licel files into netcdf
   files. New files are named by adding a ".nc" after each file's
   name. Data are converted to physical units. netCDF complies with
   COARDS conventions besides including fields such as contact and
@@ -69,7 +73,7 @@ rm2nc [list of input binary files]
 
 rm2nclist [output file] [list of input binary files] 
 
-  Convert a list of binary Raymetrics/Licel files into a single netcdf
+  Converts a list of binary Raymetrics/Licel files into a single netcdf
   file. The new file is will be <output>.nc. Data are converted to
   physical units. netCDF complies with COARDS conventions besides
   including fields such as contact and history. The output format
@@ -98,4 +102,4 @@ ABOUT ME
 
 Want to contribute or use it? Contact me!
 
-hmj.barbosa+git [at] gmail (dot) com
+hmj.barbosa+git@gmail.com

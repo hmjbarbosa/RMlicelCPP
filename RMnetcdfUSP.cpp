@@ -233,7 +233,6 @@ void profile_write_netcdf(const char* fname, RMDataFile rm)
 
   // now we start at full minutes
   // now we save the end time, because the filename is associated with THAT time
-  //RoundMinutes(rm.end, &adate);
   adate=RM_Date(rm.end);
   adate.RoundMinutes();
   sprintf(longstr,"minutes since %s",adate.write2nc().c_str());
