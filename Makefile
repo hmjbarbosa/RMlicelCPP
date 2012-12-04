@@ -16,6 +16,12 @@ PROGS=\
 
 all	:	$(PROGS)
 
+tarball	:
+	@mydir=`basename $$PWD`; cd ..;\
+	ofile=$$mydir'_'`date +%Y%b%d`'.tgz';\
+	tar -czvf $$ofile $$mydir/*.h $$mydir/*.cpp $$mydir/RM* $$mydir/ipen* \
+		$$mydir/arg* $$mydir/Makefile $$mydir/README
+
 rm2name	:	rm2name.cpp TimeDate.o RMlicelUSP.o
 	$(CC) $(LFLAGS) -o rm2name rm2name.cpp TimeDate.o RMlicelUSP.o
 
