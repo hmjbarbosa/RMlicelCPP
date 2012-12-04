@@ -26,18 +26,18 @@ clear beta_aerosol beta_aerosol_sm
 clear alpha_aerosol alpha_aerosol_sm
 clear alpha_aero
 % 
-zet_0 = 100;      % bin
+zet_0 = 100;   % bin
 sm_span = 11;  % Range for Savitzky-Golay smoothing  * 7.5 m 
-rbins = 3000; 
+%hmjb ja definido em read_sonde_Manaus rbins = 3000; 
 %
 % ***************************************************
 %  set reference values for alpha und beta Particle 
 % ***************************************************
- beta_par(1,RefBin(1)) = 1e-6; % km-1
+beta_par(1,RefBin(1)) = 1e-6; % km-1
 %
- alpha_par(1,RefBin(1)) = beta_par(1,RefBin(1))*LidarRatio(1,RefBin(1)); 
+alpha_par(1,RefBin(1)) = beta_par(1,RefBin(1))*LidarRatio(1,RefBin(1)); 
 %   
- for j=1:1 % 
+for j=1:1 % 
 % ----------------------------                
 %  use range corrected signal
 % ----------------------------
@@ -98,7 +98,7 @@ fkt2(Ref_Bin) = ext_ave/xlidar(j) * LidarRatio(j,Ref_Bin);
 %  +++++++++++++++++++++++
 %    forward integration
 %  +++++++++++++++++++++++
-     for i=Ref_Bin : rbins-1
+for i=Ref_Bin : rbins-1
    ext_ave = (ext_ray(j,i) + ext_ray(j,i+1)) * deltar; 
    fkt1(i) = fkt1(i-1) + ext_ave; 
    fkt2(i) = fkt2(i-1) + ext_ave/xlidar(j) * LidarRatio(j,i); 

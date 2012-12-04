@@ -20,13 +20,11 @@ tic  % start processing time
 disp('*** reading datafiles:');
 disp('-----------------------------')
 disp('')
-%filepath = 'D:\RaymetricsManaus\31082011\';
-filepath = '/media/work/data/EMBRAPA/lidar/31082011/';
+filepath = './31082011/';
 %
 fid=fopen([filepath 'files.dat'],'r')
 
 i=0;
-%
 while ~feof(fid);
  i=i+1;
  filename(i,:)=fgetl(fid);
@@ -36,87 +34,88 @@ fclose(fid);
 %
 datum = [filename(i,6:9) filename(i,11:12) filename(i,14:15)]
 %
-%
-rangebins = 4000;
+%rangebins = 4000;
 %pr2 = zeros(rangebins,nfiles,3); 
 %
 % -----------------
 %  open datafiles 
 % -----------------
- for i=1:nfiles
- clear M
- disp (filename(i,:))
+for i=1:nfiles
+  clear M
+  disp (filename(i,:))
+  
+  M = dlmread([filepath filename(i,:)]);
+  
+  alt = M(:,1); %*1e-3; % altitude in meters 
+  channel(:,i,1) = M(:,4); % 355 glued
+  channel(:,i,2) = M(:,7); % 387 glued
+  channel(:,i,3) = M(:,8); % 407 glued
+  channel(:,i,4) = M(:,2); % 355 ANA
+  channel(:,i,5) = M(:,3); % 355 PC
+                                                  
+  % -----------------------------------------------------------------       
+  %  read info from filename and convert character string to numbers
+  % -----------------------------------------------------------------
+  hour1(i) = str2double(filename(i,17:18));   
+  minute1(i) = str2double(filename(i,19:20));  
 
-M = dlmread([filepath filename(i,:)]);
+  % --------------------------------------------
+  %  read mesurement times as character strings 
+  % --------------------------------------------
+  hourx1(i,:) = filename(i,17:18); 
+  minutex1(i,:) = filename(i,19:20); 
+  timex1(i,:) = [hourx1(i,:) ':' minutex1(i,:)];   
+end
+toc
+rangebins=size(channel,1);
 
-                     alt = M(1:rangebins,1);%*1e-3; 
-channel(1:rangebins,i,4) = M(1:rangebins,2); 
-channel(1:rangebins,i,5) = M(1:rangebins,3); 
-channel(1:rangebins,i,1) = M(1:rangebins,4);    % 355 glued
-channel(1:rangebins,i,2) = M(1:rangebins,7);    % 387 glued
-channel(1:rangebins,i,3) = M(1:rangebins,8);    % 407 glued
-%   
-% -----------------------------------------------------------------       
-%  read info from filename and convert character string to numbers
-% -----------------------------------------------------------------
-           hour1(i) = str2double(filename(i,17:18));   
-         minute1(i) = str2double(filename(i,19:20));  
-%
-% --------------------------------------------
-%  read mesurement times as character strings 
-% --------------------------------------------
-         hourx1(i,:) = filename(i,17:18); 
-       minutex1(i,:) = filename(i,19:20); 
-         timex1(i,:) = [hourx1(i,:) ':' minutex1(i,:)];   
- end
- toc
-            
 % ----------------------
-%  calculate the range 
+%  calculate the range^2 [m^2]
 % ----------------------
-       range_corr = alt.*alt;
+range_corr = alt.*alt;
+
 % -----------------------------
 %   mean profile of all files
 % -----------------------------
-     sum_channel(:,:) = sum(channel(:,:,:),2); 
-     mean_channel = sum_channel(:,:)./nfiles;
-     mean_bg_corr = mean_channel; % 
-     log_mean_bg_corr = log(mean_bg_corr);
-     
- for j = 1:3   
-     pr2(:,j) = mean_bg_corr(:,j).*range_corr(:);
- end
- %
- figure(1)
- plot(mean_channel(:,1),alt,'b')
- %plot(mean_channel(:,4),alt,'c')
- %plot(mean_channel(:,5),alt,'c--')
- xlabel('glued bg corr signal','fontsize',[10])  
- ylabel('altitude','fontsize',[10])
- title(['Embrapa Lidar at ' datum],'fontsize',[14]) 
- hold on
- plot(mean_channel(:,2),alt,'c')
- plot(mean_channel(:,3),alt,'r')
- 
- figure(2)
-  plot(pr2(:,1),alt,'b')
-  xlabel('range corrected glued signal','fontsize',[10])  
- ylabel('altitude','fontsize',[10])
- title(['Embrapa Lidar at ' datum],'fontsize',[14]) 
+sum_channel(:,:) = sum(channel(:,:,:),2); 
+mean_channel = sum_channel(:,:)./nfiles;
+% these files already have BG removed
+% values below BG+3*sigma were transformed into NaN
+mean_bg_corr = mean_channel; % 
+log_mean_bg_corr = log(mean_bg_corr);
 
- hold on 
- plot(pr2(:,2),alt,'c')
- plot(pr2(:,3),alt,'r')
- 
- figure(3)
- plot(log_mean_bg_corr(:,1),alt,'b')
- xlabel('log of glued bg corr signal','fontsize',[10])  
- ylabel('altitude','fontsize',[10])
- title(['Embrapa Lidar at ' datum],'fontsize',[14]) 
- hold on
- plot(log_mean_bg_corr(:,2),alt,'c')
- plot(log_mean_bg_corr(:,3),alt,'r')
- 
- % end of program read_ascii_Manaus.m ***    
-     
-     
+for j = 1:3   
+  pr2(:,j) = mean_bg_corr(:,j).*range_corr(:);
+end
+%
+figure(1)
+plot(mean_channel(:,1),alt*1.e-3,'b')
+xlabel('glued bg corr signal','fontsize',[10])  
+ylabel('altitude (km)','fontsize',[10])
+title(['Embrapa Lidar at ' datum],'fontsize',[14]) 
+grid on
+hold on
+plot(mean_channel(:,2),alt*1.e-3,'c')
+plot(mean_channel(:,3),alt*1.e-3,'r')
+%
+figure(2)
+plot(pr2(:,1),alt*1.e-3,'b')
+xlabel('range corrected glued signal','fontsize',[10])  
+ylabel('altitude (km)','fontsize',[10])
+title(['Embrapa Lidar at ' datum],'fontsize',[14]) 
+grid on
+hold on 
+plot(pr2(:,2),alt*1.e-3,'c')
+plot(pr2(:,3),alt*1.e-3,'r')
+% 
+figure(3)
+plot(log_mean_bg_corr(:,1),alt*1.e-3,'b')
+xlabel('log of glued bg corr signal','fontsize',[10])  
+ylabel('altitude (km)','fontsize',[10])
+title(['Embrapa Lidar at ' datum],'fontsize',[14]) 
+grid on
+hold on
+plot(log_mean_bg_corr(:,2),alt*1.e-3,'c')
+plot(log_mean_bg_corr(:,3),alt*1.e-3,'r')
+% 
+% end of program read_ascii_Manaus.m ***    

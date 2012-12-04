@@ -9,49 +9,51 @@
 %       read_ascii_Manaus.m 
 %       read_sonde_Manaus.m
 % ---------------------------------------------------
-clear RefBin
+clear altbin xl_scal_1 xu_scal_1 xl_scal_2 xu_scal_2 xl_scal_3 xu_scal_3
+clear meanRaySig meanpr2 SigFak RaySig log_pr2 Ray_Fit
+clear RefBin diff_1 abst_1 diff_2 abst_2 diff_3 abst_3
 % ---------------------------------------------------
 %  one rangebin 
-  altbin=7.5*1e-3;
+altbin=7.5*1e-3;
 % ----------------------------------------
 %  choose altitude range for Rayleigh fit
 % ----------------------------------------
 % 355 nm elastic channel
-  xl_scal_1 = round(10/altbin); % km
-  xu_scal_1 = round(12/altbin); % km
+xl_scal_1 = round(10/altbin); % km
+xu_scal_1 = round(12/altbin); % km
 % 387 nm Raman channel
-  xl_scal_2 = round(10/altbin); % km
-  xu_scal_2 = round(12/altbin); % km
+xl_scal_2 = round(10/altbin); % km
+xu_scal_2 = round(12/altbin); % km
 % 407 nm  H_2_O channel 
-  xl_scal_3 = round(6/altbin); % km
-  xu_scal_3 = round(7/altbin); % km
+xl_scal_3 = round(6/altbin); % km
+xu_scal_3 = round(7/altbin); % km
 %   
- meanRaySig(1) = mean(pr2_ray_sig(1,xl_scal_1:xu_scal_1)); 
- meanRaySig(2) = mean(pr2_ray_sig(2,xl_scal_2:xu_scal_2)); 
- meanRaySig(3) = mean(pr2_ray_sig(3,xl_scal_3:xu_scal_3)); 
+meanRaySig(1) = mean(pr2_ray_sig(1,xl_scal_1:xu_scal_1)); 
+meanRaySig(2) = mean(pr2_ray_sig(2,xl_scal_2:xu_scal_2)); 
+meanRaySig(3) = mean(pr2_ray_sig(3,xl_scal_3:xu_scal_3)); 
 % 
 % ----------------
 %   mean signals 
 % -----------------
-     meanpr2(1) = mean(pr2(xl_scal_1:xu_scal_1,1)); 
-     meanpr2(2) = mean(pr2(xl_scal_2:xu_scal_2,2)); 
-     meanpr2(3) = mean(pr2(xl_scal_3:xu_scal_3,3)); 
+meanpr2(1) = mean(pr2(xl_scal_1:xu_scal_1,1)); 
+meanpr2(2) = mean(pr2(xl_scal_2:xu_scal_2,2)); 
+meanpr2(3) = mean(pr2(xl_scal_3:xu_scal_3,3)); 
 %    
-     SigFak(1) = meanpr2(1)/meanRaySig(1)   
-     SigFak(2) = meanpr2(2)/meanRaySig(2); 
-     SigFak(3) = meanpr2(3)/meanRaySig(3);   
+SigFak(1) = meanpr2(1)/meanRaySig(1);
+SigFak(2) = meanpr2(2)/meanRaySig(2); 
+SigFak(3) = meanpr2(3)/meanRaySig(3);   
 %
-     RaySig(1,:) = SigFak(1).*pr2_ray_sig(1,:); 
-     RaySig(2,:) = SigFak(2).*pr2_ray_sig(2,:); 
-     RaySig(3,:) = SigFak(3).*pr2_ray_sig(3,:); 
+RaySig(1,:) = SigFak(1).*pr2_ray_sig(1,:); 
+RaySig(2,:) = SigFak(2).*pr2_ray_sig(2,:); 
+RaySig(3,:) = SigFak(3).*pr2_ray_sig(3,:); 
 % ------------
 %  logarithm
 % ------------
-        Ray_Fit(1,:) = log(RaySig(1,:));  
-        Ray_Fit(2,:) = log(RaySig(2,:)); 
-        Ray_Fit(3,:) = log(RaySig(3,:));  
+Ray_Fit(1,:) = log(RaySig(1,:));  
+Ray_Fit(2,:) = log(RaySig(2,:)); 
+Ray_Fit(3,:) = log(RaySig(3,:));  
             
-        log_pr2 = real(log(pr2));    
+log_pr2 = real(log(pr2));    
 %        
 % ----------------------
 %   find reference bins
@@ -59,37 +61,37 @@ clear RefBin
 % *****************
 %    channel 1
 % *****************
-   abst_1=1e-3; 
-      for j=xl_scal_1:xu_scal_1
-          diff_1(j) = (real(log_pr2(j,1)) - Ray_Fit(1,j)).^2; 
-               if diff_1(j) < abst_1
-                  abst_1 = diff_1(j);
-                  RefBin(1)=j;  
-               end
-      end
+abst_1=1e-3; 
+for j=xl_scal_1:xu_scal_1
+  diff_1(j) = (real(log_pr2(j,1)) - Ray_Fit(1,j)).^2; 
+  if diff_1(j) < abst_1
+    abst_1 = diff_1(j);
+    RefBin(1)=j;  
+  end
+end
 % *****************
 %    channel 2
 % *****************
-     abst_2=1e-3; 
-       for j=xl_scal_2:xu_scal_2 
-           diff_2(j) = (real(log_pr2(j,2))- Ray_Fit(2,j)).^2;  
-                if diff_2(j) < abst_2
-                  abst_2=diff_2(j);
-                  RefBin(2)=j; 
-               % else RefBin(2)= RefBin(1)
-               end
-       end
+abst_2=1e-3; 
+for j=xl_scal_2:xu_scal_2 
+  diff_2(j) = (real(log_pr2(j,2))- Ray_Fit(2,j)).^2;  
+  if diff_2(j) < abst_2
+    abst_2=diff_2(j);
+    RefBin(2)=j; 
+    % else RefBin(2)= RefBin(1)
+  end
+end
 % *****************
 %    channel 3
 % *****************
-     abst_3=1e-3; 
-       for j=xl_scal_3:xu_scal_3 
-           diff_3(j) = (real(log_pr2(j,3))- Ray_Fit(3,j)).^2;  
-                if diff_3(j) < abst_3
-                  abst_3=diff_3(j); 
-                  RefBin(3)=j; 
-               end
-       end
+abst_3=1e-3; 
+for j=xl_scal_3:xu_scal_3 
+  diff_3(j) = (real(log_pr2(j,3))- Ray_Fit(3,j)).^2;  
+  if diff_3(j) < abst_3
+    abst_3=diff_3(j); 
+    RefBin(3)=j; 
+  end
+end
 %+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 %
 % --------      
