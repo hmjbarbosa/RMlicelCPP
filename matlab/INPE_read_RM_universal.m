@@ -89,7 +89,7 @@ end
 laser.frequency_shots2=fscanf(fid,'%d',1);
 params.number_channels=fscanf(fid,'%d',1);
 params.start=datenum([params.date_start(3:-1:1); params.hour_start]');
-params.ended=datenum([params.date_end(3:-1:1); params.hour_end]');
+params.end=datenum([params.date_end(3:-1:1); params.hour_end]');
 rmfield(params, {'date_start' 'hour_start' 'date_end' 'hour_end'}) ;
 
 
@@ -128,16 +128,10 @@ for canal = 1:params.number_channels
     
     % skip CR
     fgetl(fid);
-
-    ['antes de ler o canal = ' num2str(canal)]
-    ftell(fid)
-
+    
     % read n_bins data
     data=fread(fid,acq(canal).n_bins,'int32');
-
-    ['depois de ler o canal = ' num2str(canal)]
-    ftell(fid)
-
+    
     % correct data according to type: PC or analog
     if (acq(canal).is_photocnt==0) % analog
         dScale = 2^(-acq(canal).ADCbits)*(acq(canal).discr_level*1.e3)/acq(canal).averaged_shots;
@@ -160,8 +154,6 @@ for canal = 1:params.number_channels
     
 end
 
-['final = ' num2str(canal)]
-ftell(fid)
 
 
 %% End
