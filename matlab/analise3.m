@@ -2,18 +2,18 @@
 clear all; 
 ['analysis started @ ' datestr(clock)]
 
-%datain='../../Raymetrics_data';
-%dataout='./ascii';
-datain='/media/work/data/EMBRAPA/lidar/data';
-dataout='/media/work/data/EMBRAPA/lidar/data_5min_ascii';
+datain='../../Raymetrics_data';
+dataout='./data_5min_ascii';
+%datain='/media/work/data/EMBRAPA/lidar/data';
+%dataout='/media/work/data/EMBRAPA/lidar/data_5min_ascii';
 
 %% FIRST DATE
-jdi=datenum(2012, 5, 25, 12, 0, 0);
+jdi=datenum(2011, 8, 31, 12, 0, 0);
 jdf=jdi+1.;
 ndays=1;
 lastdir='x';
 
-%while(ndays<500)
+while(ndays<2)
   
   %% READ TIME SLICE
   [nfile, heads, chphy]=profile_read_dates(datain, jdi, jdf, 10, 0.004);
@@ -63,11 +63,11 @@ lastdir='x';
   % average noise and stdev are calculated from last 500 bins
   % values below (bg+3*std) become zero
   for ch=1:heads(1).nch
-    chphy(ch).cs = remove_bg(chphy(ch).crop, 500, 3);
+    chphy(ch).cs = remove_bg(chphy(ch).crop, 500, -10);
   end
   ['[5] bg noise finished @ ' datestr(clock)]
   
-  %% COMPUTE RANGE CORRECTED SIGNAL
+  %% RANGE IN METERS
   for i=1:heads(1).ndata(1)
     zh(i)=(7.5*i);
   end
@@ -91,7 +91,7 @@ lastdir='x';
       lastdir=dout;
     end
     fname=sprintf('%s/Glue_%04d_%02d_%02d-%02d%02d.txt',dout,yy,mm, ...
-                  dd,hh,mn)
+                  dd,hh,mn);
     % precisa adicionar teste de erro
     fid=fopen(fname,'w');
     pt=4000;
@@ -108,7 +108,7 @@ lastdir='x';
   jdf=jdf+1.;
   ndays=ndays+1;
 
-%end % loop over days
+end % loop over days
 
 %
 %

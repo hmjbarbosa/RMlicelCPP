@@ -28,7 +28,7 @@
 %           Raman_Manaus.m
 % ---------------------------------------------------------
 %
-zet_0 = 1; %no overlap dependence because of signal ratios -> start at the bottom
+zet_0 = 300; %no overlap dependence because of signal ratios -> start at the bottom
 %
 clear p_ave_raman_1 p_ave_elast_1 p_ave_raman_2 p_ave_elast_2
 clear m_ave_elast_1 m_ave_raman_1 m_ave_elast_2 m_ave_raman_2
@@ -82,7 +82,7 @@ end
 % -------------------------
 for i=up : -1 : zet_0   
   signals_1(i) =(mean_bg_corr(Ref_1,2)'*mean_bg_corr(i,1)'*beta_mol(1,i))/...
-                (mean_bg_corr(Ref_1,1)'*mean_bg_corr(i,2)'*beta_mol(1,Ref_1));  
+      (mean_bg_corr(Ref_1,1)'*mean_bg_corr(i,2)'*beta_mol(1,Ref_1));  
   beta_raman(i)= -beta_mol(1,i)+(beta_par(1,Ref_1)+ ...
                                  beta_mol(1,Ref_1))*signals_1(i)*exp_z_1(i)/exp_n_1(i);
 end
@@ -90,8 +90,8 @@ end
 % --------------------------------------
 %  smoothing 7.5 m * smothing length sl
 % --------------------------------------
- sl = 11; 
- beta_raman_sm = smooth(beta_raman,sl,'sgolay',3);
+sl = 11; 
+beta_raman_sm = smooth(beta_raman,sl,'sgolay',3);
 % 
 % -------------
 %  Lidar Ratio 
@@ -131,21 +131,21 @@ grid on
 % -------------- 
 %  Lidar Ratio
 % --------------
-  rLR_1 = size(Lidar_Ratio(1,:));
+rLR_1 = size(Lidar_Ratio(1,:));
 %  
-  figure(11)
-  %  set(gcf,'position',[50,100,600,800]); % units in pixels! *** 19 " ***
-   set(gcf,'position',[50,100,500,600]); % units in pixels! *** Laptop ***
-  
-  title(['Embrapa Raman Lidar on ' datum ', '  ' UTC '],'fontsize',[10]) 
-  xlabel('Lidar Ratio / sr','fontsize',[12])  
-  ylabel('Height agl / km','fontsize',[12])
+figure(11)
+%  set(gcf,'position',[50,100,600,800]); % units in pixels! *** 19 " ***
+set(gcf,'position',[50,100,500,600]); % units in pixels! *** Laptop ***
+
+title(['Embrapa Raman Lidar on ' datum ', '  ' UTC '],'fontsize',[10]) 
+xlabel('Lidar Ratio / sr','fontsize',[12])  
+ylabel('Height agl / km','fontsize',[12])
 %  axis([0 100 0 alt(Ref_1)]); 
-  axis([0 100 0 alt(up).*1e-3]); 
+axis([0 100 0 alt(up).*1e-3]); 
 box on
-  hold on
-  plot(Lidar_Ratio_sm(zet_0:rLR_1(2)),alt(zet_0:rLR_1(2)).*1e-3,'b')
-  grid on
-  legend('355 nm')
+hold on
+plot(Lidar_Ratio_sm(zet_0:rLR_1(2)),alt(zet_0:rLR_1(2)).*1e-3,'b')
+grid on
+legend('355 nm')
 %  
-  disp('End of program: Raman_beta_Manaus.m, Vers. 1.0 06/12')
+disp('End of program: Raman_beta_Manaus.m, Vers. 1.0 06/12')

@@ -20,7 +20,8 @@ tic  % start processing time
 disp('*** reading datafiles:');
 disp('-----------------------------')
 disp('')
-filepath = './31082011/';
+%filepath = './31082011/';
+filepath = '../matlab/data_5min_ascii/';
 %
 fid=fopen([filepath 'files.dat'],'r')
 

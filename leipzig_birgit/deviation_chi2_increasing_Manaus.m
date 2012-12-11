@@ -51,10 +51,10 @@ for i = lower : lower + fit_width
   %    plot(x,y,'r')
   %    plot(x,yy,'g')
     
-  abl_chi2(i) = (yy(ndata) - yy(1))/...
-                        (x(ndata) - x(1));
+  abl_chi2(i) = b;%hmjb %(yy(ndata) - yy(1))/(x(ndata) - x(1));
 end
 
+figure(20)
 plot(x,y,'r')
 plot(x,yy,'g')
 
@@ -76,13 +76,13 @@ for i = lower + fit_width+1 : rbbb - fit_width
   %    plot(x,y,'b')
   %    plot(x,yy,'c')
     
-  abl_chi2(i) = (yy(ndata) - yy(1)) / (x(ndata)- x(1));
-  if i >= 0.9*rbbb
-    return
-  end
+  abl_chi2(i) = b;%hmjb%(yy(ndata) - yy(1)) / (x(ndata)- x(1));
+   if i >= 0.9*rbbb
+     return
+   end
 end
 
-figure(1)   
+figure(21)   
 plot(x,y,'b')
 plot(x,yy,'c')
 
