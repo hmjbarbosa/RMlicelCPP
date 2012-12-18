@@ -13,20 +13,19 @@ clear altbin xl_scal_1 xu_scal_1 xl_scal_2 xu_scal_2 xl_scal_3 xu_scal_3
 clear meanRaySig meanpr2 SigFak RaySig log_pr2 Ray_Fit
 clear RefBin diff_1 abst_1 diff_2 abst_2 diff_3 abst_3
 % ---------------------------------------------------
-%  one rangebin 
-altbin=7.5*1e-3;
+
 % ----------------------------------------
 %  choose altitude range for Rayleigh fit
 % ----------------------------------------
 % 355 nm elastic channel
-xl_scal_1 = round(15/altbin); % km
-xu_scal_1 = round(17/altbin); % km
+xl_scal_1 = round(15/r_bin); % km
+xu_scal_1 = round(17/r_bin); % km
 % 387 nm Raman channel
-xl_scal_2 = round(15/altbin); % km
-xu_scal_2 = round(17/altbin); % km
+xl_scal_2 = round(15/r_bin); % km
+xu_scal_2 = round(17/r_bin); % km
 % 407 nm  H_2_O channel 
-xl_scal_3 = round(6/altbin); % km
-xu_scal_3 = round(7/altbin); % km
+xl_scal_3 = round(15/r_bin); % km
+xu_scal_3 = round(17/r_bin); % km
 %   
 meanRaySig(1) = mean(pr2_ray_sig(1,xl_scal_1:xu_scal_1)); 
 meanRaySig(2) = mean(pr2_ray_sig(2,xl_scal_2:xu_scal_2)); 
@@ -106,7 +105,6 @@ end
 % --------      
 %  plots
 % --------
-rb = 3000;  % plot height
 
 figure(6)
 % set(gcf,'position',[50,100,1200,800]); % units in pixels! *** 19 " ***
@@ -118,8 +116,8 @@ figure(6)
   ylabel('height / m','fontsize',12)
   box on 
   hold on
-  plot(pr2(1:rb,1), alt(1:rb)); 
-  plot(RaySig(1,1:rb), alt(1:rb),'g','LineWidth',2); 
+  plot(pr2(1:rbins,1), alt(1:rbins)); 
+  plot(RaySig(1,1:rbins), alt(1:rbins),'g','LineWidth',2); 
   plot(pr2(RefBin(1),1), alt(RefBin(1)),'r*');
   grid on
 %  legend('355 nm', 'Rayleigh Fit', 'Reference Bin'); 
@@ -129,20 +127,20 @@ figure(6)
     title('Rayleigh Fit 387 nm Pr^2','fontsize',14)
   box on 
   hold on
-  plot(pr2(1:rb,2), alt(1:rb)); 
-  plot(RaySig(2,1:rb), alt(1:rb),'g','LineWidth',2); 
+  plot(pr2(1:rbins,2), alt(1:rbins)); 
+  plot(RaySig(2,1:rbins), alt(1:rbins),'g','LineWidth',2); 
   plot(pr2(RefBin(2),2), alt(RefBin(2)),'r*');
  % legend('387 nm', 'Rayleigh Fit', 'Reference Bin'); 
   grid on
  
  subplot(1,3,3)
   subplot('Position',[0.7 0.08 0.2 0.85]); 
- title(['H_20' ' ' datum],'fontsize',14) 
+ title(['H_20' ' ' ],'fontsize',14) 
   box on 
   hold on
-  plot(pr2(1:rb,3), alt(1:rb)); 
-  plot(RaySig(3,1:rb), alt(1:rb),'g','LineWidth',2); 
-%  plot(pr2(RefBin(3),3), alt(RefBin(3)),'r*');
+  plot(pr2(1:rbins,3), alt(1:rbins)); 
+  plot(RaySig(3,1:rbins), alt(1:rbins),'g','LineWidth',2); 
+  plot(pr2(RefBin(3),3), alt(RefBin(3)),'r*');
 %  legend('355a nm', 'Rayleigh Fit', 'Reference Bin'); 
   grid on
 %
@@ -158,8 +156,8 @@ figure(7)
    title('rayleigh fit 355 ln Pr^2' ,'fontsize',14) 
   box on  
   hold on
-  plot(log_pr2(1:rb,1),alt(1:rb),'b');    
-  plot(Ray_Fit(1,1:rb),alt(1:rb),'g','LineWidth',2);   
+  plot(log_pr2(1:rbins,1),alt(1:rbins),'b');    
+  plot(Ray_Fit(1,1:rbins),alt(1:rbins),'g','LineWidth',2);   
   plot(log_pr2(RefBin(1),1), alt(RefBin(1)),'r*');
   grid on 
  %  legend('355 nm', 'Rayleigh Fit','Reference Bin'); 
@@ -168,20 +166,20 @@ figure(7)
   title('rayleigh fit 387 ln Pr^2' ,'fontsize',14) 
   box on 
   hold on
-  plot(log_pr2(1:rb,2),alt(1:rb),'b');  
-  plot(Ray_Fit(2,1:rb),alt(1:rb),'g','LineWidth',2);   
+  plot(log_pr2(1:rbins,2),alt(1:rbins),'b');  
+  plot(Ray_Fit(2,1:rbins),alt(1:rbins),'g','LineWidth',2);   
   plot(log_pr2(RefBin(2),2), alt(RefBin(2)),'r*');
   grid on
  % legend('387 nm', 'Rayleigh Fit', 'Reference Bin'); 
   
  subplot(1,3,3)
   subplot('Position',[0.7 0.08 0.2 0.85]); 
-  title(['H_20' ' ' datum],'fontsize',14) 
+  title(['H_20' ' ' ],'fontsize',14) 
   box on 
   hold on
-  plot(log_pr2(1:rb,3),alt(1:rb),'b');  
-  plot(Ray_Fit(3,1:rb),alt(1:rb),'g','LineWidth',2);   
- % plot(log_pr2(RefBin(3),3), alt(RefBin(3)),'r*');
+  plot(log_pr2(1:rbins,3),alt(1:rbins),'b');  
+  plot(Ray_Fit(3,1:rbins),alt(1:rbins),'g','LineWidth',2);   
+  plot(log_pr2(RefBin(3),3), alt(RefBin(3)),'r*');
   grid on
 % legend('407 nm', 'Rayleigh Fit', 'Reference Bin'); 
 %  

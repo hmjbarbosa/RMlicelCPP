@@ -28,7 +28,7 @@
 %           Raman_Manaus.m
 % ---------------------------------------------------------
 %
-zet_0 = 300; %no overlap dependence because of signal ratios -> start at the bottom
+zet_0 = 2; %no overlap dependence because of signal ratios -> start at the bottom
 %
 clear p_ave_raman_1 p_ave_elast_1 p_ave_raman_2 p_ave_elast_2
 clear m_ave_elast_1 m_ave_raman_1 m_ave_elast_2 m_ave_raman_2
@@ -74,8 +74,8 @@ for i=up : -1 : zet_0 + 1
   % Elastic molecular extinction at 355
   m_ave_elast_1(i) = 0.5*(ray_ext(1,i)+ray_ext(1,i-1));
   %       
-  exp_z_1(i-1) = exp_z_1(i)* exp(-(p_ave_raman_1(i) + m_ave_raman_1(i))*deltar); 
-  exp_n_1(i-1) = exp_n_1(i)* exp(-(p_ave_elast_1(i) + m_ave_elast_1(i))*deltar);
+  exp_z_1(i-1) = exp_z_1(i)* exp(-(p_ave_raman_1(i) + m_ave_raman_1(i))*r_bin); 
+  exp_n_1(i-1) = exp_n_1(i)* exp(-(p_ave_elast_1(i) + m_ave_elast_1(i))*r_bin);
 end
 % -------------------------
 % calculate beta Raman

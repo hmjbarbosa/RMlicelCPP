@@ -26,8 +26,8 @@ clear beta_aerosol beta_aerosol_sm
 clear alpha_aerosol alpha_aerosol_sm
 clear alpha_aero
 % 
-zet_0 = 100;   % bin
-sm_span = 11;  % Range for Savitzky-Golay smoothing  * 7.5 m 
+zet_0 = 2;   % bin
+sm_span = 11;  % Range for Savitzky-Golay smoothing  * r_bin
 %hmjb ja definido em read_sonde_Manaus rbins = 3000; 
 %
 % ***************************************************
@@ -56,13 +56,12 @@ for j=1:1
 
   % -------------------------------------------------------------------------
   %  Klett (Equ. 20; 1985):
-  %  fkt1: 2/B_R int(beta_R) = 2 int (alpha_R) = sum (alpha_1,R+alpha_2,R)*deltar
+  %  fkt1: 2/B_R int(beta_R) = 2 int (alpha_R) = sum (alpha_1,R+alpha_2,R)*r_bin
   %  fkt2: 2 int(beta_R/B_P) = 2 int(alpha_R*B_R/B_P) =  2 int (alpha_R*S_P/S_R)
   % -------------------------------------------------------------------------
   %  Fernald, AO, 1984
   %
-  deltar = 7.5e-3;
-  ext_ave =(ext_ray(j,Ref_Bin) + ext_ray(j,Ref_Bin-1)) * deltar;
+  ext_ave =(ext_ray(j,Ref_Bin) + ext_ray(j,Ref_Bin-1)) * r_bin;
   fkt1(Ref_Bin) = ext_ave; 
   fkt2(Ref_Bin) = ext_ave/xlidar(j) * LidarRatio(j,Ref_Bin); 
   % 
@@ -70,7 +69,7 @@ for j=1:1
   %   backward integration
   %  +++++++++++++++++++++++
   for i=Ref_Bin-1 : -1 : zet_0
-    ext_ave = (ext_ray(j,i) + ext_ray(j,i-1)) * deltar; 
+    ext_ave = (ext_ray(j,i) + ext_ray(j,i-1)) * r_bin; 
     fkt1(i) = fkt1(i+1) + ext_ave; 
     fkt2(i) = fkt2(i+1) + ext_ave/xlidar(j) * LidarRatio(j,i); 
   end
@@ -81,15 +80,14 @@ for j=1:1
   % -----------------------------------------------------------------------
   for i=zet_0:Ref_Bin
     zfkt(i)=rc_signal(j,i)/rc_signal(j,Ref_Bin)/exp(fkt1(i))*exp(fkt2(i));
-    %hmjb  zfkt(i)=rc_signal(j,i)/rc_signal(j,Ref_Bin)*exp(fkt1(i))/exp(fkt2(i));
   end
   %
   % Integral in denominator (2. summand); 2 cancels with 1/2 mean value 
   
-  %hmjb nfkt(Ref_Bin)=zfkt(Ref_Bin)*deltar/LidarRatio(j,Ref_Bin); 
-  nfkt(Ref_Bin)=(zfkt(Ref_Bin)+zfkt(Ref_Bin-1))*deltar/LidarRatio(j,Ref_Bin); 
+%hmjb nfkt(Ref_Bin)=zfkt(Ref_Bin)*r_bin/LidarRatio(j,Ref_Bin); 
+  nfkt(Ref_Bin)=(zfkt(Ref_Bin)+zfkt(Ref_Bin-1))*r_bin/LidarRatio(j,Ref_Bin); 
   for i=Ref_Bin-1: -1 : zet_0
-    nfkt(i)=nfkt(i+1)+(zfkt(i)+zfkt(i+1))*deltar*LidarRatio(j,i); 
+    nfkt(i)=nfkt(i+1)+(zfkt(i)+zfkt(i+1))*r_bin*LidarRatio(j,i); 
   end
   % 
   % Klett 1985, Equ. (22)
@@ -102,7 +100,7 @@ for j=1:1
   %    forward integration
   %  +++++++++++++++++++++++
   for i=Ref_Bin : rbins-1
-    ext_ave = (ext_ray(j,i) + ext_ray(j,i+1)) * deltar; 
+    ext_ave = (ext_ray(j,i) + ext_ray(j,i+1)) * r_bin; 
     fkt1(i) = fkt1(i-1) + ext_ave; 
     fkt2(i) = fkt2(i-1) + ext_ave/xlidar(j) * LidarRatio(j,i); 
   end
@@ -116,10 +114,10 @@ for j=1:1
   %
   % Integral in denominator (2. summand); 2 cancels with 1/2 mean value 
   
-  %hmjb   nfkt(Ref_Bin)=zfkt(Ref_Bin)*deltar/LidarRatio(j,Ref_Bin); 
-  nfkt(Ref_Bin)=(zfkt(Ref_Bin)+zfkt(Ref_Bin-1))*deltar/LidarRatio(j,Ref_Bin); 
+%hmjb nfkt(Ref_Bin)=zfkt(Ref_Bin)*r_bin/LidarRatio(j,Ref_Bin); 
+  nfkt(Ref_Bin)=(zfkt(Ref_Bin)+zfkt(Ref_Bin-1))*r_bin/LidarRatio(j,Ref_Bin); 
   for i=Ref_Bin : rbins-1
-    nfkt(i)=nfkt(i-1)+(zfkt(i)+zfkt(i-1))*deltar*LidarRatio(j,i); 
+    nfkt(i)=nfkt(i-1)+(zfkt(i)+zfkt(i-1))*r_bin*LidarRatio(j,i); 
   end
   % 
   % Klett 1985, Equ. (22)
@@ -160,27 +158,21 @@ rb = Ref_Bin;
 scrsz = get(0,'ScreenSize'); 
 %
 figure(8)
-%set(gcf,'position',[scrsz(3)-0.95*scrsz(3) scrsz(4)-0.95*scrsz(4) scrsz(3)-0.6*scrsz(3) scrsz(4)-0.15*scrsz(4)]);  
-set(gcf,'position',[scrsz(3)-0.9*scrsz(3) scrsz(4)-0.9*scrsz(4) scrsz(3)-0.6*scrsz(3) scrsz(4)-0.15*scrsz(4)]);  
 %
 %----------
-%   532 
+%   355
 %----------
-title(['Embrapa Lidar at ' datum],'fontsize',[14]) 
+title(['Embrapa Lidar '],'fontsize',[14]) 
 xlabel('BSC / km-1 sr-1','fontsize',[14])  
 ylabel('Height agl/ km','fontsize',[14])
-axis([-2e-3 5e-3 0 alt(rbins)*1e-3]); 
-% axis([min(beta_aerosol(1,100:rbins/2)) max(beta_aerosol(1,1:rbins/2))+0.1*max(beta_aerosol(1,1:rbins/2)) 0 alt(rbins/2)]); 
-  box on
-  hold on
- plot(beta_aerosol_sm(1,1:rbins-1), alt(1:rbins-1).*1e-3,'b','Linewidth',1); 
- grid on 
- %
- %annotation('textbox', [0.62 0.8 0.28 0.04]);
- %text(0.1*10e-3, alt(1,rb)-0.02*alt(1,rb),...
- %   {[hourx(1,:) ':' minutex(1,:) ':' secondx(1,:) ' - '...
- %   hourx(nmeas,:) ':' minutex(nmeas,:) ':' secondx(nmeas,:) ' UTC ']} ,'FontSize',[10]);
+axis([-1e-3 9e-3 0 alt(rbins)*1e-3]); 
+box on
+hold on
+plot(beta_aerosol_sm(1,1:rbins-1), alt(1:rbins-1).*1e-3,'b','Linewidth',1); 
+plot(beta_aero(1,1:rbins-1), alt(1:rbins-1).*1e-3,'r','Linewidth',1); 
+plot(beta_mol (1,1:rbins-1), alt(1:rbins-1).*1e-3,'g','Linewidth',1); 
+grid on
+hold off
+%  end of program
+disp('End of program: Klett_Manaus.m, Vers. 1.0 06/12')
 %
-
- %  end of program
-  disp('End of program: Klett_Manaus.m, Vers. 1.0 06/12')

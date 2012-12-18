@@ -73,7 +73,9 @@ fit_width = 5;  %
 % * 387 *  
 % -------
 % 1) "devation length" increasing automatically
-[abl_chi2_1,chi2,q,u] = deviation_chi2_increasing_Manaus(log_raman(2,:),alt.*1e-3,Ref_Bin,fit_width,datum);
+datum='teste';
+[abl_chi2_1,chi2,q,u] = deviation_chi2_increasing_Manaus(log_raman(2,:),alt.*1e-3,rbins,fit_width,datum);
+%hmjb [abl_chi2_1,chi2,q,u] = deviation_chi2_increasing_Manaus(log_raman(2,:),alt.*1e-3,Ref_Bin,fit_width,datum);
 % [abl_chi2_1,chi2,q,u] = deviation_chi2_increasing_Manaus(log_raman(2,:),alt,rbins/2-1,fit_width,datum);
  
 % 2) doubling manually
@@ -95,13 +97,13 @@ end
 %   plot data
 % -------------
 rbb_a = rb2; 
-rbb_p = RefBin(1); 
+rbb_p = rbins; %hmjb RefBin(1); 
 rbb_ka = RefBin(2); 
 %
 figure(9) 
 %  set(gcf,'position',[50,100,600,800]); % units in pixels! *** 19 " ***
 set(gcf,'position',[50,100,500,600]); % units in pixels! *** Laptop ***
-title(['Embrapa Raman Lidar on ' datum ', ' timex1(1,1:5) ' LT '],'fontsize',[14]) 
+%title(['Embrapa Raman Lidar on ' datum ', ' timex1(1,1:5) ' LT '],'fontsize',[14]) 
 xlabel('Extinction / km^-1','fontsize',[12])  
 ylabel('Height / km','fontsize',[12])
 axis([-0.05 0.2 alt(zet_0) alt(rbb_p)]); 
