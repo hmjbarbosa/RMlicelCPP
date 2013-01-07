@@ -46,17 +46,18 @@ for i = lower : lower + fit_width
   y = input(i-(i-lower):i+(i-lower)+1); 
   [a,b,siga,sigb,chi2,q] = fit_chi2(x,y,ndata,sig,mwt); 
   yy = a + b.*x;   
-  box on 
-  hold on
+  % box on 
+  % hold on
   %    plot(x,y,'r')
   %    plot(x,yy,'g')
-    
+
+  abl_a(i)=a;
   abl_chi2(i) = b;%hmjb %(yy(ndata) - yy(1))/(x(ndata) - x(1));
 end
 
-figure(20)
-plot(x,y,'r')
-plot(x,yy,'g')
+%figure(20)
+%plot(x,y,'r')
+%plot(x,yy,'g')
 
 % ----------------------------
 %      middle and upper part
@@ -76,14 +77,19 @@ for i = lower + fit_width+1 : rbbb - fit_width
   %    plot(x,y,'b')
   %    plot(x,yy,'c')
     
+  abl_a(i)=a;
   abl_chi2(i) = b;%hmjb%(yy(ndata) - yy(1)) / (x(ndata)- x(1));
    if i >= 0.9*rbbb
-     return
+     break
    end
 end
 
-figure(21)   
-plot(x,y,'b')
-plot(x,yy,'c')
-
+figure(21)
+plot(range(1:1990),input(1:1990)','b')
+hold on
+size(range)
+size(abl_a)
+size(abl_chi2)
+plot(range(1:1799)',abl_a+abl_chi2.*range(1:1799)','r')
+hold off
 %

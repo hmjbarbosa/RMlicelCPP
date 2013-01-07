@@ -111,6 +111,8 @@ box on
 hold on 
 % Klett
 plot(alpha_aerosol(1,zet_0:rb-1),alt(zet_0:rb-1),'b--')
+plot(alpha_aerosol(RefBin(1)), alt(RefBin(1)),'r*');
+plot(alpha_aerosol(RefBin(2)), alt(RefBin(2)),'g*');
 %
 % Raman 
 plot(aero_ext_raman(zet_0+60:rbb_a),alt(zet_0+60:rbb_a),'b','LineWidth',2)
