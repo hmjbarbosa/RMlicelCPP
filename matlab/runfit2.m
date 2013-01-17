@@ -1,5 +1,5 @@
 % Function: 
-%    function [fval, a, b, relerr] = runfit(S, z, nside)
+%    function [fval, a, b, relerr] = runfit2(S, z, nside, nside2)
 %
 % Input:
 %    S(nz, nt) - Input signal with nz levels and nt times
@@ -31,7 +31,7 @@
 %    SPAN=2*nside+1 to evaluate the running mean values in the
 %    above equations.
 %
-function [fval, a, b, relerr, Smed] = runfit(S, z, nside)
+function [fval, a, b, relerr, Smed] = runfit2(S, z, nside, nside2)
 
 [nz, nt] = size(S);
 
@@ -41,14 +41,16 @@ if ~exist('nside','var') nside=5; end
 % smooth(S,SPAN) is a running average using SPAN points. Therefore,
 % for odd SPAN, the number of points on each side of central point is
 % the same, i.e., (SPAN-1)/2
-span=1+2*nside;
+%span=1+2*nside;
+span=nside;
+span2=nside2;
 % calculate <z>
-zmed=smooth(z,span,'moving');
+zmed=mysmooth(z,span,span2);
 % calculate <z>^2
 zmed2=zmed.*zmed;
 % calculate <z*z>
 z2(:,1)=z(:,1).*z(:,1);
-z2med=smooth(z2,span,'moving');
+z2med=mysmooth(z2,span,span2);
 clear z2;
 
 % repeat the values on all nt rows
@@ -61,8 +63,8 @@ end
 
 % calculate <S> and <z*S> for all nt rows
 for j=1:nt
-  Smed(:,j)=smooth(S(:,j),span,'moving');
-  zSmed(:,j)=smooth(S(:,j).*z(:,j),span,'moving');
+  Smed(:,j)=mysmooth(S(:,j),span,span2);
+  zSmed(:,j)=mysmooth(S(:,j).*z(:,j),span,span2);
 end
 
 %
@@ -83,7 +85,7 @@ for j=1:nt
   % it is necessary to force 'moving average' because absolute
   % errors are random and smooth() algorithm would try to use
   % 'robust' method instead.
-  Sfvalmed(:,j)=smooth(Sfval(:,j),span,'moving');
+  Sfvalmed(:,j)=mysmooth(Sfval(:,j),span,span2);
 end
 relerr=sqrt(Sfvalmed*span/(span-2));
 %relerr=Sfvalmed./Smed;

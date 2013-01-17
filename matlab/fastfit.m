@@ -1,54 +1,55 @@
 % Function: 
-%    function [fval, a, b, relerr] = fastfit(S, z)
+%    function [a, b, fval, sa, sb, chi2red, ndf] = fastfit(X, Y)
 %
 % Input:
-%    S(nz, nt) - Input signal with nz levels and nt times
-%    z(nz) - Range of each zi level
-%    nside - Use 2*nside+1 points for the linear fit
+%    X(M, N) - Independent values with M rows and N coluns
+%    Y(M, N) - Dependent values with M rows and N coluns
 %
 % Output:
-%    fval - fitted values interpolated at the original zi's
-%    a - angular coeffient of the linear fit at each zi
-%    b - linear coeffient of the linear fit at each zi
-%    relerr - Sum_nside (S - fval)/Sum_nside S
+%    a - angular coefficient
+%    b - linear coefficient
+%    fval - fitted values interpolated at each xi
+%    sa - uncertainty in angular coefficient
+%    sb - uncertainty in linear coefficient 
+%    chi2red - reduced chi squared
+%    ndf - number of degrees of freedom
 %
 % Description: 
 %
-%    Does a running un-weighted least square fit of S(z)=a*z + b, ie,
-%    for each point zi in the vertical, fits a straight line using
-%    nside points to the left and to the right of zi.
+%    Does a running un-weighted least square fit of Y=a*X + b.
+%    This is done column by column and if X has only one column,
+%    then it is used for all columns in Y.
 %
 %    A linear fit results in a linear system of two equations and two
 %    variables (a and b) which can be easily solved. The result, in
 %    in a chi2 sense, is:
 %
-%       a = (<zS> - <z><S>)/(<z^2>-<z>^2)
-%       b = (<z^2><S> - <z><zS>)/(<z^2>-<z>^2)
+%       a = (<XY> - <X><Y>)/(<X^2>-<X>^2)
+%       b = (<X^2><Y> - <X><XY>)/(<X^2>-<X>^2)
 %
 %    This allows one not to use fit() functions which would be very
 %    slow because they actually search numerically for a minimum of
-%    chi2 function. Instead, here the smooth() function is used with
-%    SPAN=2*nside+1 to evaluate the running mean values in the
-%    above equations.
+%    chi2 function. 
+% 
+%    Points were either Xi or Yi are NaN are set both to
+%    NaN. Moreover, nanmean() and nansum() functions are used to skip
+%    over these NaN values.
 %
 function [a, b, fval, sa, sb, chi2red, ndf] = fastfit(X, Y)
 
 % size of Y
 [ny1, ny2] = size(Y);
 
-% check if X was given, otherwise use indexes as coordenates
-if ~exist('X','var') X(:,1)=(1:ny1)'; end
-
 % size of X
 [nx1, nx2] = size(X);
 
 % error checking
 if ny1~=nx1
-  error('FASTFIT::','X must have the same number of rows as Y!');
+  error('FASTFIT:: X must have the same number of rows as Y!');
 end
 if nx2~=1
   if ny2~=nx2
-    error('FASTFIT::','X must have the same number of columns as Y!');
+    error('FASTFIT:: X must have the same number of columns as Y!');
   end
 end
 
@@ -67,9 +68,9 @@ Y(isnan(X))=NaN;
 X(isnan(Y))=NaN;
 
 % calculate <X>, <X*X> and <X>^2
-X2=X.*X;
 Xmed=nanmean(X);
 Xmed2=Xmed.*Xmed;
+X2=X.*X;
 X2med=nanmean(X2);
 clear X2;
 

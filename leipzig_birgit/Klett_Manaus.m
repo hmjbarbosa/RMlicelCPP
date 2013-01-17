@@ -14,7 +14,6 @@
 %
 clear beta_par alpha_par
 clear rc_signal
-clear ext_ray
 clear ext_par
 clear fkt1
 clear fkt2
@@ -45,7 +44,6 @@ for j=1:1
   %  
   %  Ref_Bin = min(RefBin); 
   Ref_Bin = RefBin(j); 
-  ext_ray(j,:) = alpha_mol(j,:); 
   %
   % ***********************************
   %  Backscatter coefficient: beta_par
@@ -61,7 +59,7 @@ for j=1:1
   % -------------------------------------------------------------------------
   %  Fernald, AO, 1984
   %
-  ext_ave =(ext_ray(j,Ref_Bin) + ext_ray(j,Ref_Bin-1)) * r_bin;
+  ext_ave =(alpha_mol(j,Ref_Bin) + alpha_mol(j,Ref_Bin-1)) * r_bin;
   fkt1(Ref_Bin) = ext_ave; 
   fkt2(Ref_Bin) = ext_ave/xlidar(j) * LidarRatio(j,Ref_Bin); 
   % 
@@ -69,7 +67,7 @@ for j=1:1
   %   backward integration
   %  +++++++++++++++++++++++
   for i=Ref_Bin-1 : -1 : zet_0
-    ext_ave = (ext_ray(j,i) + ext_ray(j,i-1)) * r_bin; 
+    ext_ave = (alpha_mol(j,i) + alpha_mol(j,i-1)) * r_bin; 
     fkt1(i) = fkt1(i+1) + ext_ave; 
     fkt2(i) = fkt2(i+1) + ext_ave/xlidar(j) * LidarRatio(j,i); 
   end
@@ -100,7 +98,7 @@ for j=1:1
   %    forward integration
   %  +++++++++++++++++++++++
   for i=Ref_Bin : rbins-1
-    ext_ave = (ext_ray(j,i) + ext_ray(j,i+1)) * r_bin; 
+    ext_ave = (alpha_mol(j,i) + alpha_mol(j,i+1)) * r_bin; 
     fkt1(i) = fkt1(i-1) + ext_ave; 
     fkt2(i) = fkt2(i-1) + ext_ave/xlidar(j) * LidarRatio(j,i); 
   end
@@ -155,13 +153,12 @@ end
 %----------
 rb = Ref_Bin; 
 %
-scrsz = get(0,'ScreenSize'); 
-%
-figure(8)
-%
 %----------
 %   355
 %----------
+figure(8)
+xx=xx0+5*wdx; yy=yy0+5*wdy;
+set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
 title(['Embrapa Lidar '],'fontsize',[14]) 
 xlabel('BSC / km-1 sr-1','fontsize',[14])  
 ylabel('Height agl/ km','fontsize',[14])
@@ -171,6 +168,7 @@ hold on
 plot(beta_aerosol_sm(1,1:rbins-1), alt(1:rbins-1).*1e-3,'b','Linewidth',1); 
 plot(beta_aero(1,1:rbins-1), alt(1:rbins-1).*1e-3,'r','Linewidth',1); 
 plot(beta_mol (1,1:rbins-1), alt(1:rbins-1).*1e-3,'g','Linewidth',1); 
+plot(beta_aerosol(1,RefBin(1)), alt(RefBin(1)).*1e-3,'r*');
 grid on
 hold off
 %  end of program

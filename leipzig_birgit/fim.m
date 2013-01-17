@@ -1,13 +1,20 @@
-h=figure(1)
+figure(20)
 hold off
 
-plot(mean_bg_corr(3500:4000,1),'r')
+plot (real(log( beta_raman_sm(1:1700) )))
 hold on
-plot(mean_bg_corr(3500:4000,2),'b')
+plot (real(log( beta_aerosol_sm(1:1700) )),'r')
+hold off
+grid
 
-%plot(mean_bg_corr(2500:4000,1)./mean_bg_corr(2500:4000,2)*0.001,'k')
+figure(21)
 hold off
 
+plot (real(( beta_raman_sm(1:1700) )))
+hold on
+plot (real(( beta_aerosol_sm(1:1700) )),'r')
+hold off
 grid
 
 %
+    

@@ -12,12 +12,22 @@ res_beta=1e3*res_alfa./res_lrt; % in km-1 ??
 
 figure(8)
 hold on
-plot(res_beta, res_alti*1e-3,'k');
+plot(res_beta, res_alti*1e-3,'k','LineWidth',2);
 hold off
 
 figure(9)
 hold on
 plot(res_alfa*1e3, res_alti,'k','LineWidth',2);
+hold off
+
+figure(10)
+hold on
+plot(res_beta, res_alti*1e-3,'k','LineWidth',2);
+hold off
+
+figure(11)
+hold on
+plot(res_lrt, res_alti*1e-3,'k','LineWidth',2);
 hold off
 
 %

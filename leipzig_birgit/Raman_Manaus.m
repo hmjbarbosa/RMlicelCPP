@@ -45,14 +45,17 @@ aang = 1.05;    % European Urban
 % aerosol_wave_fac(3) = (532/1064)^aang; 
 % 
 ray_ext(1,:) = alpha_mol(1,:);   % 355 
-ray_ext(2,:) = ray_ext(1,:).*ray_fac(1); % 387
+%hmjb ray_ext(2,:) = ray_ext(1,:).*ray_fac(1); % 387
+ ray_ext(2,:) = alpha_mol(2,:);   % 355 
 %
 % --------------------
 for i = zet_0:rbins  
   % --------------------
   %   logarithm
   % ---------------- 
-  log_raman(2,i) = log(ray_ext(2,i)/pr2(i,2)'); % 387 nm
+%  log_raman(2,i) = log(Nn2(i)/pr2(i,2)'); % 387 nm
+  log_raman(2,i)  = log(ray_ext(2,i)/pr2(i,2)'); % 387 nm
+  log_ramanB(2,i) = log(ray_ext(2,i)/pr2(i,2)'); % 387 nm
 end 
 % --------------
 %    deviation
@@ -74,7 +77,11 @@ fit_width = 5;  %
 % -------
 % 1) "devation length" increasing automatically
 datum='teste';
-[abl_chi2_1,chi2,q,u] = deviation_chi2_increasing_Manaus(log_raman(2,:),alt.*1e-3,rbins,fit_width,datum);
+[abl_chi2_1,chi2,q,u]=deviation_chi2_increasing_Manaus(log_raman(2,:),alt.*1e-3,Ref_Bin,fit_width,datum);
+
+[fval,abl_chi2_1B,b,relerr,smed]=runfit2(log_ramanB(2,1:rbins)', ...
+					 alt(1:rbins).*1e-3, 5, 200);
+
 %hmjb [abl_chi2_1,chi2,q,u] = deviation_chi2_increasing_Manaus(log_raman(2,:),alt.*1e-3,Ref_Bin,fit_width,datum);
 % [abl_chi2_1,chi2,q,u] = deviation_chi2_increasing_Manaus(log_raman(2,:),alt,rbins/2-1,fit_width,datum);
  
@@ -82,31 +89,34 @@ datum='teste';
 % [abl_chi2_1,chi2,q,u] = deviation_chi2_increasing_doubling(log_raman(5,:),alt,rbins-1,fit_width,datum2);
 %
 abl_Raman = abl_chi2_1; 
-rb1 = size(abl_Raman);
-rb2=rb1(2); 
+abl_RamanB = abl_chi2_1B; 
+%abl_Raman(1)=abl_Raman(3);
+%abl_Raman(2)=abl_Raman(3);
+rb1 = size(abl_Raman,2);
 % 
 % ---------------------
 %   Raman extinction
 % ---------------------
-aero_ext_raman = NaN(2,rb1);
+aero_ext_raman = NaN(rb1,1);
 %
-for i=u:rb2
-  aero_ext_raman(i) = (abl_Raman(i)-ray_ext(1,i)-ray_ext(2,i))./(1+aerosol_wave_fac(1));
+for i=u:rb1
+  aero_ext_raman(i)  = (abl_Raman(i)-ray_ext(1,i)-ray_ext(2,i))./(1+aerosol_wave_fac(1));
+  aero_ext_ramanB(i) = (abl_RamanB(i)-ray_ext(1,i)-ray_ext(2,i))./(1+aerosol_wave_fac(1));
 end
+['teste']
+u
+aero_ext_raman(460:2000)=0;
+
 % -------------
 %   plot data
 % -------------
-rbb_a = rb2; 
-rbb_p = rbins; %hmjb RefBin(1); 
-rbb_ka = RefBin(2); 
 %
-figure(9) 
-%  set(gcf,'position',[50,100,600,800]); % units in pixels! *** 19 " ***
-set(gcf,'position',[50,100,500,600]); % units in pixels! *** Laptop ***
-%title(['Embrapa Raman Lidar on ' datum ', ' timex1(1,1:5) ' LT '],'fontsize',[14]) 
+figure(9); clf
+xx=xx0+4*wdx; yy=yy0+4*wdy;
+set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
 xlabel('Extinction / km^-1','fontsize',[12])  
 ylabel('Height / km','fontsize',[12])
-axis([-0.05 0.2 alt(zet_0) alt(rbb_p)]); 
+axis([-0.05 0.2 alt(zet_0) alt(rbins)]); 
 box on 
 hold on 
 % Klett
@@ -115,7 +125,8 @@ plot(alpha_aerosol(RefBin(1)), alt(RefBin(1)),'r*');
 plot(alpha_aerosol(RefBin(2)), alt(RefBin(2)),'g*');
 %
 % Raman 
-plot(aero_ext_raman(zet_0+60:rbb_a),alt(zet_0+60:rbb_a),'b','LineWidth',2)
+plot(aero_ext_raman(zet_0:rb1),alt(zet_0:rb1),'b','LineWidth',2)
+plot(aero_ext_ramanB(zet_0:rb1),alt(zet_0:rb1),'r','LineWidth',1)
 %
 legend('Klett 355')%, 'Raman 355')
 grid on

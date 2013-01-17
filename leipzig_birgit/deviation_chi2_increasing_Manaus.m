@@ -84,12 +84,12 @@ for i = lower + fit_width+1 : rbbb - fit_width
    end
 end
 
-figure(21)
-plot(range(1:1990),input(1:1990)','b')
-hold on
-size(range)
-size(abl_a)
-size(abl_chi2)
-plot(range(1:1799)',abl_a+abl_chi2.*range(1:1799)','r')
-hold off
-%
+%figure(21)
+%plot(range(1:1990),input(1:1990)','o')
+%hold on
+%size(range)
+%size(abl_a)
+%size(abl_chi2)
+%plot(range(1:1799)',abl_a+abl_chi2.*range(1:1799)','r')
+%hold off
+%%

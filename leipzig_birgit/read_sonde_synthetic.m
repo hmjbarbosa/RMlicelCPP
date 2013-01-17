@@ -25,8 +25,12 @@ pres=sonde.data(:,3);  % P in hPa!
 altitude=sonde.data(:,2); % in m 
 temp=273.16 + sonde.data(:,4); % T in K
 % P = rho*R*T, R=287.05 J/kg/K
-% rho = P/T/R = 3.4837e-3 * P / T  
-rho=100.*pres./temp/287.05
+% 100 corrects hPa to Pa, hence rho in kg/m3
+rho=100*pres./temp/287.05;
+% number density of air [#/m3]
+Nair=100*pres./temp/1.3806503e-23;
+% number density of nitrogen [#/m3]
+Nn2=0.7808*Nair;
 
 % number of levels in sounding
 nlines=size(pres,1);
@@ -54,17 +58,17 @@ Ns=2.54743e19; % cm^-3
 
 lambda=0.355; % microns
 sigmaS=A*(lambda)^(-(B+C*lambda+D/lambda))/(8*pi/3); % cm^2
-betaS=Ns*sigmaS*10^5; % para ter em km^-1 ao inves de cm^-1
+betaS=Ns*sigmaS*1e5; % for km^-1 intead of cm^-1
 beta_ray(1,:) = betaS.*(pres./temp)*Ts/Ps;  % 355 nm !!! factor is in km!!!
 
 lambda=0.387; % microns
 sigmaS=A*(lambda)^(-(B+C*lambda+D/lambda))/(8*pi/3); % cm^2
-betaS=Ns*sigmaS*10^5; % para ter em km^-1 ao inves de cm^-1
+betaS=Ns*sigmaS*1e5; % for km^-1 intead of cm^-1
 beta_ray(2,:) = betaS.*(pres./temp)*Ts/Ps;  % 387 nm
 
 lambda=0.532; % microns
 sigmaS=A*(lambda)^(-(B+C*lambda+D/lambda))/(8*pi/3); % cm^2
-betaS=Ns*sigmaS*10^5; % para ter em km^-1 ao inves de cm^-1
+betaS=Ns*sigmaS*1e5; % for km^-1 intead of cm^-1
 beta_ray(3,:) = betaS.*(pres./temp)*Ts/Ps;  % 407 nm
 
 % ------------------------------------------------------
@@ -140,7 +144,8 @@ end
 %  Plot
 % -------
 figure(4)
-set(gcf,'position',[0,100,400,600]); % units in pixels!
+xx=xx0+4*wdx; yy=yy0+4*wdy;
+set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
 plot(beta_mol(1,:),alt(1:rbins)*1e-3,'b'); 
 hold on
 plot(beta_mol(2,:),alt(1:rbins)*1e-3,'c');
@@ -158,7 +163,8 @@ hold off
 
 % -------
 figure(5)
-set(gcf,'position',[200,100,400,600]); % units in pixels!
+xx=xx0+5*wdx; yy=yy0+5*wdy;
+set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
 %hl1=line(temp,altitude*1e-3,'Color','r');
 plot(temp,altitude*1e-3,'Color','r');
 hold on
