@@ -96,6 +96,7 @@ title(['EARLINET exercize'],'fontsize',[14])
 grid on
 hold on
 plot(mean_channel(:,2),alt*1.e-3,'c')
+hold off
 %
 figure(2)
 xx=xx0+2*wdx; yy=yy0+2*wdy;
@@ -107,6 +108,7 @@ title(['EARLINET exercize'],'fontsize',[14])
 grid on
 hold on 
 plot(pr2(:,2),alt*1.e-3,'c')
+hold off
 % 
 figure(3)
 xx=xx0+3*wdx; yy=yy0+3*wdy;
@@ -118,5 +120,6 @@ title(['EARLINET exercize'],'fontsize',[14])
 grid on
 hold on
 plot(log_mean_bg_corr(:,2),alt*1.e-3,'c')
+hold off
 % 
 % end of program read_ascii_synthetic.m ***    

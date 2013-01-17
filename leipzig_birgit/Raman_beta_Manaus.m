@@ -43,41 +43,13 @@ up = upp(1)
 %
 Ref_1 = RefBin(2) 
 %
-% when cirrus clouds are present set the alttude bin
-% cir=1000
-% Ref_1 = cir
-%
-up=1400;
 %------------------------------------
 % reference value for beta particle
 %------------------------------------
 Ref_1=up;
 beta_par(1,Ref_1)= 1e-12;  % in km
-%--------------------
-% in case of cirrus
-%--------------------
-% beta_par(1,cir)= 8e-3;
+% beta_par(1,cir)= 8e-3; % in case of cirrus
 %
-exp_z_1(up)=1;
-exp_n_1(up)=1;
-%
-% *********
-%  355 nm 
-% *********
-% for i=Ref_1 : -1 : zet_0 + 1
-%for i=up : -1 : zet_0 + 1
-%  % Raman Particle extinction at 387
-%  p_ave_raman_1(i) = 0.5*(aero_ext_raman(i) + aero_ext_raman(i-1))*aerosol_wave_fac(1); 
-%  % Raman molecular extinction at 387
-%  m_ave_raman_1(i) = 0.5*(ray_ext(2,i)+ray_ext(2,i-1));    
-%  % Elastic particle  extinction at 355
-%  p_ave_elast_1(i) = 0.5*(aero_ext_raman(i) + aero_ext_raman(i-1)); 
-%  % Elastic molecular extinction at 355
-%  m_ave_elast_1(i) = 0.5*(ray_ext(1,i)+ray_ext(1,i-1));
-%  %       
-%  exp_z_1(i-1) = exp_z_1(i)* exp(+(p_ave_raman_1(i) + m_ave_raman_1(i))*r_bin); 
-%  exp_n_1(i-1) = exp_n_1(i)* exp(+(p_ave_elast_1(i) + m_ave_elast_1(i))*r_bin);
-%end
 p_ave_raman_1(up)=0;
 m_ave_raman_1(up)=0;
 p_ave_elast_1(up)=0;
@@ -129,43 +101,38 @@ Lidar_Ratio_sm(zet_0:up) = aero_ext_raman(zet_0:up)./beta_raman_sm(zet_0:up);
 %rbbb = size(beta_aerosol);
 rbbr = size(beta_raman_sm(:));
 %
-figure(10)
+figure(10); 
 xx=xx0+3*wdx; yy=yy0+3*wdy;
+% Klett
+plot(beta_aerosol_sm(1,zet_0:rbbr(1)), alt(zet_0:rbbr(1)).*1e-3,'b--');
 set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
-title(['Embrapa Raman Lidar on ' datum ', '  ' UTC '],'fontsize',[10]) 
+axis([-0.2e-3 10e-3 0 alt(up)*1e-3*1.2]); 
 xlabel('BSC km-1 sr-1','fontsize',[12])  
 ylabel('Height agl / km','fontsize',[12])
-axis([-0.2e-3 10e-3 0 alt(up).*1e-3]); 
-box on
-hold on
-plot(beta_aerosol_sm(1,zet_0:rbbr(1)), alt(zet_0:rbbr(1)).*1e-3,'b--'); %Klett
-plot(beta_mol(1,zet_0:rbbr(1)), alt(zet_0:rbbr(1)).*1e-3,'r'); 
-%
-plot(beta_raman_sm(zet_0:rbbr(1)), alt(zet_0:rbbr(1)).*1e-3,'b','LineWidth',2)
-betaref_1 =  num2str(beta_par(1,Ref_1), '%5.1e'); 
-refheight = [num2str(alt(Ref_1)*1e-3,'%5.1f') ' km'];
-text(0.4*5e-3, 0.74*alt(Ref_1)*1e-3, ['Beta-Ref. 355 =' betaref_1 ' at ' refheight])
+title(['Raman'],'fontsize',[14]) 
 grid on
-
- legend('355 Klett')
+hold on
+% Raman
+plot(beta_raman_sm(zet_0:rbbr(1)), alt(zet_0:rbbr(1)).*1e-3,'b','LineWidth',2)
+plot(beta_aerosol_sm(RefBin(1)), alt(RefBin(1))*1e-3,'r*');
+plot(beta_aerosol_sm(RefBin(2)), alt(RefBin(2))*1e-3,'g*');
+legend('Klett', 'Raman', 'RefBin 355', 'RefBin 387')
+hold off
 %  
 % -------------- 
 %  Lidar Ratio
 % --------------
 rLR_1 = size(Lidar_Ratio(1,:));
 %  
-figure(11)
+figure(11);
 xx=xx0+2*wdx; yy=yy0+2*wdy;
+plot(Lidar_Ratio_sm(zet_0:rLR_1(2)),alt(zet_0:rLR_1(2)).*1e-3,'b')
 set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
-title(['Embrapa Raman Lidar on ' datum ', '  ' UTC '],'fontsize',[10]) 
+axis([0 100 0 alt(up)*1e-3*1.2]); 
 xlabel('Lidar Ratio / sr','fontsize',[12])  
 ylabel('Height agl / km','fontsize',[12])
-%  axis([0 100 0 alt(Ref_1)]); 
-axis([0 100 0 alt(up).*1e-3]); 
-box on
-hold on
-plot(Lidar_Ratio_sm(zet_0:rLR_1(2)),alt(zet_0:rLR_1(2)).*1e-3,'b')
+title(['Raman'],'fontsize',[14])
 grid on
-legend('355 nm')
+hold off
 %  
 disp('End of program: Raman_beta_Manaus.m, Vers. 1.0 06/12')

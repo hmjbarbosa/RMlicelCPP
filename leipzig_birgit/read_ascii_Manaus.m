@@ -13,12 +13,12 @@
 %
 %--------------------------------------------------------------------------
 %
-clear 
+clear all
 %
 tic  % start processing time
 %
-disp('*** reading datafiles:');
-disp('-----------------------------')
+disp('*** reading MANAUS datafiles:');
+disp('--------------------------------')
 disp('')
 %filepath = './31082011/';
 filepath = '../matlab/data_5min_ascii/';
@@ -75,9 +75,13 @@ rangebins=size(channel,1);
 % ----------------------
 range_corr = alt.*alt;
 
+% bin height in km
+r_bin=(alt(2)-alt(1))*1e-3; 
+
 % -----------------------------
 %   mean profile of all files
 % -----------------------------
+addpath('../matlab');
 %sum_channel(:,:) = sum(channel(:,:,:),2); 
 %mean_channel = sum_channel(:,:)./nfiles;
 %hmjb/bb - 4/dec - to skip over nan values in the end of the profile
@@ -86,39 +90,47 @@ mean_channel = nanmean(channel,2);
 % values below BG+3*sigma were transformed into NaN
 mean_bg_corr = mean_channel; % 
 log_mean_bg_corr = log(mean_bg_corr);
-
+%
 for j = 1:3   
   pr2(:,j) = mean_bg_corr(:,j).*range_corr(:);
 end
 %
+wsx=300;  wdx=310; xx0=-wsx;
+wsy=900; wdy=0;   yy0=30;
 figure(1)
+xx=xx0+1*wdx; yy=yy0+1*wdy;
+set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
 plot(mean_channel(:,1),alt*1.e-3,'b')
-xlabel('glued bg corr signal','fontsize',[10])  
+xlabel('smooth bg-corr signal','fontsize',[10])  
 ylabel('altitude (km)','fontsize',[10])
 title(['Embrapa Lidar at ' datum],'fontsize',[14]) 
 grid on
 hold on
 plot(mean_channel(:,2),alt*1.e-3,'c')
-plot(mean_channel(:,3),alt*1.e-3,'r')
+hold off
 %
 figure(2)
+xx=xx0+2*wdx; yy=yy0+2*wdy;
+set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
 plot(pr2(:,1),alt*1.e-3,'b')
-xlabel('range corrected glued signal','fontsize',[10])  
+xlabel('range corrected smooth bg-corr signal','fontsize',[10])  
 ylabel('altitude (km)','fontsize',[10])
 title(['Embrapa Lidar at ' datum],'fontsize',[14]) 
 grid on
 hold on 
 plot(pr2(:,2),alt*1.e-3,'c')
-plot(pr2(:,3),alt*1.e-3,'r')
+hold off
 % 
 figure(3)
+xx=xx0+3*wdx; yy=yy0+3*wdy;
+set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
 plot(log_mean_bg_corr(:,1),alt*1.e-3,'b')
-xlabel('log of glued bg corr signal','fontsize',[10])  
+xlabel('log of smooth bg-corr signal','fontsize',[10])  
 ylabel('altitude (km)','fontsize',[10])
 title(['Embrapa Lidar at ' datum],'fontsize',[14]) 
 grid on
 hold on
 plot(log_mean_bg_corr(:,2),alt*1.e-3,'c')
-plot(log_mean_bg_corr(:,3),alt*1.e-3,'r')
+hold off
 % 
 % end of program read_ascii_Manaus.m ***    

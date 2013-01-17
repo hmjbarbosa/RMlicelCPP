@@ -158,18 +158,18 @@ rb = Ref_Bin;
 %----------
 figure(8)
 xx=xx0+5*wdx; yy=yy0+5*wdy;
-set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
-title(['Embrapa Lidar '],'fontsize',[14]) 
-xlabel('BSC / km-1 sr-1','fontsize',[14])  
-ylabel('Height agl/ km','fontsize',[14])
-axis([-1e-3 9e-3 0 alt(rbins)*1e-3]); 
-box on
-hold on
-plot(beta_aerosol_sm(1,1:rbins-1), alt(1:rbins-1).*1e-3,'b','Linewidth',1); 
+set(gcf,'position',[xx,yy,2*wsx,wsy]); % units in pixels!
 plot(beta_aero(1,1:rbins-1), alt(1:rbins-1).*1e-3,'r','Linewidth',1); 
-plot(beta_mol (1,1:rbins-1), alt(1:rbins-1).*1e-3,'g','Linewidth',1); 
-plot(beta_aerosol(1,RefBin(1)), alt(RefBin(1)).*1e-3,'r*');
+axis([-1e-3 9e-3 0 alt(rbins)*1e-3]); 
+xlabel('BSC / km-1 sr-1','fontsize',[14])  
+ylabel('Height / km','fontsize',[14])
+title(['Klett'],'fontsize',[14]) 
 grid on
+hold on
+plot(beta_mol (1,1:rbins-1), alt(1:rbins-1).*1e-3,'g','Linewidth',1); 
+plot(beta_aerosol_sm(1,1:rbins-1), alt(1:rbins-1).*1e-3,'b','Linewidth',1); 
+plot(beta_aerosol(1,RefBin(1)), alt(RefBin(1)).*1e-3,'r*');
+legend('Total', 'Molecular', 'Klett', 'Reference Bin'); 
 hold off
 %  end of program
 disp('End of program: Klett_Manaus.m, Vers. 1.0 06/12')

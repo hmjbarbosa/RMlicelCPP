@@ -103,33 +103,28 @@ for i=u:rb1
   aero_ext_raman(i)  = (abl_Raman(i)-ray_ext(1,i)-ray_ext(2,i))./(1+aerosol_wave_fac(1));
   aero_ext_ramanB(i) = (abl_RamanB(i)-ray_ext(1,i)-ray_ext(2,i))./(1+aerosol_wave_fac(1));
 end
-['teste']
-u
-aero_ext_raman(460:2000)=0;
 
 % -------------
 %   plot data
 % -------------
-%
-figure(9); clf
+figure(9);
 xx=xx0+4*wdx; yy=yy0+4*wdy;
+% Klett
+plot(alpha_aerosol(1,zet_0:rb-1),alt(zet_0:rb-1)*1e-3,'b--')
 set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
+axis([-0.05 0.2 0 alt(rb1)*1e-3*1.2]); 
 xlabel('Extinction / km^-1','fontsize',[12])  
 ylabel('Height / km','fontsize',[12])
-axis([-0.05 0.2 alt(zet_0) alt(rbins)]); 
-box on 
-hold on 
-% Klett
-plot(alpha_aerosol(1,zet_0:rb-1),alt(zet_0:rb-1),'b--')
-plot(alpha_aerosol(RefBin(1)), alt(RefBin(1)),'r*');
-plot(alpha_aerosol(RefBin(2)), alt(RefBin(2)),'g*');
-%
-% Raman 
-plot(aero_ext_raman(zet_0:rb1),alt(zet_0:rb1),'b','LineWidth',2)
-plot(aero_ext_ramanB(zet_0:rb1),alt(zet_0:rb1),'r','LineWidth',1)
-%
-legend('Klett 355')%, 'Raman 355')
+title(['Raman'],'fontsize',[14]) 
 grid on
+hold on 
+% Raman 
+plot(aero_ext_raman(zet_0:rb1),alt(zet_0:rb1)*1e-3,'b','LineWidth',2)
+plot(aero_ext_ramanB(zet_0:rb1),alt(zet_0:rb1)*1e-3,'r','LineWidth',1)
+plot(alpha_aerosol(RefBin(1)), alt(RefBin(1))*1e-3,'r*');
+plot(alpha_aerosol(RefBin(2)), alt(RefBin(2))*1e-3,'g*');
+legend('Klett', 'Raman', 'RamanB', 'RefBin 355', 'RefBin 387')
+hold off
 %
 %  end of program
 %  

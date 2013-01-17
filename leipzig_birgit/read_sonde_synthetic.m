@@ -1,8 +1,7 @@
-% read_sonde_Manaus.m
-%                                  01/07    BHeese 
-%   Anpassung an RS80 Sonde        09/07    BHeese
-%   Standardsonde justiert         11/07    BHeese
-%   only Manaus sounding           06/12    BHeese
+% read_sonde_synthetic.m
+%
+%   First version based on BHesse  12/12    HBarbosa
+%   cleaning and commeting         01/13    HBarbosa
 %
 clear sonde site radiofile sondedata scale
 clear temp pres RH altitude rbins
@@ -12,15 +11,17 @@ clear beta_mol alpha_mol tau zet2 ray_signal pr2_ray_sig
 % Radiosonde Wyoming Amazonas
 % -----------------------------
 %
-
 site = 'EARLINET exercize';
-
 radiofile=['../synthetic_signals/Temperature_and_Pressure/txt/PTsim.txt.txt']
-  
+
 disp(['*** read radiosounding data ' radiofile]);
-
+% cannot be read with constant width because the columns shift
+% left/right. this happens because there is only a single space
+% between each column, and the number of digits in each column
+% varies. hence, we read as a numeric table with space as column
+% separator
 sonde=importdata(radiofile, ' ', 1);
-
+%---
 pres=sonde.data(:,3);  % P in hPa!
 altitude=sonde.data(:,2); % in m 
 temp=273.16 + sonde.data(:,4); % T in K
@@ -31,9 +32,10 @@ rho=100*pres./temp/287.05;
 Nair=100*pres./temp/1.3806503e-23;
 % number density of nitrogen [#/m3]
 Nn2=0.7808*Nair;
-
+%---
 % number of levels in sounding
-nlines=size(pres,1);
+nlines=max(size(pres));
+
 % highest level in souding, in units of lidar levels
 rbins=floor(altitude(nlines)*1e-3/r_bin);
 % or if you want to extrapolate the sounding data, just set to the
@@ -99,6 +101,10 @@ LidarRatio(3,1:rbins) = 55;
 % -------------------------------------------
 %  Interpolation to Lidar sampling altitudes
 % -------------------------------------------
+% hmjb - beta_ray decays exponentially towards zero with increasing
+% height. Extrapolating it above the highest level in the sounding can
+% lead to negative (unphysical) values. Hence interpolation is done in
+% log() and then take the exp() of the result.
 scale(1,:) = interp1(altitude(1:nlines),log(beta_ray(1,1:nlines)),alt(1:rbins),'linear','extrap');
 scale(2,:) = interp1(altitude(1:nlines),log(beta_ray(2,1:nlines)),alt(1:rbins),'linear','extrap');
 scale(3,:) = interp1(altitude(1:nlines),log(beta_ray(3,1:nlines)),alt(1:rbins),'linear','extrap');
@@ -106,7 +112,9 @@ beta_mol(1,:) = exp(scale(1,:));
 beta_mol(2,:) = exp(scale(2,:));
 beta_mol(3,:) = exp(scale(3,:));
 
-% interpolation can lead to negative values
+% with the trick above, this shouldn't be necessary, but it won't hurt
+% either. let's make sure the interpolation did not lead to negative
+% values
 beta_mol(beta_mol<=0) = NaN;
 
 % -----------------
@@ -148,14 +156,15 @@ xx=xx0+4*wdx; yy=yy0+4*wdy;
 set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
 plot(beta_mol(1,:),alt(1:rbins)*1e-3,'b'); 
 hold on
+% at lidar levels
 plot(beta_mol(2,:),alt(1:rbins)*1e-3,'c');
 plot(beta_mol(3,:),alt(1:rbins)*1e-3,'r'); 
-
+% at sounding levels
 plot(beta_ray(1,:),altitude(:)*1e-3,'bo'); 
 plot(beta_ray(2,:),altitude(:)*1e-3,'co');
 plot(beta_ray(3,:),altitude(:)*1e-3,'ro'); 
 title(['Radiosounding from ' site],'fontsize',[14]) 
-legend('355', '387', '408');
+legend('355', '387', '408', '355 sonde', '387 sonde', '408 sonde');
 ylabel('Height / km')
 xlabel('Lidar Beta / m-1')
 grid on
@@ -165,7 +174,6 @@ hold off
 figure(5)
 xx=xx0+5*wdx; yy=yy0+5*wdy;
 set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
-%hl1=line(temp,altitude*1e-3,'Color','r');
 plot(temp,altitude*1e-3,'Color','r');
 hold on
 ax1 = gca;
