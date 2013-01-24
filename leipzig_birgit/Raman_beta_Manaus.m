@@ -86,12 +86,13 @@ end
 % --------------------------------------
 sl = 11; 
 beta_raman_sm = smooth(beta_raman,sl,'sgolay',3);
+aero_ext_raman_sm = smooth(aero_ext_raman,sl,'sgolay',3);
 % 
 % -------------
 %  Lidar Ratio 
 % -------------
 Lidar_Ratio(zet_0:up) = aero_ext_raman(zet_0:up)./beta_raman(zet_0:up)';  
-Lidar_Ratio_sm(zet_0:up) = aero_ext_raman(zet_0:up)./beta_raman_sm(zet_0:up);  
+Lidar_Ratio_sm(zet_0:up) = aero_ext_raman_sm(zet_0:up)./beta_raman_sm(zet_0:up);  
 %    
 % +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 %   Plots

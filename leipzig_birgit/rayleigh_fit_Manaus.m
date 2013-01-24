@@ -18,11 +18,11 @@ clear RefBin diff_1 abst_1 diff_2 abst_2 diff_3 abst_3
 %  choose altitude range for Rayleigh fit
 % ----------------------------------------
 % 355 nm elastic channel
-xl_scal_1 = round(8/r_bin); % km
-xu_scal_1 = round(10/r_bin); % km
+xl_scal_1 = round(15/r_bin); % km
+xu_scal_1 = round(17/r_bin); % km
 % 387 nm Raman channel
-xl_scal_2 = round(8/r_bin); % km
-xu_scal_2 = round(10/r_bin); % km
+xl_scal_2 = round(15/r_bin); % km
+xu_scal_2 = round(17/r_bin); % km
 % 407 nm  H_2_O channel 
 xl_scal_3 = round(15/r_bin); % km
 xu_scal_3 = round(17/r_bin); % km
