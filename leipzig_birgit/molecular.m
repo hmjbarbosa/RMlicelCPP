@@ -16,6 +16,8 @@
 %    read_ascii_*.m
 %    read_sonde_*.m
 %------------------------------------------------------------------------
+
+% Read Physics Constants
 constants;
 
 %------------------------------------------------------------------------
@@ -23,7 +25,7 @@ constants;
 %------------------------------------------------------------------------
 lambda_rayleigh=0.355; % Elastic [microns]
 lambda_raman=0.387;    % Raman N2 [microns]
-co2ppmv = 390; % CO2 concentration [ppmv]
+co2ppmv = 375; % CO2 concentration [ppmv]
 
 lambda=[lambda_rayleigh lambda_raman];
 
@@ -37,16 +39,16 @@ lambda=[lambda_rayleigh lambda_raman];
 %% or Bodhaine et al (1999), Eq (4)
 if (lambda > 0.23)
   %% lambda > 0.23 microns
-  dn300 = (5791817 ./ (238.0185 - invl2) + ...
-	167909 ./ (57.362 - invl2))*1e-8; 
+  dn300 = (5791817 ./ (238.0185 - 1./lambda.^2) + ...
+	167909 ./ (57.362 - 1./lambda.^2))*1e-8; 
 else
   %% lambda <= 0.23 microns
-  dn300 = (8060.51 + 2480990 ./ (132.274 - invl2) + ...
-	14455.7 ./ (39.32957 - invl2))*1e-8;
+  dn300 = (8060.51 + 2480990 ./ (132.274 - 1./lambda.^2) + ...
+	14455.7 ./ (39.32957 - 1./lambda.^2))*1e-8;
 end
 
 %% Correct for different concentration
-%% or Bodhaine et al (1999), Eq (19)
+%% Bodhaine et al (1999), Eq (19)
 dnAir = dn300 .* (1 + (0.54 * (co2ppmv*1e-6 - 0.0003)));
 
 %% Actual index of refraction at 300 ppmv CO2
@@ -95,7 +97,7 @@ rhoAir = (6*fAir-6)./(3+7*fAir);
 % Chandrasekhar (Chap. 1, p. 49)
 % or Bucholtz (1995), eqs (12) and (13)
 gammaAir = rhoAir./(2-rhoAir);
-P_Ray = 0.75*((1+3.*gammaAir)+(1-gammaAir).*cos(pi)^2) ./ (1+2.*gamma);
+P_Ray = 0.75*((1+3.*gammaAir)+(1-gammaAir)*(cos(pi)^2))./(1+2.*gammaAir);
 
 %%------------------------------------------------------------------------
 %% RAYLEIGH TOTAL SCATERING CROSS SECTION
@@ -113,26 +115,29 @@ sigma_std = 24 * (pi^3) * ((nAir.^2-1).^2) .* fAir ./...
 
 % In traditional lidar notation, Bucholtz (1995) eqs (2), (9) and (10)
 % defines the scattering part of the molecular extinction coeficient.
-% Therefore, here the usual term 'alpha' is used.
+% Therefore, here the usual greek letter 'alpha' is used instead of
+% 'beta' as in Bucholtz.
 
-% For the standard atmosphere, [1/m]
+% Bucholtz (1995), eq (9), units [m^-1]
+% factor 1e6 converts #/cm^3 to #/m^3
 alpha_std = Nstd*1e6 * sigma_std; 
-% For the whole column
-for ii = 1:length(lambda)
-  betamol_s(:,ii) = beta_s(ii) * ((pres./temp) * Tstd/Pstd); 
-end
+% Bucholtz (1995), eq (10), units [m^-1]
+% scaling for each P and T in the column 
+alpha_mol_snd = ((pres_snd./temp_snd) * Tstd/Pstd) * alpha_std;
 
 %%------------------------------------------------------------------------
 %% RAYLEIGH ANGULAR VOLUME-SCATTERING COEFFICIENT
 %%------------------------------------------------------------------------
 
+% In traditional lidar notation, Bucholtz (1995) eq (14) defines the
+% backscattering coeficient. Here the usual greek letter 'beta' is
+% used as in Bucholtz.
 
-%Rayleigh angular volume scattering coefficient(Coeficiente de dispersion
-%molecular total o extinción molecular. [m]-1 [sr]-1
-  for ie = 1:length(lambda)
-      betamol_theta(:,ie) = (betamol_s(:,ie)./4*pi).*P_Ray(ie); %*sind(12.475); %Caso de inclinación del sistema lidar.
-  end
-%  plot(altitude,betamol_s(:,1)); xlim([1 10000]);
+% Multiply by phase function for -180deg and divide by 4pi steradians 
+% Units: [m]-1 [sr]-1
+beta_mol_snd = alpha_mol_snd*diag(P_Ray)/(4*pi); 
 
-%Rayleigh extinction to backscatter ratio, Rayleigh lidar ratio... S_mol= betamol_S/betamol_theta  [sr] error en l medida de Re..
-  S_mol = (4*pi)./P_Ray; % Es acosejable usar de esta manera en vez de (8/3)pi = 8.377 sr pues eso introduce un error de 1.5 % en la mayoria de las lambdas de los lidares
+% Rayleigh extinction to backscatter ratio
+% ie, Rayleigh lidar ratio 
+LR_mol = (4*pi)./P_Ray; 
+%
