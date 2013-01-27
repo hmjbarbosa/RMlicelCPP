@@ -49,7 +49,7 @@ ray_ext(1,:) = alpha_mol(1,:);   % 355
  ray_ext(2,:) = alpha_mol(2,:);   % 355 
 %
 % --------------------
-for i = zet_0:rbins  
+for i = zet_0:maxbin  
   % --------------------
   %   logarithm
   % ---------------- 
@@ -65,13 +65,13 @@ fit_width = 5;  %
                     % progressiv fit-width increasing with height: 
                     % am Anfang unten bis unten + fit_breite+1 ableiten 
                     % über ndata = (2*(i-unten)+1) = 3,5,7,9,11,...
-                    % danach immer in 2*fit_breite Schritten 2 rbins mehr! 
+                    % danach immer in 2*fit_breite Schritten 2 maxbin mehr! 
                     % bei fit_breite = 5: in 1 km ~500 m, in 2 km ~700 m, 
                     % in 3km ~900 m, in 4 km ~ 1100m, in 5 km ~ 1300m 
                     % 
                     % 2) ableitung_chi2_doubling.m, (Poisson Statistics) 
                     % the fit-width doubles with height (5, 10 oder 20
-                    % rbins) at the ranges "mitte 1", "mitte 2" und  "oben"
+                    % maxbin) at the ranges "mitte 1", "mitte 2" und  "oben"
 % -------
 % * 387 *  
 % -------
@@ -79,19 +79,13 @@ fit_width = 5;  %
 datum='teste';
 [abl_chi2_1,chi2,q,u]=deviation_chi2_increasing_Manaus(log_raman(2,:),alt.*1e-3,Ref_Bin,fit_width,datum);
 
-[fval,abl_chi2_1B,b,relerr,smed]=runfit2(log_ramanB(2,1:rbins)', ...
-					 alt(1:rbins).*1e-3, 5, 200);
+[fval,abl_chi2_1B,b,relerr,smed]=runfit2(log_ramanB(2,1:maxbin)', ...
+					 alt(1:maxbin).*1e-3, 2, 200);
 
-%hmjb [abl_chi2_1,chi2,q,u] = deviation_chi2_increasing_Manaus(log_raman(2,:),alt.*1e-3,Ref_Bin,fit_width,datum);
-% [abl_chi2_1,chi2,q,u] = deviation_chi2_increasing_Manaus(log_raman(2,:),alt,rbins/2-1,fit_width,datum);
- 
-% 2) doubling manually
-% [abl_chi2_1,chi2,q,u] = deviation_chi2_increasing_doubling(log_raman(5,:),alt,rbins-1,fit_width,datum2);
 %
 abl_Raman = abl_chi2_1; 
 abl_RamanB = abl_chi2_1B; 
-%abl_Raman(1)=abl_Raman(3);
-%abl_Raman(2)=abl_Raman(3);
+
 rb1 = size(abl_Raman,2);
 % 
 % ---------------------

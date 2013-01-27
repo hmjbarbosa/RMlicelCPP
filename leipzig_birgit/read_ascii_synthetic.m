@@ -84,8 +84,8 @@ for j = 1:3
   pr2(:,j) = mean_bg_corr(:,j).*range_corr(:);
 end
 %
-wsx=300;  wdx=310; xx0=-wsx;
-wsy=900; wdy=0;   yy0=30;
+wsx=250; wdx=260; xx0=-wsx;
+wsy=650; wdy=0;   yy0=50;
 figure(1)
 xx=xx0+1*wdx; yy=yy0+1*wdy;
 set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!

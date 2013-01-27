@@ -2,6 +2,7 @@
 read_ascii_synthetic
 % figure 4 5
 read_sonde_synthetic
+molecular
 % figure 6 7
 rayleigh_fit_Manaus
 % figure 8

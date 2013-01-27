@@ -27,14 +27,17 @@ clear alpha_aero
 % 
 zet_0 = 2;   % bin
 sm_span = 11;  % Range for Savitzky-Golay smoothing  * r_bin
-%hmjb ja definido em read_sonde_Manaus rbins = 3000; 
+%hmjb ja definido em read_sonde_Manaus maxbin = 3000; 
 %
 % ***************************************************
 %  set reference values for alpha und beta Particle 
 % ***************************************************
 beta_par(1,RefBin(1)) = 1e-6; % km-1
 %
-alpha_par(1,RefBin(1)) = beta_par(1,RefBin(1))*LidarRatio(1,RefBin(1)); 
+LR_par(1,1:maxbin) = 55;
+LR_par(2,1:maxbin) = 55;
+
+alpha_par(1,RefBin(1)) = beta_par(1,RefBin(1))*LR_par(1,RefBin(1)); 
 %   
 for j=1:1
   % ----------------------------                
@@ -61,7 +64,7 @@ for j=1:1
   %
   ext_ave =(alpha_mol(j,Ref_Bin) + alpha_mol(j,Ref_Bin-1)) * r_bin;
   fkt1(Ref_Bin) = ext_ave; 
-  fkt2(Ref_Bin) = ext_ave/xlidar(j) * LidarRatio(j,Ref_Bin); 
+  fkt2(Ref_Bin) = ext_ave/LR_mol(j) * LR_par(j,Ref_Bin); 
   % 
   %  +++++++++++++++++++++++
   %   backward integration
@@ -69,7 +72,7 @@ for j=1:1
   for i=Ref_Bin-1 : -1 : zet_0
     ext_ave = (alpha_mol(j,i) + alpha_mol(j,i-1)) * r_bin; 
     fkt1(i) = fkt1(i+1) + ext_ave; 
-    fkt2(i) = fkt2(i+1) + ext_ave/xlidar(j) * LidarRatio(j,i); 
+    fkt2(i) = fkt2(i+1) + ext_ave/LR_mol(j) * LR_par(j,i); 
   end
 
   % 
@@ -82,10 +85,10 @@ for j=1:1
   %
   % Integral in denominator (2. summand); 2 cancels with 1/2 mean value 
   
-%hmjb nfkt(Ref_Bin)=zfkt(Ref_Bin)*r_bin/LidarRatio(j,Ref_Bin); 
-  nfkt(Ref_Bin)=(zfkt(Ref_Bin)+zfkt(Ref_Bin-1))*r_bin/LidarRatio(j,Ref_Bin); 
+%hmjb nfkt(Ref_Bin)=zfkt(Ref_Bin)*r_bin/LR_par(j,Ref_Bin); 
+  nfkt(Ref_Bin)=(zfkt(Ref_Bin)+zfkt(Ref_Bin-1))*r_bin/LR_par(j,Ref_Bin); 
   for i=Ref_Bin-1: -1 : zet_0
-    nfkt(i)=nfkt(i+1)+(zfkt(i)+zfkt(i+1))*r_bin*LidarRatio(j,i); 
+    nfkt(i)=nfkt(i+1)+(zfkt(i)+zfkt(i+1))*r_bin*LR_par(j,i); 
   end
   % 
   % Klett 1985, Equ. (22)
@@ -97,30 +100,30 @@ for j=1:1
   %  +++++++++++++++++++++++
   %    forward integration
   %  +++++++++++++++++++++++
-  for i=Ref_Bin : rbins-1
+  for i=Ref_Bin : maxbin-1
     ext_ave = (alpha_mol(j,i) + alpha_mol(j,i+1)) * r_bin; 
     fkt1(i) = fkt1(i-1) + ext_ave; 
-    fkt2(i) = fkt2(i-1) + ext_ave/xlidar(j) * LidarRatio(j,i); 
+    fkt2(i) = fkt2(i-1) + ext_ave/LR_mol(j) * LR_par(j,i); 
   end
   % 
   % -----------------------------------------------------------------------
   %  zfkt: exp(S'-Sm') after Klett (Equ. 22)(Paper 1985) = S-Sm+fkt1-fkt2 
   % -----------------------------------------------------------------------
-  for i=Ref_Bin : rbins-1
+  for i=Ref_Bin : maxbin-1
     zfkt(i)=rc_signal(j,i)/rc_signal(j,Ref_Bin)/exp(fkt1(i))*exp(fkt2(i));
   end
   %
   % Integral in denominator (2. summand); 2 cancels with 1/2 mean value 
   
-%hmjb nfkt(Ref_Bin)=zfkt(Ref_Bin)*r_bin/LidarRatio(j,Ref_Bin); 
-  nfkt(Ref_Bin)=(zfkt(Ref_Bin)+zfkt(Ref_Bin-1))*r_bin/LidarRatio(j,Ref_Bin); 
-  for i=Ref_Bin : rbins-1
-    nfkt(i)=nfkt(i-1)+(zfkt(i)+zfkt(i-1))*r_bin*LidarRatio(j,i); 
+%hmjb nfkt(Ref_Bin)=zfkt(Ref_Bin)*r_bin/LR_par(j,Ref_Bin); 
+  nfkt(Ref_Bin)=(zfkt(Ref_Bin)+zfkt(Ref_Bin-1))*r_bin/LR_par(j,Ref_Bin); 
+  for i=Ref_Bin : maxbin-1
+    nfkt(i)=nfkt(i-1)+(zfkt(i)+zfkt(i-1))*r_bin*LR_par(j,i); 
   end
   % 
   % Klett 1985, Equ. (22)
   %
-  for i=Ref_Bin : rbins-1
+  for i=Ref_Bin : maxbin-1
     beta_aero(j,i) = zfkt(i)/(1./beta_bv(j) + nfkt(i)); 
   end
   % +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -128,14 +131,14 @@ for j=1:1
   % Backscatter profile
   % ---------------------
   %for i=1:Ref_Bin-1
-  for i=1:rbins-1
+  for i=1:maxbin-1
     if i <= zet_0
       beta_aerosol(j,i) = NaN; 
       alpha_aerosol(j,i) = NaN; 
     else      
       % substract beta_mol to achieve beta_aerosol
       beta_aerosol(j,i) = beta_aero(j,i) - beta_mol(j,i); 
-      alpha_aerosol(j,i) = beta_aerosol(j,i) * LidarRatio(j,i); % careful! 
+      alpha_aerosol(j,i) = beta_aerosol(j,i) * LR_par(j,i); % careful! 
     end
   end   
 %*****************************
@@ -159,15 +162,15 @@ rb = Ref_Bin;
 figure(8)
 xx=xx0+5*wdx; yy=yy0+5*wdy;
 set(gcf,'position',[xx,yy,2*wsx,wsy]); % units in pixels!
-plot(beta_aero(1,1:rbins-1), alt(1:rbins-1).*1e-3,'r','Linewidth',1); 
-axis([-1e-3 9e-3 0 alt(rbins)*1e-3]); 
+plot(beta_aero(1,1:maxbin-1), alt(1:maxbin-1).*1e-3,'r','Linewidth',1); 
+axis([-1e-3 9e-3 0 alt(maxbin)*1e-3]); 
 xlabel('BSC / km-1 sr-1','fontsize',[14])  
 ylabel('Height / km','fontsize',[14])
 title(['Klett'],'fontsize',[14]) 
 grid on
 hold on
-plot(beta_mol (1,1:rbins-1), alt(1:rbins-1).*1e-3,'g','Linewidth',1); 
-plot(beta_aerosol_sm(1,1:rbins-1), alt(1:rbins-1).*1e-3,'b','Linewidth',1); 
+plot(beta_mol (1,1:maxbin-1), alt(1:maxbin-1).*1e-3,'g','Linewidth',1); 
+plot(beta_aerosol_sm(1,1:maxbin-1), alt(1:maxbin-1).*1e-3,'b','Linewidth',1); 
 plot(beta_aerosol(1,RefBin(1)), alt(RefBin(1)).*1e-3,'r*');
 legend('Total', 'Molecular', 'Klett', 'Reference Bin'); 
 hold off

@@ -118,10 +118,10 @@ sigma_std = 24 * (pi^3) * ((nAir.^2-1).^2) .* fAir ./...
 % Therefore, here the usual greek letter 'alpha' is used instead of
 % 'beta' as in Bucholtz.
 
-% Bucholtz (1995), eq (9), units [m^-1]
+% Bucholtz (1995), eq (9), units [km^-1]
 % factor 1e6 converts #/cm^3 to #/m^3
-alpha_std = Nstd*1e6 * sigma_std; 
-% Bucholtz (1995), eq (10), units [m^-1]
+alpha_std = Nstd*1e6 * sigma_std * 1000.; 
+% Bucholtz (1995), eq (10), units [km^-1]
 % scaling for each P and T in the column 
 alpha_mol_snd = ((pres_snd./temp_snd) * Tstd/Pstd) * alpha_std;
 
@@ -129,15 +129,16 @@ alpha_mol_snd = ((pres_snd./temp_snd) * Tstd/Pstd) * alpha_std;
 %% RAYLEIGH ANGULAR VOLUME-SCATTERING COEFFICIENT
 %%------------------------------------------------------------------------
 
+% Rayleigh extinction to backscatter ratio
+% ie, Rayleigh lidar ratio [sr]
+LR_mol = (4*pi)./P_Ray; 
+
 % In traditional lidar notation, Bucholtz (1995) eq (14) defines the
 % backscattering coeficient. Here the usual greek letter 'beta' is
 % used as in Bucholtz.
 
 % Multiply by phase function for -180deg and divide by 4pi steradians 
-% Units: [m]-1 [sr]-1
+% Units: [km]-1 [sr]-1
 beta_mol_snd = alpha_mol_snd*diag(P_Ray)/(4*pi); 
 
-% Rayleigh extinction to backscatter ratio
-% ie, Rayleigh lidar ratio 
-LR_mol = (4*pi)./P_Ray; 
 %

@@ -34,144 +34,124 @@ rho_snd=100*pres_snd./temp_snd/287.05;
 %Nn2=0.7808*Nair;
 %---
 % number of levels in sounding
-nlines=max(size(pres_snd));
+nlev_snd=max(size(pres_snd));
 
-% highest level in souding, in units of lidar levels
-rbins=floor(alt_snd(nlines)*1e-3/r_bin);
+% max lidar bin of sounding 
+%maxbin=floor(alt_snd(nlev_snd)*1e-3/r_bin);
 % or if you want to extrapolate the sounding data, just set to the
 % number of bins in the lidar data
-%rbins = size(channel,1);
+%maxbin = size(channel,1);
 
 %*****************************************************
 %        calculate Beta  Rayleigh
 %*****************************************************
 
-% --------------------------------------------------------
-%  calculate rayleight backscatter, temp_snd in K, pres_snd in hPa
-% --------------------------------------------------------
-% 0.2um < lambda < 0.5um
-A=3.01577e-28; % 
-B=3.55212;
-C=1.35579;
-D=0.11563;
-Ts=288.15; % K
-Ps=1013.25 % hPa
-Ns=2.54743e19; % cm^-3
-
-lambda=0.355; % microns
-sigmaS=A*(lambda)^(-(B+C*lambda+D/lambda))/(8*pi/3); % cm^2
-betaS=Ns*sigmaS*1e5; % for km^-1 intead of cm^-1
-beta_ray(1,:) = betaS.*(pres_snd./temp_snd)*Ts/Ps;  % 355 nm !!! factor is in km!!!
-
-lambda=0.387; % microns
-sigmaS=A*(lambda)^(-(B+C*lambda+D/lambda))/(8*pi/3); % cm^2
-betaS=Ns*sigmaS*1e5; % for km^-1 intead of cm^-1
-beta_ray(2,:) = betaS.*(pres_snd./temp_snd)*Ts/Ps;  % 387 nm
-
-lambda=0.532; % microns
-sigmaS=A*(lambda)^(-(B+C*lambda+D/lambda))/(8*pi/3); % cm^2
-betaS=Ns*sigmaS*1e5; % for km^-1 intead of cm^-1
-beta_ray(3,:) = betaS.*(pres_snd./temp_snd)*Ts/Ps;  % 407 nm
-
-% ------------------------------------------------------
-%  Lidar Ratio for Rayleigh-scattering (8/3)pi = 8.377 sr
-%  with Depol correction for the Cabannes line
-% -------------------------------------------------------
-%    
-xlidar(1)=8.736; % 355 nm      S_c/(8/3)*pi = 1.0426
-xlidar(2)=8.736; % 387 nm 
-xlidar(3)=8.712; % 532 nm
-%  xlidar(4)=8.712; % 532 nm                   = 1.0400
-%  xlidar(6)=8.698; % 1064 nm                  = 1.0383
-
-% ----------------------
-%  Rayleigh Extinction
-% ----------------------
-alpha_ray(1,:) = beta_ray(1,:).*xlidar(1);
-alpha_ray(2,:) = beta_ray(2,:).*xlidar(2);
-alpha_ray(3,:) = beta_ray(3,:).*xlidar(3);
-
-% -------------------------------
-%  Lidar Ratio for particles
-% -------------------------------
-LidarRatio(1,1:rbins) = 55;
-LidarRatio(2,1:rbins) = 55;
-LidarRatio(3,1:rbins) = 55;
-
-% -------------------------------------------
-%  Interpolation to Lidar sampling altitudes
-% -------------------------------------------
-% hmjb - beta_ray decays exponentially towards zero with increasing
-% height. Extrapolating it above the highest level in the sounding can
-% lead to negative (unphysical) values. Hence interpolation is done in
-% log() and then take the exp() of the result.
-scale(1,:) = interp1(alt_snd(1:nlines),log(beta_ray(1,1:nlines)),alt(1:rbins),'linear','extrap');
-scale(2,:) = interp1(alt_snd(1:nlines),log(beta_ray(2,1:nlines)),alt(1:rbins),'linear','extrap');
-scale(3,:) = interp1(alt_snd(1:nlines),log(beta_ray(3,1:nlines)),alt(1:rbins),'linear','extrap');
-beta_mol(1,:) = exp(scale(1,:));
-beta_mol(2,:) = exp(scale(2,:));
-beta_mol(3,:) = exp(scale(3,:));
-
-% with the trick above, this shouldn't be necessary, but it won't hurt
-% either. let's make sure the interpolation did not lead to negative
-% values
-beta_mol(beta_mol<=0) = NaN;
-
-% -----------------
-%  Rayleigh Signal 
-% -----------------
-alpha_mol(1,:) = beta_mol(1,:).*xlidar(1); 
-alpha_mol(2,:) = beta_mol(2,:).*xlidar(2); 
-alpha_mol(3,:) = beta_mol(3,:).*xlidar(3); 
-% 
-for j = 1:3
-  for i=1:rbins
-    if i==1
-      tau(j,i) = alpha_mol(j,i)*r_bin; 
-    else
-      tau(j,i) = tau(j,i-1)+alpha_mol(j,i)*r_bin; 
-    end
-  end
-end
-
-for j = 1:3
-  for i=1:rbins
-    % calculate pr2_ray_sig in km-1 
-    if (j==1 || j==2)
-      pr2_ray_sig(j,i)=beta_mol(j,i)*exp(-tau(j,i)-tau(1,i));
-    elseif (j==3 || j==4)
-      pr2_ray_sig(j,i)=beta_mol(j,i)*exp(-tau(j,i)-tau(3,i));
-    else
-      pr2_ray_sig(j,i)=beta_mol(j,i)*exp(-tau(j,i)-tau(5,i));
-    end
-  end
-end
+%% --------------------------------------------------------
+%%  calculate rayleight backscatter, temp_snd in K, pres_snd in hPa
+%% --------------------------------------------------------
+%% 0.2um < lambda < 0.5um
+%A=3.01577e-28; % 
+%B=3.55212;
+%C=1.35579;
+%D=0.11563;
+%Ts=288.15; % K
+%Ps=1013.25 % hPa
+%Ns=2.54743e19; % cm^-3
 %
+%lambda=0.355; % microns
+%sigmaS=A*(lambda)^(-(B+C*lambda+D/lambda))/8.736; % cm^2 sr^-1 
+%betaS=Ns*sigmaS*1e5; % for km^-1 sr^-1 intead of cm^-1 sr^-1 
+%beta_ray(1,:) = betaS.*(pres_snd./temp_snd)*Ts/Ps;  % 355 nm !!! factor is in km!!!
+%
+%lambda=0.387; % microns
+%sigmaS=A*(lambda)^(-(B+C*lambda+D/lambda))/8.736; % cm^2 sr^-1 
+%betaS=Ns*sigmaS*1e5; % for km^-1 intead of cm^-1
+%beta_ray(2,:) = betaS.*(pres_snd./temp_snd)*Ts/Ps;  % 387 nm
+%
+%lambda=0.532; % microns
+%sigmaS=A*(lambda)^(-(B+C*lambda+D/lambda))/8.736; % cm^2 sr^-1 
+%betaS=Ns*sigmaS*1e5; % for km^-1 intead of cm^-1
+%beta_ray(3,:) = betaS.*(pres_snd./temp_snd)*Ts/Ps;  % 407 nm
+%
+%% ------------------------------------------------------
+%%  Lidar Ratio for Rayleigh-scattering (8/3)pi = 8.377 sr
+%%  with Depol correction for the Cabannes line
+%% -------------------------------------------------------
+%%    
+%xlidar(1)=8.736; % 355 nm      S_c/(8/3)*pi = 1.0426
+%xlidar(2)=8.736; % 387 nm 
+%xlidar(3)=8.712; % 532 nm
+%%  xlidar(4)=8.712; % 532 nm                   = 1.0400
+%%  xlidar(6)=8.698; % 1064 nm                  = 1.0383
+%
+%% ----------------------
+%%  Rayleigh Extinction
+%% ----------------------
+%alpha_ray(1,:) = beta_ray(1,:).*xlidar(1);
+%alpha_ray(2,:) = beta_ray(2,:).*xlidar(2);
+%alpha_ray(3,:) = beta_ray(3,:).*xlidar(3);
+%
+%% -------------------------------
+%%  Lidar Ratio for particles
+%% -------------------------------
+%%LidarRatio(1,1:maxbin) = 55;
+%%LidarRatio(2,1:maxbin) = 55;
+%%LidarRatio(3,1:maxbin) = 55;
+%%
+%% -------------------------------------------
+%%  Interpolation to Lidar sampling altitudes
+%% -------------------------------------------
+%% hmjb - beta_ray decays exponentially towards zero with increasing
+%% height. Extrapolating it above the highest level in the sounding can
+%% lead to negative (unphysical) values. Hence interpolation is done in
+%% log() and then take the exp() of the result.
+%scale(1,:) = interp1(alt_snd(1:nlev_snd),log(beta_ray(1,1:nlev_snd)),alt(1:maxbin),'linear','extrap');
+%scale(2,:) = interp1(alt_snd(1:nlev_snd),log(beta_ray(2,1:nlev_snd)),alt(1:maxbin),'linear','extrap');
+%scale(3,:) = interp1(alt_snd(1:nlev_snd),log(beta_ray(3,1:nlev_snd)),alt(1:maxbin),'linear','extrap');
+%beta_mol(1,:) = exp(scale(1,:));
+%beta_mol(2,:) = exp(scale(2,:));
+%beta_mol(3,:) = exp(scale(3,:));
+%
+%% with the trick above, this shouldn't be necessary, but it won't hurt
+%% either. let's make sure the interpolation did not lead to negative
+%% values
+%beta_mol(beta_mol<=0) = NaN;
+%
+%% -----------------
+%%  Rayleigh Signal 
+%% -----------------
+%alpha_mol(1,:) = beta_mol(1,:).*xlidar(1); 
+%alpha_mol(2,:) = beta_mol(2,:).*xlidar(2); 
+%alpha_mol(3,:) = beta_mol(3,:).*xlidar(3); 
+%% 
+%for j = 1:3
+%  for i=1:maxbin
+%    if i==1
+%      tau(j,i) = alpha_mol(j,i)*r_bin; 
+%    else
+%      tau(j,i) = tau(j,i-1)+alpha_mol(j,i)*r_bin; 
+%    end
+%  end
+%end
+%
+%for j = 1:3
+%  for i=1:maxbin
+%    % calculate pr2_ray_sig in km-1 
+%    if (j==1 || j==2)
+%      pr2_ray_sig(j,i)=beta_mol(j,i)*exp(-tau(j,i)-tau(1,i));
+%    elseif (j==3 || j==4)
+%      pr2_ray_sig(j,i)=beta_mol(j,i)*exp(-tau(j,i)-tau(3,i));
+%    else
+%      pr2_ray_sig(j,i)=beta_mol(j,i)*exp(-tau(j,i)-tau(5,i));
+%    end
+%  end
+%end
+%%
 
 %
 %  Plot
 % -------
 figure(4)
-xx=xx0+4*wdx; yy=yy0+4*wdy;
-set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
-plot(beta_mol(1,:),alt(1:rbins)*1e-3,'b'); 
-hold on
-% at lidar levels
-plot(beta_mol(2,:),alt(1:rbins)*1e-3,'c');
-plot(beta_mol(3,:),alt(1:rbins)*1e-3,'r'); 
-% at sounding levels
-plot(beta_ray(1,:),alt_snd(:)*1e-3,'bo'); 
-plot(beta_ray(2,:),alt_snd(:)*1e-3,'co');
-plot(beta_ray(3,:),alt_snd(:)*1e-3,'ro'); 
-title(['Radiosounding from ' site],'fontsize',[14]) 
-legend('355', '387', '408', '355 sonde', '387 sonde', '408 sonde');
-ylabel('Height / km')
-xlabel('Lidar Beta / m-1')
-grid on
-hold off
-
-% -------
-figure(5)
 xx=xx0+5*wdx; yy=yy0+5*wdy;
 set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
 plot(temp_snd,alt_snd*1e-3,'Color','r');
@@ -192,10 +172,30 @@ ax2 = axes('Position',get(ax1,'Position'),'XAxisLocation','top',...
            'YAxisLocation','right','Color','none',...
            'XColor','b','YColor','k');
 xlabel(ax2,'density / kg/m3')
-
 line(rho_snd,alt_snd,'Color','b','Parent',ax2);
 grid on
 hold off
+
+% -------
+%figure(5)
+%xx=xx0+4*wdx; yy=yy0+4*wdy;
+%set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
+%plot(beta_mol(1,:),alt(1:maxbin)*1e-3,'b'); 
+%hold on
+%% at lidar levels
+%plot(beta_mol(2,:),alt(1:maxbin)*1e-3,'c');
+%plot(beta_mol(3,:),alt(1:maxbin)*1e-3,'r'); 
+%% at sounding levels
+%plot(beta_ray(1,:),alt_snd(:)*1e-3,'bo'); 
+%plot(beta_ray(2,:),alt_snd(:)*1e-3,'co');
+%plot(beta_ray(3,:),alt_snd(:)*1e-3,'ro'); 
+%title(['Radiosounding from ' site],'fontsize',[14]) 
+%legend('355', '387', '408', '355 sonde', '387 sonde', '408 sonde');
+%ylabel('Height / km')
+%xlabel('Lidar Beta / m-1')
+%grid on
+%hold off
+%
 %
 disp('End of program: read_sonde_synthetic.m, Vers. 1.0 06/2012')
 %
