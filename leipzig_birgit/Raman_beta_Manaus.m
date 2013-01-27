@@ -5,8 +5,8 @@
 % beta_aero_355(z) = 
 %            - beta_ray_355(z)+(beta_par(z0)+ beta_mol(z0)) ...
 %           .*(P_387(z0).*P_355(z).*NR(z)/P_355(z0).*P_387(z0).*NR(z0) ...
-%           .* exp(-int_z0_z(aero_ext_387 + ray_ext_387)/      
-%              exp(-int_z0_z(aero_ext_355 + ray_ext_355)
+%           .* exp(-int_z0_z(aero_ext_387 + alpha_mol_387)/      
+%              exp(-int_z0_z(aero_ext_355 + alpha_mol_355)
 %
 % z0 is aerosolfree layer -> beta_mol(z0) >> beta_par(z0) 
 %                         -> beta_mol(z0) + beta_par(z0) ... 
@@ -58,11 +58,11 @@ for i=up - 1 : -1 : zet_0
   % Raman Particle extinction at 387
   p_ave_raman_1(i) = p_ave_raman_1(i+1) + 0.5*(aero_ext_raman(i) + aero_ext_raman(i+1))*aerosol_wave_fac(1); 
   % Raman molecular extinction at 387
-  m_ave_raman_1(i) = m_ave_raman_1(i+1) + 0.5*(ray_ext(2,i)+ray_ext(2,i+1));    
+  m_ave_raman_1(i) = m_ave_raman_1(i+1) + 0.5*(alpha_mol(i,2)+alpha_mol(i+1,2));    
   % Elastic particle  extinction at 355
   p_ave_elast_1(i) = p_ave_elast_1(i+1) + 0.5*(aero_ext_raman(i) + aero_ext_raman(i+1)); 
   % Elastic molecular extinction at 355
-  m_ave_elast_1(i) = m_ave_elast_1(i+1) + 0.5*(ray_ext(1,i)+ray_ext(1,i+1));
+  m_ave_elast_1(i) = m_ave_elast_1(i+1) + 0.5*(alpha_mol(i,1)+alpha_mol(i+1,1));
 end
 for i=up : -1 : zet_0
   exp_z_1(i) = exp(+(p_ave_raman_1(i) + m_ave_raman_1(i))*r_bin); 

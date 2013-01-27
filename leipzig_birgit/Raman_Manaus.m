@@ -44,9 +44,9 @@ aang = 1.05;    % European Urban
 % aerosol_wave_fac(2) = (532/607)^aang;  
 % aerosol_wave_fac(3) = (532/1064)^aang; 
 % 
-ray_ext(1,:) = alpha_mol(1,:);   % 355 
+%ray_ext(1,:) = alpha_mol(:,1);   % 355 
 %hmjb ray_ext(2,:) = ray_ext(1,:).*ray_fac(1); % 387
- ray_ext(2,:) = alpha_mol(2,:);   % 355 
+% ray_ext(2,:) = alpha_mol(:,2);   % 355 
 %
 % --------------------
 for i = zet_0:maxbin  
@@ -54,8 +54,8 @@ for i = zet_0:maxbin
   %   logarithm
   % ---------------- 
 %  log_raman(2,i) = log(Nn2(i)/pr2(i,2)'); % 387 nm
-  log_raman(2,i)  = log(ray_ext(2,i)/pr2(i,2)'); % 387 nm
-  log_ramanB(2,i) = log(ray_ext(2,i)/pr2(i,2)'); % 387 nm
+  log_raman(2,i)  = log(alpha_mol(i,2)/pr2(i,2)'); % 387 nm
+  log_ramanB(2,i) = log(alpha_mol(i,2)/pr2(i,2)'); % 387 nm
 end 
 % --------------
 %    deviation
@@ -94,8 +94,8 @@ rb1 = size(abl_Raman,2);
 aero_ext_raman = NaN(rb1,1);
 %
 for i=u:rb1
-  aero_ext_raman(i)  = (abl_Raman(i)-ray_ext(1,i)-ray_ext(2,i))./(1+aerosol_wave_fac(1));
-  aero_ext_ramanB(i) = (abl_RamanB(i)-ray_ext(1,i)-ray_ext(2,i))./(1+aerosol_wave_fac(1));
+  aero_ext_raman(i)  = (abl_Raman(i)-alpha_mol(i,1)-alpha_mol(i,2))./(1+aerosol_wave_fac(1));
+  aero_ext_ramanB(i) = (abl_RamanB(i)-alpha_mol(i,1)-alpha_mol(i,2))./(1+aerosol_wave_fac(1));
 end
 
 % -------------

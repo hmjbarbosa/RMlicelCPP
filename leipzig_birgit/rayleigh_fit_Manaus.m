@@ -36,15 +36,15 @@ beta_mol(:,2) = exp(interp1(alt_snd, log(beta_mol_snd(:,2)), alt(1:maxbin),'line
 % -----------------
 %  Rayleigh Signal 
 % -----------------
-alpha_mol(1,:) = beta_mol(:,1).*LR_mol(1); 
-alpha_mol(2,:) = beta_mol(:,2).*LR_mol(2); 
+alpha_mol(:,1) = beta_mol(:,1).*LR_mol(1); 
+alpha_mol(:,2) = beta_mol(:,2).*LR_mol(2); 
 % 
 for j = 1:2
   for i=1:maxbin
     if i==1
-      tau(j,i) = alpha_mol(j,i)*r_bin; 
+      tau(j,i) = alpha_mol(i,j)*r_bin; 
     else
-      tau(j,i) = tau(j,i-1)+alpha_mol(j,i)*r_bin; 
+      tau(j,i) = tau(j,i-1)+alpha_mol(i,j)*r_bin; 
     end
   end
 end

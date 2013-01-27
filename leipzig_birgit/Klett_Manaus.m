@@ -62,7 +62,7 @@ for j=1:1
   % -------------------------------------------------------------------------
   %  Fernald, AO, 1984
   %
-  ext_ave =(alpha_mol(j,Ref_Bin) + alpha_mol(j,Ref_Bin-1)) * r_bin;
+  ext_ave =(alpha_mol(Ref_Bin,j) + alpha_mol(Ref_Bin-1,j)) * r_bin;
   fkt1(Ref_Bin) = ext_ave; 
   fkt2(Ref_Bin) = ext_ave/LR_mol(j) * LR_par(j,Ref_Bin); 
   % 
@@ -70,7 +70,7 @@ for j=1:1
   %   backward integration
   %  +++++++++++++++++++++++
   for i=Ref_Bin-1 : -1 : zet_0
-    ext_ave = (alpha_mol(j,i) + alpha_mol(j,i-1)) * r_bin; 
+    ext_ave = (alpha_mol(i,j) + alpha_mol(i-1,j)) * r_bin; 
     fkt1(i) = fkt1(i+1) + ext_ave; 
     fkt2(i) = fkt2(i+1) + ext_ave/LR_mol(j) * LR_par(j,i); 
   end
@@ -101,7 +101,7 @@ for j=1:1
   %    forward integration
   %  +++++++++++++++++++++++
   for i=Ref_Bin : maxbin-1
-    ext_ave = (alpha_mol(j,i) + alpha_mol(j,i+1)) * r_bin; 
+    ext_ave = (alpha_mol(i,j) + alpha_mol(i+1,j)) * r_bin; 
     fkt1(i) = fkt1(i-1) + ext_ave; 
     fkt2(i) = fkt2(i-1) + ext_ave/LR_mol(j) * LR_par(j,i); 
   end
