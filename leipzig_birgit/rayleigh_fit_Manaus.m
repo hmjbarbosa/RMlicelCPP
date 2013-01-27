@@ -28,16 +28,16 @@ maxbin=floor(alt_snd(nlev_snd)*1e-3/r_bin);
 % height. Extrapolating it above the highest level in the sounding can
 % lead to negative (unphysical) values. Hence interpolation is done in
 % log() and then the exp() of the result is taken.
-scale(1,:) = interp1(alt_snd, log(beta_mol_snd(:,1)), alt(1:maxbin),'linear','extrap');
-scale(2,:) = interp1(alt_snd, log(beta_mol_snd(:,2)), alt(1:maxbin),'linear','extrap');
-beta_mol(1,:) = exp(scale(1,:));
-beta_mol(2,:) = exp(scale(2,:));
+beta_mol(:,1) = exp(interp1(alt_snd, log(beta_mol_snd(:,1)), alt(1:maxbin),'linear','extrap'));
+beta_mol(:,2) = exp(interp1(alt_snd, log(beta_mol_snd(:,2)), alt(1:maxbin),'linear','extrap'));
+%beta_mol(1,:) = exp(interp1(alt_snd, log(beta_mol_snd(:,1)), alt(1:maxbin),'linear','extrap'));
+%beta_mol(2,:) = exp(interp1(alt_snd, log(beta_mol_snd(:,2)), alt(1:maxbin),'linear','extrap'));
 
 % -----------------
 %  Rayleigh Signal 
 % -----------------
-alpha_mol(1,:) = beta_mol(1,:).*LR_mol(1); 
-alpha_mol(2,:) = beta_mol(2,:).*LR_mol(2); 
+alpha_mol(1,:) = beta_mol(:,1).*LR_mol(1); 
+alpha_mol(2,:) = beta_mol(:,2).*LR_mol(2); 
 % 
 for j = 1:2
   for i=1:maxbin
@@ -53,11 +53,11 @@ for j = 1:2
   for i=1:maxbin
     % calculate pr2_ray_sig in km-1 
     if (j==1 || j==2)
-      pr2_ray_sig(j,i)=beta_mol(j,i)*exp(-tau(j,i)-tau(1,i));
+      pr2_ray_sig(j,i)=beta_mol(i,j)*exp(-tau(j,i)-tau(1,i));
     elseif (j==3 || j==4)
-      pr2_ray_sig(j,i)=beta_mol(j,i)*exp(-tau(j,i)-tau(3,i));
+      pr2_ray_sig(j,i)=beta_mol(i,j)*exp(-tau(j,i)-tau(3,i));
     else
-      pr2_ray_sig(j,i)=beta_mol(j,i)*exp(-tau(j,i)-tau(5,i));
+      pr2_ray_sig(j,i)=beta_mol(i,j)*exp(-tau(j,i)-tau(5,i));
     end
   end
 end

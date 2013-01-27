@@ -53,7 +53,7 @@ for j=1:1
   % ***********************************
   %   
   beta_par(j,Ref_Bin-1) = beta_par(j,Ref_Bin); 
-  beta_bv(j) = beta_par(j,Ref_Bin)+ beta_mol(j,Ref_Bin);
+  beta_bv(j) = beta_par(j,Ref_Bin)+ beta_mol(Ref_Bin,j);
 
   % -------------------------------------------------------------------------
   %  Klett (Equ. 20; 1985):
@@ -137,7 +137,7 @@ for j=1:1
       alpha_aerosol(j,i) = NaN; 
     else      
       % substract beta_mol to achieve beta_aerosol
-      beta_aerosol(j,i) = beta_aero(j,i) - beta_mol(j,i); 
+      beta_aerosol(j,i) = beta_aero(j,i) - beta_mol(i,j); 
       alpha_aerosol(j,i) = beta_aerosol(j,i) * LR_par(j,i); % careful! 
     end
   end   
@@ -169,7 +169,7 @@ ylabel('Height / km','fontsize',[14])
 title(['Klett'],'fontsize',[14]) 
 grid on
 hold on
-plot(beta_mol (1,1:maxbin-1), alt(1:maxbin-1).*1e-3,'g','Linewidth',1); 
+plot(beta_mol (1:maxbin-1,1), alt(1:maxbin-1).*1e-3,'g','Linewidth',1); 
 plot(beta_aerosol_sm(1,1:maxbin-1), alt(1:maxbin-1).*1e-3,'b','Linewidth',1); 
 plot(beta_aerosol(1,RefBin(1)), alt(RefBin(1)).*1e-3,'r*');
 legend('Total', 'Molecular', 'Klett', 'Reference Bin'); 
