@@ -25,31 +25,18 @@ clear signal
 clear ray_ext
 %
 % starting point in rangebins
-zet_0 = 2; 
+bin1st = 2; 
 %
-% --------------------------------- 
-%  Rayleigh wavelength dependence
-% ---------------------------------
-ray_fac(1) = (355/387)^4.085; 
-%  ray_fac(2) = (532/607)^4.085; 
-%  ray_fac(3) = (532/1064)^4.085; 
-% 
 % ------------------------
 %  Angström coefficient 
 % ------------------------
 aang = 1.05;    % European Urban
-% aang = 0.2;     % Saharan Desert Dust   
+% aang = 0.2;   % Saharan Desert Dust   
 %
- aerosol_wave_fac(1) = (355/387)^aang;  
-% aerosol_wave_fac(2) = (532/607)^aang;  
-% aerosol_wave_fac(3) = (532/1064)^aang; 
-% 
-%ray_ext(1,:) = alpha_mol(:,1);   % 355 
-%hmjb ray_ext(2,:) = ray_ext(1,:).*ray_fac(1); % 387
-% ray_ext(2,:) = alpha_mol(:,2);   % 355 
+aerosol_wave_fac(1) = (355/387)^aang;  
 %
 % --------------------
-for i = zet_0:maxbin  
+for i = bin1st:maxbin  
   % --------------------
   %   logarithm
   % ---------------- 
@@ -104,7 +91,7 @@ end
 figure(9);
 xx=xx0+4*wdx; yy=yy0+4*wdy;
 % Klett
-plot(alpha_aerosol(1,zet_0:rb-1),alt(zet_0:rb-1)*1e-3,'b--')
+plot(alpha_aerosol(1,bin1st:rb-1),alt(bin1st:rb-1)*1e-3,'b--')
 set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
 axis([-0.05 0.2 0 alt(rb1)*1e-3*1.2]); 
 xlabel('Extinction / km^-1','fontsize',[12])  
@@ -113,8 +100,8 @@ title(['Raman'],'fontsize',[14])
 grid on
 hold on 
 % Raman 
-plot(aero_ext_raman(zet_0:rb1),alt(zet_0:rb1)*1e-3,'b','LineWidth',2)
-plot(aero_ext_ramanB(zet_0:rb1),alt(zet_0:rb1)*1e-3,'r','LineWidth',1)
+plot(aero_ext_raman(bin1st:rb1),alt(bin1st:rb1)*1e-3,'b','LineWidth',2)
+plot(aero_ext_ramanB(bin1st:rb1),alt(bin1st:rb1)*1e-3,'r','LineWidth',1)
 plot(alpha_aerosol(RefBin(1)), alt(RefBin(1))*1e-3,'r*');
 plot(alpha_aerosol(RefBin(2)), alt(RefBin(2))*1e-3,'g*');
 legend('Klett', 'Raman', 'RamanB', 'RefBin 355', 'RefBin 387')

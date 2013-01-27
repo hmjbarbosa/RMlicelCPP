@@ -28,7 +28,7 @@
 %           Raman_Manaus.m
 % ---------------------------------------------------------
 %
-zet_0 = 2; %no overlap dependence because of signal ratios -> start at the bottom
+bin1st = 2; %no overlap dependence because of signal ratios -> start at the bottom
 %
 clear p_ave_raman_1 p_ave_elast_1 p_ave_raman_2 p_ave_elast_2
 clear m_ave_elast_1 m_ave_raman_1 m_ave_elast_2 m_ave_raman_2
@@ -54,7 +54,7 @@ p_ave_raman_1(up)=0;
 m_ave_raman_1(up)=0;
 p_ave_elast_1(up)=0;
 m_ave_elast_1(up)=0;
-for i=up - 1 : -1 : zet_0
+for i=up - 1 : -1 : bin1st
   % Raman Particle extinction at 387
   p_ave_raman_1(i) = p_ave_raman_1(i+1) + 0.5*(aero_ext_raman(i) + aero_ext_raman(i+1))*aerosol_wave_fac(1); 
   % Raman molecular extinction at 387
@@ -64,7 +64,7 @@ for i=up - 1 : -1 : zet_0
   % Elastic molecular extinction at 355
   m_ave_elast_1(i) = m_ave_elast_1(i+1) + 0.5*(alpha_mol(i,1)+alpha_mol(i+1,1));
 end
-for i=up : -1 : zet_0
+for i=up : -1 : bin1st
   exp_z_1(i) = exp(+(p_ave_raman_1(i) + m_ave_raman_1(i))*r_bin); 
   exp_n_1(i) = exp(+(p_ave_elast_1(i) + m_ave_elast_1(i))*r_bin);
 end
@@ -72,7 +72,7 @@ end
 % -------------------------
 % calculate beta Raman
 % -------------------------
-for i=up : -1 : zet_0   
+for i=up : -1 : bin1st   
   signals_1(i) =(mean(mean_bg_corr(Ref_1-100:Ref_1+100,2))*mean_bg_corr(i,1)'*beta_mol(i,1))/...
                 (mean(mean_bg_corr(Ref_1-100:Ref_1+100,1))*mean_bg_corr(i,2)'*beta_mol(Ref_1,1));  
 %  signals_1(i) =(mean_bg_corr(Ref_1,2)'*mean_bg_corr(i,1)'*beta_mol(1,i))/...
@@ -91,8 +91,8 @@ aero_ext_raman_sm = smooth(aero_ext_raman,sl,'sgolay',3);
 % -------------
 %  Lidar Ratio 
 % -------------
-Lidar_Ratio(zet_0:up) = aero_ext_raman(zet_0:up)./beta_raman(zet_0:up)';  
-Lidar_Ratio_sm(zet_0:up) = aero_ext_raman_sm(zet_0:up)./beta_raman_sm(zet_0:up);  
+Lidar_Ratio(bin1st:up) = aero_ext_raman(bin1st:up)./beta_raman(bin1st:up)';  
+Lidar_Ratio_sm(bin1st:up) = aero_ext_raman_sm(bin1st:up)./beta_raman_sm(bin1st:up);  
 %    
 % +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 %   Plots
@@ -105,7 +105,7 @@ rbbr = size(beta_raman_sm(:));
 figure(10); 
 xx=xx0+3*wdx; yy=yy0+3*wdy;
 % Klett
-plot(beta_aerosol_sm(1,zet_0:rbbr(1)), alt(zet_0:rbbr(1)).*1e-3,'b--');
+plot(beta_aerosol_sm(1,bin1st:rbbr(1)), alt(bin1st:rbbr(1)).*1e-3,'b--');
 set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
 axis([-0.2e-3 10e-3 0 alt(up)*1e-3*1.2]); 
 xlabel('BSC km-1 sr-1','fontsize',[12])  
@@ -114,7 +114,7 @@ title(['Raman'],'fontsize',[14])
 grid on
 hold on
 % Raman
-plot(beta_raman_sm(zet_0:rbbr(1)), alt(zet_0:rbbr(1)).*1e-3,'b','LineWidth',2)
+plot(beta_raman_sm(bin1st:rbbr(1)), alt(bin1st:rbbr(1)).*1e-3,'b','LineWidth',2)
 plot(beta_aerosol_sm(RefBin(1)), alt(RefBin(1))*1e-3,'r*');
 plot(beta_aerosol_sm(RefBin(2)), alt(RefBin(2))*1e-3,'g*');
 legend('Klett', 'Raman', 'RefBin 355', 'RefBin 387')
@@ -127,7 +127,7 @@ rLR_1 = size(Lidar_Ratio(1,:));
 %  
 figure(11);
 xx=xx0+2*wdx; yy=yy0+2*wdy;
-plot(Lidar_Ratio_sm(zet_0:rLR_1(2)),alt(zet_0:rLR_1(2)).*1e-3,'b')
+plot(Lidar_Ratio_sm(bin1st:rLR_1(2)),alt(bin1st:rLR_1(2)).*1e-3,'b')
 set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
 axis([0 100 0 alt(up)*1e-3*1.2]); 
 xlabel('Lidar Ratio / sr','fontsize',[12])  
