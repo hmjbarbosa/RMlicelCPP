@@ -14,8 +14,10 @@ for i=1:nx
   p2=i+c;
   if (p1<1)
     p1=1;
+    p2=1+2*c;
   end
   if (p2>nx)
+    p1=nx-2*c;
     p2=nx;
   end
 

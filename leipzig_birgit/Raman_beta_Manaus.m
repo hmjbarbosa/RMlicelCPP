@@ -39,7 +39,7 @@ clear Lidar_Ratio
 %
 % define upper boundary from Raman Ext coeff
 upp = size(aero_ext_raman); 
-up = upp(1)
+up = upp(2)
 %
 Ref_1 = RefBin(2) 
 %
@@ -56,7 +56,7 @@ p_ave_elast_1(up)=0;
 m_ave_elast_1(up)=0;
 for i=up - 1 : -1 : bin1st
   % Raman Particle extinction at 387
-  p_ave_raman_1(i) = p_ave_raman_1(i+1) + 0.5*(aero_ext_raman(i) + aero_ext_raman(i+1))*aerosol_wave_fac(1); 
+  p_ave_raman_1(i) = p_ave_raman_1(i+1) + 0.5*(aero_ext_raman(i) + aero_ext_raman(i+1))*lambda_aang; 
   % Raman molecular extinction at 387
   m_ave_raman_1(i) = m_ave_raman_1(i+1) + 0.5*(alpha_mol(i,2)+alpha_mol(i+1,2));    
   % Elastic particle  extinction at 355
@@ -91,7 +91,7 @@ aero_ext_raman_sm = smooth(aero_ext_raman,sl,'sgolay',3);
 % -------------
 %  Lidar Ratio 
 % -------------
-Lidar_Ratio(bin1st:up) = aero_ext_raman(bin1st:up)./beta_raman(bin1st:up)';  
+Lidar_Ratio(bin1st:up) = aero_ext_raman(bin1st:up)./beta_raman(bin1st:up);  
 Lidar_Ratio_sm(bin1st:up) = aero_ext_raman_sm(bin1st:up)./beta_raman_sm(bin1st:up);  
 %    
 % +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

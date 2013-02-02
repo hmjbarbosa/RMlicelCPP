@@ -87,10 +87,8 @@ for j=1:nt
   % 'robust' method instead.
   Sfvalmed(:,j)=mysmooth(Sfval(:,j),span,span2);
 end
-relerr=sqrt(Sfvalmed*span/(span-2));
-%relerr=Sfvalmed./Smed;
-%clear Smed Sfvalmed Sfval;
-clear Sfvalmed Sfval;
+relerr=sqrt(Sfvalmed);
 
+clear Sfvalmed Sfval;
 return
-%end
+%
