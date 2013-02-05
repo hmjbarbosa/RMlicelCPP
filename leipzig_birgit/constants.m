@@ -1,6 +1,46 @@
+%------------------------------------------------------------------------
+% M-File:
+%    molecular.m
+%
+% Authors:
+%    H.M.J. Barbosa (hbarbosa@if.usp.br), IF, USP, Brazil
+%
+% Description
+%
+%    Defines important physic's constants, most of which are used
+%    by the molecular scattering calculation.
+%
+% Input
+%
+%    none
+%
+% Ouput
+%
+%    k - Boltzmann constant [m2 kg / s2 K]
+%    Na - Avogadro's number [#]
+%    Mvol - Molar volume [L/mol] at 1013.25hPa and 273.15K
+%    Tstd - Temperature of standard atmosphere [K]
+%    Pstd - Pressure of standard atmosphere [hPa]
+%    Nstd - Molecular density [#/cm3] at Tstd and Pstd
+%
+%    Atmospheric Constituents Concentration [ppv] and Molecular weight
+%    [grams per mol] for: N2, O2, Ar, Ne, He, Kr, H2 Xe
+%
+% Usage
+%
+%    Just execute the M-file.
+%
+% References
+% 
+%    Seinfeld and Pandis (1998)
+%    Handbook of Physics and Chemistry (CRC 1997)
+%    Bodhaine et al, 1999: J. Atmos. Ocea. Tech, v. 16, p.1854
+%
+%------------------------------------------------------------------------
+
 % Physics
 k=1.3806503e-23; % Boltzmann [m2 kg / s2 K]
-Na=6.0221367e23; % Avogadro's number []
+Na=6.0221367e23; % Avogadro's number [#]
 Mvol=22.4141;    % Molar volume [L/mol] at 1013.25hPa and 273.15K
 
 % Standard Atmosphere Reference values
