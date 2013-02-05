@@ -124,12 +124,32 @@ for j=xl_scal_2:xu_scal_2
     RefBin(2)=j; 
   end
 end
-%+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-%
-% --------      
-%  plots
-% --------
 
+%------------------------------------------------------------------------
+%  Plots
+%------------------------------------------------------------------------
+%
+%
+% -------------
+figure(5)
+xx=xx0+4*wdx; yy=yy0+4*wdy;
+set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
+% at lidar levels
+plot(beta_mol(:,1),alt(1:maxbin)*1e-3,'b'); 
+hold on
+plot(beta_mol(:,2),alt(1:maxbin)*1e-3,'c');
+% at sounding levels
+plot(beta_mol_snd(:,1),alt_snd(:)*1e-3,'bo'); 
+plot(beta_mol_snd(:,2),alt_snd(:)*1e-3,'co');
+xlabel('Lidar Beta / m-1')
+ylabel('Height / km')
+title('beta scatter for sounding','fontsize',[14]) 
+legend('355', '387', '355 sonde', '387 sonde');
+grid on
+hold off
+%
+%
+% -------------
 figure(6)
 xx=xx0+1*wdx; yy=yy0+1*wdy;
 set(gcf,'position',[xx,yy,2*wsx,wsy]); % units in pixels!
@@ -154,10 +174,8 @@ hold on
 plot(RaySig(2,1:maxbin), alt(1:maxbin)*1e-3,'g','LineWidth',2); 
 plot(pr2(RefBin(2),2), alt(RefBin(2))*1e-3,'r*');
 legend('Lidar', 'Rayleigh Fit', 'Reference Bin'); 
-
 %
-% -------------
-%  log signal
+%
 % -------------
 figure(7)
 xx=xx0+3*wdx; yy=yy0+3*wdy;

@@ -26,7 +26,7 @@
 %    nAir     (1, 2) - index of refraction []
 %    fAir     (1, 2) - king factor of air []
 %    rhoAir   (1, 2) - depolarization factor of air []
-%    P_mol    (1, 2) - phase function at -180deg []
+%    Pf_mol   (1, 2) - phase function at -180deg []
 %    LR_mol   (1, 2) - molecular lidar ratio [sr]
 %
 %    alpha_mol_snd(nlev_snd, 2) - extinction coefficient [km^-1]
@@ -36,12 +36,13 @@
 %
 %    First run: 
 %
+%        constants.m
 %        read_sonde_*.m
 %
 %    This will set nlev_snd, pres_snd and temp_snd, the number of
 %    levels in the souding data, the pressure and temperature in each
-%    level, respectively. User must also change the code to set co2
-%    concentration and the elastic and raman wavelengths.
+%    level, respectively. User must also change the code to set the
+%    elastic and raman wavelengths.
 %
 % References
 % 
@@ -55,15 +56,11 @@
 %
 %------------------------------------------------------------------------
 
-% Read Physics Constants
-constants;
-
 %------------------------------------------------------------------------
 % User definitions
 %------------------------------------------------------------------------
 lambda_rayleigh=0.355; % Elastic [microns]
 lambda_raman=0.387;    % Raman N2 [microns]
-co2ppmv = 375; % CO2 concentration [ppmv]
 
 lambda=[lambda_rayleigh lambda_raman];
 clear lambda_rayleigh lambda_raman;
@@ -138,7 +135,7 @@ clear fN2 fO2 fAr fCO2;
 % Chandrasekhar (Chap. 1, p. 49)
 % or Bucholtz (1995), eqs (12) and (13)
 gammaAir = rhoAir./(2-rhoAir);
-P_mol = 0.75*((1+3.*gammaAir)+(1-gammaAir)*(cos(pi)^2))./(1+2.*gammaAir);
+Pf_mol = 0.75*((1+3.*gammaAir)+(1-gammaAir)*(cos(pi)^2))./(1+2.*gammaAir);
 
 %%------------------------------------------------------------------------
 %% RAYLEIGH TOTAL SCATERING CROSS SECTION
@@ -174,7 +171,7 @@ clear alpha_std;
 
 % Rayleigh extinction to backscatter ratio
 % ie, Rayleigh lidar ratio [sr]
-LR_mol = (4*pi)./P_mol; 
+LR_mol = (4*pi)./Pf_mol; 
 
 % In traditional lidar notation, Bucholtz (1995) eq (14) defines the
 % backscattering coeficient. Here the usual greek letter 'beta' is
@@ -182,7 +179,7 @@ LR_mol = (4*pi)./P_mol;
 
 % Multiply by phase function for -180deg and divide by 4pi steradians 
 % Units: [km]-1 [sr]-1
-%beta_mol_snd = alpha_mol_snd*diag(P_mol)/(4*pi); 
+%beta_mol_snd = alpha_mol_snd*diag(Pf_mol)/(4*pi); 
 beta_mol_snd = alpha_mol_snd*diag(LR_mol.^-1); 
 
 %

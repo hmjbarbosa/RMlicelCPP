@@ -1,156 +1,64 @@
-% read_sonde_synthetic.m
+%------------------------------------------------------------------------
+% M-File:
+%    read_sonde_synthetic.m
 %
-%   First version based on BHesse  12/12    HBarbosa
-%   cleaning and commeting         01/13    HBarbosa
+% Authors:
+%    H.M.J. Barbosa (hbarbosa@if.usp.br), IF, USP, Brazil
 %
-clear sonde site radiofile scale
-clear temp_snd pres_snd rho_snd alt_snd 
-clear beta_ray xlidar alpha_ray LidarRatio rbins
-clear beta_mol alpha_mol tau zet2 ray_signal pr2_ray_sig 
-% -----------------------------
-% Radiosonde Wyoming Amazonas
-% -----------------------------
+% Description
 %
-site = 'EARLINET exercize';
-radiofile=['../synthetic_signals/Temperature_and_Pressure/txt/PTsim.txt.txt']
+%    Reads temperature and pressure profiles distributed with
+%    EARLINET's synthetic lidar signals.
+%
+% Input
+%
+%    radiofile - path and filename to data file
+%
+% Ouput
+%
+%    pres_snd(nlev_snd, 1) - column with pressure in hPa
+%    temp_snd(nlev_snd, 1) - column with temperature in K
+%    rho_snd(nlev_snd, 1) - column with density in kg/m3
+%    alt_snd(nlev_snd, 1) - column with altitude in m
+%
+% Usage
+%
+%    First run: 
+%
+%        constants.m
+%
+%    Then execute this script.
+%
+%------------------------------------------------------------------------
+clear sonde radiofile
+clear temp_snd pres_snd rho_snd alt_snd nlev_snd
 
-disp(['*** read radiosounding data ' radiofile]);
-% cannot be read with constant width because the columns shift
-% left/right. this happens because there is only a single space
+% This file cannot be read with constant width because the columns
+% shift left/right. This happens because there is only a single space
 % between each column, and the number of digits in each column
-% varies. hence, we read as a numeric table with space as column
+% varies. Hence, we read as a numeric table with space as column
 % separator
+radiofile=['../synthetic_signals/Temperature_and_Pressure/txt/PTsim.txt.txt']
+disp(['*** read radiosounding data ' radiofile]);
 sonde=importdata(radiofile, ' ', 1);
-%---
+
 pres_snd=sonde.data(:,3);  % P in hPa!
 alt_snd=sonde.data(:,2); % in m 
-temp_snd=273.16 + sonde.data(:,4); % T in K
-% P = rho*R*T, R=287.05 J/kg/K
+temp_snd=T0 + sonde.data(:,4); % T in K
+
+% P = rho*R*T, Rair=287.05 J/kg/K
 % 100 corrects hPa to Pa, hence rho in kg/m3
-rho_snd=100*pres_snd./temp_snd/287.05;
-%% number density of air [#/m3]
-%Nair=100*pres_snd./temp_snd/1.3806503e-23;
-%% number density of nitrogen [#/m3]
-%Nn2=0.7808*Nair;
-%---
+rho_snd=100*pres_snd./temp_snd/Rair;
+
 % number of levels in sounding
 nlev_snd=max(size(pres_snd));
 
-% max lidar bin of sounding 
-%maxbin=floor(alt_snd(nlev_snd)*1e-3/r_bin);
-% or if you want to extrapolate the sounding data, just set to the
-% number of bins in the lidar data
-%maxbin = size(channel,1);
-
-%*****************************************************
-%        calculate Beta  Rayleigh
-%*****************************************************
-
-%% --------------------------------------------------------
-%%  calculate rayleight backscatter, temp_snd in K, pres_snd in hPa
-%% --------------------------------------------------------
-%% 0.2um < lambda < 0.5um
-%A=3.01577e-28; % 
-%B=3.55212;
-%C=1.35579;
-%D=0.11563;
-%Ts=288.15; % K
-%Ps=1013.25 % hPa
-%Ns=2.54743e19; % cm^-3
+%------------------------------------------------------------------------
+%  Plots
+%------------------------------------------------------------------------
 %
-%lambda=0.355; % microns
-%sigmaS=A*(lambda)^(-(B+C*lambda+D/lambda))/8.736; % cm^2 sr^-1 
-%betaS=Ns*sigmaS*1e5; % for km^-1 sr^-1 intead of cm^-1 sr^-1 
-%beta_ray(1,:) = betaS.*(pres_snd./temp_snd)*Ts/Ps;  % 355 nm !!! factor is in km!!!
 %
-%lambda=0.387; % microns
-%sigmaS=A*(lambda)^(-(B+C*lambda+D/lambda))/8.736; % cm^2 sr^-1 
-%betaS=Ns*sigmaS*1e5; % for km^-1 intead of cm^-1
-%beta_ray(2,:) = betaS.*(pres_snd./temp_snd)*Ts/Ps;  % 387 nm
-%
-%lambda=0.532; % microns
-%sigmaS=A*(lambda)^(-(B+C*lambda+D/lambda))/8.736; % cm^2 sr^-1 
-%betaS=Ns*sigmaS*1e5; % for km^-1 intead of cm^-1
-%beta_ray(3,:) = betaS.*(pres_snd./temp_snd)*Ts/Ps;  % 407 nm
-%
-%% ------------------------------------------------------
-%%  Lidar Ratio for Rayleigh-scattering (8/3)pi = 8.377 sr
-%%  with Depol correction for the Cabannes line
-%% -------------------------------------------------------
-%%    
-%xlidar(1)=8.736; % 355 nm      S_c/(8/3)*pi = 1.0426
-%xlidar(2)=8.736; % 387 nm 
-%xlidar(3)=8.712; % 532 nm
-%%  xlidar(4)=8.712; % 532 nm                   = 1.0400
-%%  xlidar(6)=8.698; % 1064 nm                  = 1.0383
-%
-%% ----------------------
-%%  Rayleigh Extinction
-%% ----------------------
-%alpha_ray(1,:) = beta_ray(1,:).*xlidar(1);
-%alpha_ray(2,:) = beta_ray(2,:).*xlidar(2);
-%alpha_ray(3,:) = beta_ray(3,:).*xlidar(3);
-%
-%% -------------------------------
-%%  Lidar Ratio for particles
-%% -------------------------------
-%%LidarRatio(1,1:maxbin) = 55;
-%%LidarRatio(2,1:maxbin) = 55;
-%%LidarRatio(3,1:maxbin) = 55;
-%%
-%% -------------------------------------------
-%%  Interpolation to Lidar sampling altitudes
-%% -------------------------------------------
-%% hmjb - beta_ray decays exponentially towards zero with increasing
-%% height. Extrapolating it above the highest level in the sounding can
-%% lead to negative (unphysical) values. Hence interpolation is done in
-%% log() and then take the exp() of the result.
-%scale(1,:) = interp1(alt_snd(1:nlev_snd),log(beta_ray(1,1:nlev_snd)),alt(1:maxbin),'linear','extrap');
-%scale(2,:) = interp1(alt_snd(1:nlev_snd),log(beta_ray(2,1:nlev_snd)),alt(1:maxbin),'linear','extrap');
-%scale(3,:) = interp1(alt_snd(1:nlev_snd),log(beta_ray(3,1:nlev_snd)),alt(1:maxbin),'linear','extrap');
-%beta_mol(1,:) = exp(scale(1,:));
-%beta_mol(2,:) = exp(scale(2,:));
-%beta_mol(3,:) = exp(scale(3,:));
-%
-%% with the trick above, this shouldn't be necessary, but it won't hurt
-%% either. let's make sure the interpolation did not lead to negative
-%% values
-%beta_mol(beta_mol<=0) = NaN;
-%
-%% -----------------
-%%  Rayleigh Signal 
-%% -----------------
-%alpha_mol(1,:) = beta_mol(1,:).*xlidar(1); 
-%alpha_mol(2,:) = beta_mol(2,:).*xlidar(2); 
-%alpha_mol(3,:) = beta_mol(3,:).*xlidar(3); 
-%% 
-%for j = 1:3
-%  for i=1:maxbin
-%    if i==1
-%      tau(j,i) = alpha_mol(j,i)*r_bin; 
-%    else
-%      tau(j,i) = tau(j,i-1)+alpha_mol(j,i)*r_bin; 
-%    end
-%  end
-%end
-%
-%for j = 1:3
-%  for i=1:maxbin
-%    % calculate pr2_ray_sig in km-1 
-%    if (j==1 || j==2)
-%      pr2_ray_sig(j,i)=beta_mol(j,i)*exp(-tau(j,i)-tau(1,i));
-%    elseif (j==3 || j==4)
-%      pr2_ray_sig(j,i)=beta_mol(j,i)*exp(-tau(j,i)-tau(3,i));
-%    else
-%      pr2_ray_sig(j,i)=beta_mol(j,i)*exp(-tau(j,i)-tau(5,i));
-%    end
-%  end
-%end
-%%
-
-%
-%  Plot
-% -------
+% -------------
 figure(4)
 xx=xx0+5*wdx; yy=yy0+5*wdy;
 set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
@@ -175,26 +83,6 @@ xlabel(ax2,'density / kg/m3')
 line(rho_snd,alt_snd,'Color','b','Parent',ax2);
 grid on
 hold off
-
-% -------
-%figure(5)
-%xx=xx0+4*wdx; yy=yy0+4*wdy;
-%set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
-%plot(beta_mol(1,:),alt(1:maxbin)*1e-3,'b'); 
-%hold on
-%% at lidar levels
-%plot(beta_mol(2,:),alt(1:maxbin)*1e-3,'c');
-%plot(beta_mol(3,:),alt(1:maxbin)*1e-3,'r'); 
-%% at sounding levels
-%plot(beta_ray(1,:),alt_snd(:)*1e-3,'bo'); 
-%plot(beta_ray(2,:),alt_snd(:)*1e-3,'co');
-%plot(beta_ray(3,:),alt_snd(:)*1e-3,'ro'); 
-%title(['Radiosounding from ' site],'fontsize',[14]) 
-%legend('355', '387', '408', '355 sonde', '387 sonde', '408 sonde');
-%ylabel('Height / km')
-%xlabel('Lidar Beta / m-1')
-%grid on
-%hold off
 %
 %
 disp('End of program: read_sonde_synthetic.m, Vers. 1.0 06/2012')
