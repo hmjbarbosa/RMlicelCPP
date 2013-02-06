@@ -1,6 +1,6 @@
 %------------------------------------------------------------------------
 % M-File:
-%    read_ascii_synthetic.m
+%    read_ascii_Manaus.m
 %
 % Authors:
 %    H.M.J. Barbosa (hbarbosa@if.usp.br), IF, USP, Brazil
@@ -25,12 +25,17 @@
 %
 % Input
 %
-%    filelist{1} - path and filename to list of elastic files
-%    filelist{2} - path and filename to list of raman files
+%    filelist{1} - path and filename to list of embrapa files
 %
 % Ouput
 %
-%    alt_snd(nlev_snd, 1) - column with altitude in m
+%    rangebins - number of bins in lidar signal
+%    r_bin     - vertical resolution in [km]
+%    alt  (rangebins, 1) - altitude in [m]
+%    altsq(rangebins, 1) - altitude squared in [m2]
+%
+%    P  (rangebins, 2) - signal to be processed (avg, bg, glue, etc...)
+%    Pr2(rangebins, 2) - range corrected signal to be processed 
 %
 % Usage
 %
@@ -47,85 +52,49 @@
 %%  READ DATA
 %%------------------------------------------------------------------------
 
-tic  % start processing time
-%
-disp('*** reading MANAUS datafiles:');
-disp('--------------------------------')
-disp('')
 
+% open list of files to be read
 filepath = '../matlab/data_5min_ascii/';
-fid=fopen([filepath 'files.dat'],'r')
+filelist = [ filepath 'files.dat'];
+disp(['Reading file list: ' filelist]);
+filenames=importdata([filelist]);
+nfiles = size(filenames,1);
+disp(['Number of files found: ' int2str(nfiles)]);
 
-i=0;
-while ~feof(fid);
- i=i+1;
- filename(i,:)=fgetl(fid);
-end
-nfiles = i;
-fclose(fid); 
-%
-datum = [filename(i,6:9) filename(i,11:12) filename(i,14:15)]
-%
-%rangebins = 4000;
-%pr2 = zeros(rangebins,nfiles,3); 
-%
-% -----------------
-%  open datafiles 
-% -----------------
+% loop over each file to be read
+tic
 for i=1:nfiles
-  clear M
-  disp (filename(i,:))
-  
-  M = dlmread([filepath filename(i,:)]);
-  
-  alt = M(:,1); %*1e-3; % altitude in meters 
-  channel(:,i,1) = M(:,4); % 355 glued
-  channel(:,i,2) = M(:,7); % 387 glued
-  channel(:,i,3) = M(:,8); % 407 glued
-  channel(:,i,4) = M(:,2); % 355 ANA
-  channel(:,i,5) = M(:,3); % 355 PC
-                                                  
-  % -----------------------------------------------------------------       
-  %  read info from filename and convert character string to numbers
-  % -----------------------------------------------------------------
-  hour1(i) = str2double(filename(i,17:18));   
-  minute1(i) = str2double(filename(i,19:20));  
-
-  % --------------------------------------------
-  %  read mesurement times as character strings 
-  % --------------------------------------------
-  hourx1(i,:) = filename(i,17:18); 
-  minutex1(i,:) = filename(i,19:20); 
-  timex1(i,:) = [hourx1(i,:) ':' minutex1(i,:)];   
+  clear M;
+  disp (['File #' int2str(i) ' ' filenames{i}]);
+  M=importdata([filepath filenames{i}],' ',1);
+  alt = M.data(:,1); % altitude in meters 
+  % notice: channel(z, lambda, time)
+  channel(:,1,i) = M.data(:,4); % 355 glued
+  channel(:,2,i) = M.data(:,7); % 387 glued
 end
 toc
 rangebins=size(channel,1);
 
-% ----------------------
-%  calculate the range^2 [m^2]
-% ----------------------
-range_corr = alt.*alt;
+%%------------------------------------------------------------------------
+%% RANGE CORRECTION AND OTHER SIGNAL PROCESSING
+%%------------------------------------------------------------------------
+
+% calculate the range^2 [m^2]
+altsq = alt.*alt;
 
 % bin height in km
 r_bin=(alt(2)-alt(1))*1e-3; 
 
-% -----------------------------
-%   mean profile of all files
-% -----------------------------
-addpath('../matlab');
-%sum_channel(:,:) = sum(channel(:,:,:),2); 
-%mean_channel = sum_channel(:,:)./nfiles;
-%hmjb/bb - 4/dec - to skip over nan values in the end of the profile
-mean_channel = squeeze(nanmean(channel,2));
-% these files already have BG removed
-% values below BG+3*sigma were transformed into NaN
-mean_bg_corr = mean_channel; % 
-log_mean_bg_corr = log(mean_bg_corr);
-%
-for j = 1:3   
-  pr2(:,j) = mean_bg_corr(:,j).*range_corr(:);
+% matrix to hold lidar received power P(z, lambda)
+% anything user needs: time average, bg correction, glueing, etc..
+P=squeeze(nanmean(channel,3));
+clear channel;
+
+% range corrected signal
+for j = 1:2
+  Pr2(:,j) = P(:,j).*altsq(:);
 end
-%
+
 %------------------------------------------------------------------------
 %  Plots
 %------------------------------------------------------------------------
@@ -134,37 +103,34 @@ end
 figure(1)
 xx=xx0+1*wdx; yy=yy0+1*wdy;
 set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
-plot(mean_channel(:,1),alt*1.e-3,'b')
+plot(P(:,1),alt*1.e-3,'b')
 xlabel('smooth bg-corr signal','fontsize',[10])  
 ylabel('altitude (km)','fontsize',[10])
-title(['Embrapa Lidar at ' datum],'fontsize',[14]) 
 grid on
 hold on
-plot(mean_channel(:,2),alt*1.e-3,'c')
+plot(P(:,2),alt*1.e-3,'c')
 hold off
 %
 figure(2)
 xx=xx0+2*wdx; yy=yy0+2*wdy;
 set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
-plot(pr2(:,1),alt*1.e-3,'b')
+plot(Pr2(:,1),alt*1.e-3,'b')
 xlabel('range corrected smooth bg-corr signal','fontsize',[10])  
 ylabel('altitude (km)','fontsize',[10])
-title(['Embrapa Lidar at ' datum],'fontsize',[14]) 
 grid on
 hold on 
-plot(pr2(:,2),alt*1.e-3,'c')
+plot(Pr2(:,2),alt*1.e-3,'c')
 hold off
 % 
 figure(3)
 xx=xx0+3*wdx; yy=yy0+3*wdy;
 set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
-plot(log_mean_bg_corr(:,1),alt*1.e-3,'b')
+plot(log(P(:,1)),alt*1.e-3,'b')
 xlabel('log of smooth bg-corr signal','fontsize',[10])  
 ylabel('altitude (km)','fontsize',[10])
-title(['Embrapa Lidar at ' datum],'fontsize',[14]) 
 grid on
 hold on
-plot(log_mean_bg_corr(:,2),alt*1.e-3,'c')
+plot(log(P(:,2)),alt*1.e-3,'c')
 hold off
 % 
 % end of program read_ascii_Manaus.m ***    

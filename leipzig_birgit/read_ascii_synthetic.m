@@ -16,7 +16,13 @@
 %
 % Ouput
 %
-%    alt_snd(nlev_snd, 1) - column with altitude in m
+%    rangebins - number of bins in lidar signal
+%    r_bin     - vertical resolution in [km]
+%    alt  (rangebins, 1) - altitude in [m]
+%    altsq(rangebins, 1) - altitude squared in [m2]
+%
+%    P  (rangebins, 2) - signal to be processed (avg, bg, glue, etc...)
+%    Pr2(rangebins, 2) - range corrected signal to be processed 
 %
 % Usage
 %
@@ -41,18 +47,19 @@ tic
 for j=1:2
   
   % open file list of j-th channel
-  clear filename;
+  clear filenames;
   disp(['Reading file list: ' filepath filelist{j}]);
-  filename=importdata([filepath filelist{j}]);
-  nfiles = size(filename,1);
+  filenames=importdata([filepath filelist{j}]);
+  nfiles = size(filenames,1);
   disp(['Number of files found: ' int2str(nfiles)]);
 
   % open each file in this list
   for i=1:nfiles
     clear M;
-    disp(['File #' int2str(i) ' ' filename{i}]);
-    M=importdata([filepath filename{i}],' ',1);
-    alt = M.data(:,2); % altitude in meters 
+    disp(['File #' int2str(i) ' ' filenames{i}]);
+    M=importdata([filepath filenames{i}],' ',1);
+    alt = M.data(:,2); % altitude in meters
+    % notice: channel(z, lambda, time)
     channel(:,j,i) = M.data(:,3); 
   end
 end
@@ -64,21 +71,19 @@ rangebins=size(channel,1);
 %%------------------------------------------------------------------------
 
 % calculate the range^2 [m^2]
-range_corr = alt.*alt;
+altsq = alt.*alt;
 
 % bin height in km
 r_bin=(alt(2)-alt(1))*1e-3; 
 
-% time average 
-mean_channel = squeeze(nanmean(channel,3));
-
-% smoothing
-addpath('../matlab');
-mean_bg_corr = smooth_region(mean_channel, 3, 400, 7, 800, 10);
+% matrix to hold lidar received power P(z, lambda)
+% anything user needs: time average, bg correction, glueing, etc..
+P=smooth_region(squeeze(nanmean(channel,3)), 3, 400, 7, 800, 10);
+clear channel;
 
 % range bg-corrected signal
 for j = 1:2
-  pr2(:,j) = mean_bg_corr(:,j).*range_corr(:);
+  Pr2(:,j) = P(:,j).*altsq(:);
 end
 
 %------------------------------------------------------------------------
@@ -89,37 +94,34 @@ end
 figure(1)
 xx=xx0+1*wdx; yy=yy0+1*wdy;
 set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
-plot(mean_channel(:,1),alt*1.e-3,'b')
+plot(P(:,1),alt*1.e-3,'b')
 xlabel('smooth bg-corr signal','fontsize',[10])  
 ylabel('altitude (km)','fontsize',[10])
-title(['EARLINET exercize'],'fontsize',[14]) 
 grid on
 hold on
-plot(mean_channel(:,2),alt*1.e-3,'c')
+plot(P(:,2),alt*1.e-3,'c')
 hold off
 %
 figure(2)
 xx=xx0+2*wdx; yy=yy0+2*wdy;
 set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
-plot(pr2(:,1),alt*1.e-3,'b')
+plot(Pr2(:,1),alt*1.e-3,'b')
 xlabel('range corrected smooth bg-corr signal','fontsize',[10])  
 ylabel('altitude (km)','fontsize',[10])
-title(['EARLINET exercize'],'fontsize',[14]) 
 grid on
 hold on 
-plot(pr2(:,2),alt*1.e-3,'c')
+plot(Pr2(:,2),alt*1.e-3,'c')
 hold off
 % 
 figure(3)
 xx=xx0+3*wdx; yy=yy0+3*wdy;
 set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
-plot(log(mean_bg_corr(:,1)),alt*1.e-3,'b')
+plot(log(P(:,1)),alt*1.e-3,'b')
 xlabel('log of smooth bg-corr signal','fontsize',[10])  
 ylabel('altitude (km)','fontsize',[10])
-title(['EARLINET exercize'],'fontsize',[14]) 
 grid on
 hold on
-plot(log(mean_bg_corr(:,2)),alt*1.e-3,'c')
+plot(log(P(:,2)),alt*1.e-3,'c')
 hold off
 % 
 % end of program read_ascii_synthetic.m ***    

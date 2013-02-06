@@ -43,7 +43,7 @@ for j=1:1
   % ----------------------------                
   %  use range corrected signal
   % ----------------------------
-  rc_signal(j,:) = pr2(:,j);
+  rc_signal(j,:) = Pr2(:,j);
   %  
   %  Ref_Bin = min(RefBin); 
   Ref_Bin = RefBin(j); 

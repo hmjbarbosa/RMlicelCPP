@@ -49,7 +49,7 @@ lambda_aang = (355/387)^aang;
 
 % Calculate term to be derived
 for i = bin1st:maxbin  
-  log_raman(2,i) = log(alpha_mol(i,2)/pr2(i,2)'); % 387 nm
+  log_raman(2,i) = log(alpha_mol(i,2)/Pr2(i,2)'); % 387 nm
 end 
 
 % Compute the derivative as a simple linear fit centered in each
