@@ -1,6 +1,6 @@
 %------------------------------------------------------------------------
 % M-File:
-%    read_sonde_synthetic.m
+%    read_sonde_Manaus.m
 %
 % Authors:
 %    H.M.J. Barbosa (hbarbosa@if.usp.br), IF, USP, Brazil
@@ -34,7 +34,7 @@
 %    Then execute this script.
 %
 %------------------------------------------------------------------------
-clear sonde radiofile sondedata
+clear radiofile sondedata
 clear temp_snd pres_snd rho_snd alt_snd nlev_snd
 
 % cannot read as a table because wyoming files have empty space for

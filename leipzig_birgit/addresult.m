@@ -1,4 +1,4 @@
-file=['../synthetic_signals/Solutions/txt/aerowv1.000.txt']
+file=['../synthetic_signals/Solutions/txt/aerowv1.000.txt'];
   
 solution=importdata(file, ' ', 1);
 

@@ -26,11 +26,7 @@
 %
 % Usage
 %
-%    First run: 
-%
-%        constants.m
-%
-%    Then execute this script.
+%    Just execute this script.
 %
 %------------------------------------------------------------------------
 
@@ -81,7 +77,7 @@ r_bin=(alt(2)-alt(1))*1e-3;
 P=smooth_region(squeeze(nanmean(channel,3)), 3, 400, 7, 800, 10);
 clear channel;
 
-% range bg-corrected signal
+% range bg-corrected signal Pr2(z, lambda)
 for j = 1:2
   Pr2(:,j) = P(:,j).*altsq(:);
 end

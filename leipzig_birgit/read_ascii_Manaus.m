@@ -39,11 +39,7 @@
 %
 % Usage
 %
-%    First run: 
-%
-%        constants.m
-%
-%    Then execute this script.
+%    Just execute this script.
 %
 %------------------------------------------------------------------------
 
@@ -90,7 +86,7 @@ r_bin=(alt(2)-alt(1))*1e-3;
 P=squeeze(nanmean(channel,3));
 clear channel;
 
-% range corrected signal
+% range corrected signal Pz2(z, lambda)
 for j = 1:2
   Pr2(:,j) = P(:,j).*altsq(:);
 end
