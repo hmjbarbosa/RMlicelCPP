@@ -66,6 +66,7 @@ for j = 1:2
     end
   end
 end
+
 % Compute "expected" molecular signal. Because it is not divided by
 % z^2 this is already range corrected. Note that units are completely
 % arbitrary: there is no detector efficiency, no mirror, not even the
@@ -112,6 +113,7 @@ figure(20)
 plot(Pr2(xl_scal_1:xu_scal_1,1),'ro');
 hold on;
 plot(RaySig(xl_scal_1:xu_scal_1,1),'b');
+xlabel('bins'); ylabel('Pr2 and RaySig');
 hold off;
 
 % ------------
@@ -125,16 +127,77 @@ figure(21)
 plot(log_Pr2(xl_scal_1:xu_scal_1,1),'ro');
 hold on;
 plot(Ray_Fit(1,xl_scal_1:xu_scal_1),'b');
+xlabel('bins'); ylabel('log(Pr2) and log(RaySig)');
 hold off;
 
-figure(22)
+figure(22); clf;
 plot(Pr2_mol(xl_scal_1:xu_scal_1,1),Pr2(xl_scal_1:xu_scal_1,1),'ro');
 f0=fit(Pr2_mol(xl_scal_1:xu_scal_1,1),Pr2(xl_scal_1:xu_scal_1,1),'poly1');
 hold on;
 plot(Pr2_mol(xl_scal_1:xu_scal_1,1),RaySig(xl_scal_1:xu_scal_1,1),'b');
 plot(f0,'g');
+xlabel('Pr2_mol'); ylabel('Pr2, Fit and Scaled');
 
-%        
+figure(23); clf;
+scatter(Pr2_mol(1:maxbin,1),Pr2(1:maxbin,1),1,(1:maxbin));
+
+n500=floor(0.5/r_bin+0.5);
+[fval, a, b, relerr] = ...
+    runfit2(Pr2(1:maxbin,1), Pr2_mol(1:maxbin,1),n500,n500);
+
+tmpX=Pr2_mol(1:maxbin,1);
+tmpY=Pr2(1:maxbin,1);
+
+[a, b, fval, sa, sb, chi2red, ndf] = fastfit(tmpX,tmpY);
+
+disp(['masking based on linear coef...']);
+nmask=sum(isnan(tmpY)); nmask_old=-1;
+iter=0;
+while(nmask_old ~= nmask)
+  nmask_old=nmask;
+  
+  disp(['iter= ' num2str(iter) ' nmask=' num2str(nmask) ...
+        ' a=' num2str(a) ' sa=' num2str(sa) ... 
+        ' b=' num2str(b) ' sb=' num2str(sb) ... 
+        ' chi2red=' num2str(chi2red) ' ndf=' num2str(ndf) ]); 
+
+  distance=abs(tmpY-fval)./sqrt(chi2red); 
+
+  tmpY(distance>3)=nan; 
+  nmask=sum(isnan(tmpY));
+
+  [a, b, fval, sa, sb, chi2red, ndf] = fastfit(tmpX,tmpY);
+
+  figure(26); hold off;
+  scatter(tmpX,tmpY,1,(1:maxbin));
+  hold on; 
+  plot(tmpX,tmpX*a+b,'r');
+
+  pause
+  iter=iter+1; 
+end
+figure(24); clf; plot(b,'r'); hold on; plot(bmask,'g'); ylabel('b');
+
+%disp(['masking based on angular coef...']);
+%amask=a; 
+%%amask(isnan(bmask))=nan;
+%namask=sum(isnan(amask));
+%namask_old=-1;
+%iter=0;
+%while(namask_old ~= namask)
+%  namask_old=namask;
+%  disp(['iter= ' num2str(iter) ' namask=' num2str(namask) ' of ' ...
+%        num2str(size(a,1)) ' amask=' num2str(nanmean(amask)) ]);
+%  distance=abs(amask-nanmean(amask))./nanstd(amask);
+%  amask(distance>3)=nan;
+%  namask=sum(isnan(amask));
+%  iter=iter+1;
+%end
+figure(25); clf; plot(a,'r'); hold on; plot(amask,'g'); ylabel('a');
+%
+%
+return
+        
 % ----------------------
 %   find reference bins
 % ----------------------
@@ -165,6 +228,7 @@ for j=xl_scal_2:xu_scal_2
     RefBin(2)=j; 
   end
 end
+
 
 %------------------------------------------------------------------------
 %  Plots
