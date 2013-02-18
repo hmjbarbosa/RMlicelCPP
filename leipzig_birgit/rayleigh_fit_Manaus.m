@@ -77,6 +77,7 @@ for j = 1:2
   for i=1:maxbin
     % calculate Pr2_mol in km-1 
     Pr2_mol(i,j)=beta_mol(i,j)*exp(-tau(i,j)-tau(i,1));
+    P_mol(i,j)=beta_mol(i,j)*exp(-tau(i,j)-tau(i,1))./altsq(i);
   end
 end
 
@@ -109,12 +110,6 @@ meanPr2(2) = mean(Pr2(xl_scal_2:xu_scal_2,2));
 RaySig(:,1) = Pr2_mol(:,1)*meanPr2(1)/meanRaySig(1); 
 RaySig(:,2) = Pr2_mol(:,2)*meanPr2(2)/meanRaySig(2); 
 
-figure(20)
-plot(Pr2(xl_scal_1:xu_scal_1,1),'ro');
-hold on;
-plot(RaySig(xl_scal_1:xu_scal_1,1),'b');
-xlabel('bins'); ylabel('Pr2 and RaySig');
-hold off;
 
 % ------------
 %  logarithm
@@ -123,30 +118,15 @@ Ray_Fit(1,:) = log(RaySig(:,1));
 Ray_Fit(2,:) = log(RaySig(:,2)); 
 log_Pr2 = real(log(Pr2));    
 
-figure(21)
-plot(log_Pr2(xl_scal_1:xu_scal_1,1),'ro');
-hold on;
-plot(Ray_Fit(1,xl_scal_1:xu_scal_1),'b');
-xlabel('bins'); ylabel('log(Pr2) and log(RaySig)');
-hold off;
-
-figure(22); clf;
-plot(Pr2_mol(xl_scal_1:xu_scal_1,1),Pr2(xl_scal_1:xu_scal_1,1),'ro');
-f0=fit(Pr2_mol(xl_scal_1:xu_scal_1,1),Pr2(xl_scal_1:xu_scal_1,1),'poly1');
-hold on;
-plot(Pr2_mol(xl_scal_1:xu_scal_1,1),RaySig(xl_scal_1:xu_scal_1,1),'b');
-plot(f0,'g');
-xlabel('Pr2_mol'); ylabel('Pr2, Fit and Scaled');
-
-figure(23); clf;
-scatter(Pr2_mol(1:maxbin,1),Pr2(1:maxbin,1),1,(1:maxbin));
-
-n500=floor(0.5/r_bin+0.5);
-[fval, a, b, relerr] = ...
-    runfit2(Pr2(1:maxbin,1), Pr2_mol(1:maxbin,1),n500,n500);
-
+% Data to use for determination of molecular region
 tmpX=Pr2_mol(1:maxbin,1);
 tmpY=Pr2(1:maxbin,1);
+tmpZ=(1:maxbin);
+
+figure(23); clf;
+scatter(tmpX,tmpY,10,tmpZ);
+xlabel('Pr2 molecular'); ylabel('Pr2 lidar');
+grid on; colorbar;
 
 [a, b, fval, sa, sb, chi2red, ndf] = fastfit(tmpX,tmpY);
 
@@ -163,20 +143,52 @@ while(nmask_old ~= nmask)
 
   distance=abs(tmpY-fval)./sqrt(chi2red); 
 
-  tmpY(distance>3)=nan; 
+  tmpY(distance>3)=nan;
+%  for i=2:length(tmpY)-1
+%    if (tmpY(i-1)==NaN & tmpY(i+1)==NaN)
+%      tmpY(i)=NaN;
+%    end
+%  end
   nmask=sum(isnan(tmpY));
 
   [a, b, fval, sa, sb, chi2red, ndf] = fastfit(tmpX,tmpY);
 
-  figure(26); hold off;
-  scatter(tmpX,tmpY,1,(1:maxbin));
-  hold on; 
-  plot(tmpX,tmpX*a+b,'r');
+  figure(26); clf; hold off;
+  scatter(log(tmpX(~isnan(tmpY))),log(tmpY(~isnan(tmpY))),10,tmpZ(~isnan(tmpY)));
+  hold on; grid on;
+  plot(log(tmpX(~isnan(tmpY))),log(tmpX(~isnan(tmpY))*a+b),'r');
+  xlabel('log(Pr2 mol)'); ylabel('log(Pr2) and log(Fit)');
 
-  pause
+  figure(27); clf; hold off;
+  scatter(tmpX(~isnan(tmpY)),tmpY(~isnan(tmpY)),10,tmpZ(~isnan(tmpY)));
+  hold on; grid on;
+  plot(tmpX(~isnan(tmpY)),tmpX(~isnan(tmpY))*a+b,'r');
+  xlabel('Pr2 mol'); ylabel('Pr2 and Fit');
+
   iter=iter+1; 
 end
-figure(24); clf; plot(b,'r'); hold on; plot(bmask,'g'); ylabel('b');
+tmpZ(isnan(tmpY))=NaN;
+['lowest used bin #' num2str(min(tmpZ)) ...
+ ' at height=' num2str(alt(min(tmpZ))) ]
+
+['highest used bin #' num2str(max(tmpZ)) ...
+ ' at height=' num2str(alt(max(tmpZ))) ]
+
+[a, b, fval, sa, sb, chi2red, ndf] = fastfit(P_mol(~isnan(tmpY)),P(~isnan(tmpY)));
+
+disp(['iter= ' num2str(iter) ' nmask=' num2str(nmask) ...
+      ' a=' num2str(a) ' sa=' num2str(sa) ... 
+      ' b=' num2str(b) ' sb=' num2str(sb) ... 
+      ' chi2red=' num2str(chi2red) ' ndf=' num2str(ndf) ]); 
+
+figure(28); clf; hold off;
+scatter(log(P_mol(~isnan(tmpY))),log(P(~isnan(tmpY))),10,tmpZ(~isnan(tmpY)));
+hold on; grid on;
+plot(log(P_mol(~isnan(tmpY))),log(P_mol(~isnan(tmpY))*a+b),'r');
+xlabel('P mol'); ylabel('P and Fit');
+
+return
+%figure(24); clf; plot(b,'r'); hold on; plot(mask,'g'); ylabel('b');
 
 %disp(['masking based on angular coef...']);
 %amask=a; 
@@ -193,10 +205,10 @@ figure(24); clf; plot(b,'r'); hold on; plot(bmask,'g'); ylabel('b');
 %  namask=sum(isnan(amask));
 %  iter=iter+1;
 %end
-figure(25); clf; plot(a,'r'); hold on; plot(amask,'g'); ylabel('a');
+%figure(25); clf; plot(a,'r'); hold on; plot(amask,'g'); ylabel('a');
 %
 %
-return
+%return
         
 % ----------------------
 %   find reference bins

@@ -62,11 +62,11 @@ tic
 for i=1:nfiles
   clear M;
   disp (['File #' int2str(i) ' ' filenames{i}]);
-  M=importdata([filepath filenames{i}],' ',1);
-  alt = M.data(:,1); % altitude in meters 
+  M=importdata([filepath filenames{i}],' ',0);
+  alt = M(:,1); % altitude in meters 
   % notice: channel(z, lambda, time)
-  channel(:,1,i) = M.data(:,4); % 355 glued
-  channel(:,2,i) = M.data(:,7); % 387 glued
+  channel(:,1,i) = M(:,4); % 355 glued
+  channel(:,2,i) = M(:,7); % 387 glued
 end
 toc
 rangebins=size(channel,1);
@@ -83,7 +83,7 @@ r_bin=(alt(2)-alt(1))*1e-3;
 
 % matrix to hold lidar received power P(z, lambda)
 % anything user needs: time average, bg correction, glueing, etc..
-P=squeeze(nanmean(channel,3));
+P=squeeze(nanmean(channel,3))+0.01225-0.0018474;%+0.003214053354444;
 clear channel;
 
 % range corrected signal Pz2(z, lambda)
