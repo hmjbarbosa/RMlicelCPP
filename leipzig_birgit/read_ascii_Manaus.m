@@ -59,7 +59,8 @@ disp(['Number of files found: ' int2str(nfiles)]);
 
 % loop over each file to be read
 tic
-for i=1:nfiles
+for i=1:1
+%for i=1:nfiles
   clear M;
   disp (['File #' int2str(i) ' ' filenames{i}]);
   M=importdata([filepath filenames{i}],' ',0);
@@ -83,7 +84,7 @@ r_bin=(alt(2)-alt(1))*1e-3;
 
 % matrix to hold lidar received power P(z, lambda)
 % anything user needs: time average, bg correction, glueing, etc..
-P=squeeze(nanmean(channel,3))+0.01225-0.0018474;%+0.003214053354444;
+P=squeeze(nanmean(channel,3));%+0.002;%+0.01225-0.0018474;%+0.003214053354444;
 clear channel;
 
 % range corrected signal Pz2(z, lambda)
