@@ -85,201 +85,173 @@ end
 %% 
 %%------------------------------------------------------------------------
 
-% ----------------------------------------
-%  choose altitude range for Rayleigh fit
-% ----------------------------------------
-% elastic channel
-%xl_scal_1 = round(15/r_bin); % km
-%xu_scal_1 = round(17/r_bin); % km
-%% Raman channel
-%xl_scal_2 = round(15/r_bin); % km
-%xu_scal_2 = round(17/r_bin); % km
-
-% simulado molecular
-%meanRaySig(1) = mean(Pr2_mol(xl_scal_1:xu_scal_1,1)); 
-%meanRaySig(2) = mean(Pr2_mol(xl_scal_2:xu_scal_2,2)); 
-% 
-% ----------------
-%   mean signals 
-% -----------------
-% medido lidar
-%meanPr2(1) = mean(Pr2(xl_scal_1:xu_scal_1,1)); 
-%meanPr2(2) = mean(Pr2(xl_scal_2:xu_scal_2,2)); 
-%    
-% Scales the molecular-sounding to the "values" of the lidar data
-%RaySig(:,1) = Pr2_mol(:,1)*meanPr2(1)/meanRaySig(1); 
-%RaySig(:,2) = Pr2_mol(:,2)*meanPr2(2)/meanRaySig(2); 
-
-
-% ------------
-%  logarithm
-% ------------
-%Ray_Fit(1,:) = log(RaySig(:,1));  
-%Ray_Fit(2,:) = log(RaySig(:,2)); 
-%log_Pr2 = real(log(Pr2));    
-
-% loop on background correction
-
-bg=1e-20; b=1e-23; 
-ch=1; nn=0;
-
-pmin=nanmin(P(rangebins-100:rangebins,ch));
-pmax=nanmax(P(rangebins-100:rangebins,ch));
-pave=nanmean(P(rangebins-100:rangebins,ch));
-
-bg1=pave+10*(pmax-pmin);
-bg2=pave-10*(pmax-pmin);
-
-while(abs((bg1-bg2)/(bg1+bg2)) > 1e-3)
-
-% (-linear coef) of fitting between P x Pmol is the BG correction
-% to be made. Correct for that before procedding.
-  if (nn==0)
-    bg=bg1;
-  elseif(nn==1)
-    f1=b;
-    bg=bg2;
-  elseif(nn==2)
-    f2=b;
-    bg=(bg1+bg2)*0.5;
-  else
-    ['bg1 ' num2str(bg1) ' f1 ' num2str(f1) ' bg2 ' num2str(bg2) ' f2 ' ...
-     num2str(f2) ' bg ' num2str(bg) ' f ' num2str(b) ]
-
-%    poly=inv([bg1^2 bg1 1; bg2^2 bg2 1; bg^2 bg 1])*[f1;f2;b];
-%    bg=    
-    if (f1*b<0)
-      f2=b;
-      bg2=bg;
-    else
-      f1=b;
-      bg1=bg;
-    end
-    bg=(bg1+bg2)*0.5;
-  end
-  if (nn==3)
-%    return
-  end
-%  bg=bg+b;
-  ['TOTAL BG: ' num2str(bg) ' EXTRA BG: ' num2str(b) ' ratio=' num2str(b/bg)]
-
-  % Data to use for determination of molecular region
-  tmpXX=P_mol(1:maxbin,ch);
-  tmpYY=P(1:maxbin,ch)-bg;
-
-  tmpX=Pr2_mol(1:maxbin,ch);
-  tmpY=Pr2(1:maxbin,ch)-bg*altsq(1:maxbin);
-  tmpZ=(1:maxbin);
-
-  [fval, a]=runfit2(tmpY, tmpX, 120, 120);
-  slope=atan(a);
+% for elastic and raman channels
+for ch=1:2
   
-  figure(23); clf;
-  scatter(tmpX,tmpY,10,tmpZ);
-  xlabel('Pr2 molecular'); ylabel('Pr2 lidar');
-  hold on; grid on; colorbar;
+  % LOOP ON BACKGROUND CORRECTION
+  %
+  % This is a 1-D numerical algorithm for finding a root, ie, b=0
+  % after the rayleigh by changing the parameter BG. First step is to
+  % bracket the function, ie, to find limits for our parameter such
+  % that func(param1) < 0 and func(param2) > 0 or vice-versa. If
+  % this is the case, we know the root is between these values.
+  pmin=nanmin(P(rangebins-100:rangebins,ch));
+  pmax=nanmax(P(rangebins-100:rangebins,ch));
+  pave=nanmean(P(rangebins-100:rangebins,ch));
+  bg1=pave+10*(pmax-pmin);
+  bg2=pave-10*(pmax-pmin);
 
-  disp(['masking based on linear coef...']);
-  nmask=sum(isnan(tmpY)); nmask_old=-1;
-  iter=0;
-  while(nmask_old ~= nmask)
-    nmask_old=nmask;
+  % In each step of the loop, we will divide the interval in half, and
+  % calculate the function in between, and then choose one side. The
+  % convergence criteria is meet when size of this interval
+  % (i.e. uncertainty in the value of BG, our parameter) becomes small
+  % enough compared to BG itself.
+  nBG=1;
+  while(abs((bg1-bg2)/(bg1+bg2)) > 1e-3)
+
+    % At this point we do not know yet f1=func(bg1) or f2=func(bg2)
+    % In principle, the estimation above should do it, but right
+    % now we only have a wild guess. Therefore the first two steps
+    % are just to calculate b(bg1) and b(bg2), and after that we
+    % start dividing the interval in half.
+    if (nBG==1)
+      bg=bg1;
+    elseif(nBG==2)
+      bg=bg2;
+    else
+      bg=(bg1+bg2)*0.5;
+    end
+
+    % Select data from a channel and apply the correction
+    tmpXX=P_mol  (1:maxbin,ch);
+    tmpYY=P      (1:maxbin,ch)-bg;
+    tmpX =Pr2_mol(1:maxbin,ch);
+    tmpY =Pr2    (1:maxbin,ch)-bg*altsq(1:maxbin);
+    tmpZ =       (1:maxbin);
+
+    figure(23); clf;
+    scatter(tmpX,tmpY,10,tmpZ);
+    xlabel('Pr2 molecular'); ylabel('Pr2 lidar');
+    hold on; grid on; colorbar;
+
+    % Calculate the local derivative using a running linear fit
+    pathlen=500; % meters
+    npath=floor(pathlen*1e-3/2/r_bin);
+    [fval, a]=runfit2(tmpY, tmpX, npath, npath);
+    slope=atan(a);
+  
+    % Initialize counters for the number of NaN data points
+    nmask=sum(isnan(tmpY)); nmask_old=-1;
+
+    % LOOP ON MOLECULAR REGION
+    % Convergence will stop when not more points are removed base
+    % on the criteria stablished below
+    iter=0;
+    while(nmask_old ~= nmask)
+      nmask_old=nmask;
     
-    [a, b, fval, sa, sb, chi2red, ndf] = fastfit(tmpX,tmpY);
-    distance=abs(tmpY-fval)./sqrt(chi2red); 
-    tmpY(distance>2)=nan;
-    tmpY(abs(slope-atan(a))>pi/2.)=nan;
-    nmask=sum(isnan(tmpY));
+      % Do a linear fit using all points
+      [a, b, fval, sa, sb, chi2red, ndf] = fastfit(tmpX,tmpY);
+      % For each point, exclude those which are too far away
+      distance=abs(tmpY-fval)./sqrt(chi2red); 
+      tmpY(distance>2)=nan;
+      % For each point, exclude those not aligned
+      tmpY(abs(slope-atan(a))>pi/2.)=nan;
+      % Recompute the mask counter
+      nmask=sum(isnan(tmpY));
     
-    disp(['iter= ' num2str(iter) ' nmask=' num2str(nmask) ...
-          ' a=' num2str(a) ' sa=' num2str(sa) ... 
-          ' b=' num2str(b) ' sb=' num2str(sb) ... 
-          ' chi2red=' num2str(chi2red) ' ndf=' num2str(ndf) ]); 
+      disp(['iter= ' num2str(iter) ' nmask=' num2str(nmask) ...
+	    ' a=' num2str(a) ' sa=' num2str(sa) ... 
+	    ' b=' num2str(b) ' sb=' num2str(sb) ... 
+	    ' chi2red=' num2str(chi2red) ' ndf=' num2str(ndf) ]); 
     
-    figure(27); clf; hold off;
+      figure(24); clf; hold off;
+      scatter(tmpX(~isnan(tmpY)),tmpY(~isnan(tmpY)),10,tmpZ(~isnan(tmpY)));
+      hold on; grid on;
+      plot(tmpX(~isnan(tmpY)),tmpX(~isnan(tmpY))*a+b,'r');
+      xlabel('Pr2 mol'); ylabel('Pr2 and Fit');
+      
+      iter=iter+1; 
+    end
+    
+    figure(24); clf; hold off;
     scatter(tmpX(~isnan(tmpY)),tmpY(~isnan(tmpY)),10,tmpZ(~isnan(tmpY)));
     hold on; grid on;
     plot(tmpX(~isnan(tmpY)),tmpX(~isnan(tmpY))*a+b,'r');
     xlabel('Pr2 mol'); ylabel('Pr2 and Fit');
+    colorbar;
     
-    iter=iter+1; 
-  end
-  figure(27); clf; hold off;
-  scatter(tmpX(~isnan(tmpY)),tmpY(~isnan(tmpY)),10,tmpZ(~isnan(tmpY)));
-  hold on; grid on;
-  plot(tmpX(~isnan(tmpY)),tmpX(~isnan(tmpY))*a+b,'r');
-  xlabel('Pr2 mol'); ylabel('Pr2 and Fit');
-  colorbar;
-  figure(23); plot(Pr2_mol(1:maxbin,ch),Pr2_mol(1:maxbin,ch)*a+b,'r');
+    figure(23); plot(Pr2_mol(1:maxbin,ch),Pr2_mol(1:maxbin,ch)*a+b,'r');
   
-  tmpZ(isnan(tmpY))=NaN;
-  ['lowest used bin #' num2str(min(tmpZ)) ' at height=' num2str(alt(min(tmpZ))) ]
-  ['highest used bin #' num2str(max(tmpZ)) ' at height=' num2str(alt(max(tmpZ))) ]
-  
-  [a, b, fval, sa, sb, chi2red, ndf] = fastfit(tmpXX(~isnan(tmpY)),tmpYY(~isnan(tmpY)));
-  
-  disp(['iter= ' num2str(iter) ' nmask=' num2str(nmask) ...
-        ' a=' num2str(a) ' sa=' num2str(sa) ... 
-        ' b=' num2str(b) ' sb=' num2str(sb) ... 
-        ' chi2red=' num2str(chi2red) ' ndf=' num2str(ndf) ]); 
-  
-  ['TOTAL BG: ' num2str(bg) ' EXTRA BG: ' num2str(b) ' ratio=' num2str(b/bg)]
-  
-  nn=nn+1;
-  out(nn,1)=bg;
-  out(nn,2)=b;
-  out(nn,3)=sb;
-  out(nn,4)=ndf;
-  figure(1);
-  plot(out(:,2)); hold on;
-  plot(out(:,3),'r');
-  plot(-out(:,3),'r');
-  plot(out(:,1),'g'); hold off;
-  legend('b','+sig','-sig','bg');
-  
-%  figure(28); clf; hold off;
-%  scatter((P_mol(~isnan(tmpY),ch)),(P(~isnan(tmpY),ch)),10,tmpZ(~isnan(tmpY)));
-%  hold on; grid on; colorbar;
-%  plot((P_mol(~isnan(tmpY),ch)),(P_mol(~isnan(tmpY),ch)*a+b),'r');
-%  xlabel('P mol'); ylabel('P and Fit');
-  
-%  pause
-  
-end
+    % Save some info about the Pr2 fit for future analysis
+    tmpZ(isnan(tmpY))=NaN;
+    ['lowest used bin #' num2str(min(tmpZ)) ' at height=' num2str(alt(min(tmpZ))) ]
+    ['highest used bin #' num2str(max(tmpZ)) ' at height=' num2str(alt(max(tmpZ))) ]
+    out(1,nBG,ch)=bg;
+    out(2,nBG,ch)=iter;
+    out(3,nBG,ch)=nmask;
+    out(4,nBG,ch)=chi2red;
+    out(5,nBG,ch)=min(tmpZ);
+    out(6,nBG,ch)=max(tmpZ);
 
-%return
-        
-%% ----------------------
-%%   find reference bins
-%% ----------------------
-%% *****************
-%%    channel 1
-%% *****************
-%%hmjb abst_1=1e-3;
-%abst_1=(real(log_Pr2(xl_scal_1,1)) - Ray_Fit(1,xl_scal_1)).^2;
-%RefBin(1)=xl_scal_1;
-%for j=xl_scal_1:xu_scal_1
-%  diff_1(j) = (real(log_Pr2(j,1)) - Ray_Fit(1,j)).^2; 
-%  if diff_1(j) < abst_1
-%    abst_1 = diff_1(j);
-%    RefBin(1)=j;  
-%  end
-%end
-%
-%% *****************
-%%    channel 2
-%% *****************
-%%hmjb abst_2=1e-3; 
-%abst_2=(real(log_Pr2(xl_scal_2,2)) - Ray_Fit(2,xl_scal_2)).^2;
-%RefBin(2)=xl_scal_2;
-%for j=xl_scal_2:xu_scal_2 
-%  diff_2(j) = (real(log_Pr2(j,2))- Ray_Fit(2,j)).^2;  
-%  if diff_2(j) < abst_2
-%    abst_2=diff_2(j);
-%    RefBin(2)=j; 
-%  end
-%end
-%
+    % Use the points selected by the Pr2() fit and now fit in P() We
+    % need to check if the BG*R^2 term which is missing from the
+    % previous fit will not cause problem when data has too much
+    % noise.
+    [a, b, fval, sa, sb, chi2red, ndf] = fastfit(tmpXX(~isnan(tmpY)),tmpYY(~isnan(tmpY)));
+    disp(['iter= ' num2str(iter) ' nmask=' num2str(nmask) ...
+	  ' a=' num2str(a) ' sa=' num2str(sa) ... 
+	  ' b=' num2str(b) ' sb=' num2str(sb) ... 
+	  ' chi2red=' num2str(chi2red) ' ndf=' num2str(ndf) ]);     
+  
+    % Save some info about the P fit for future analysis
+    out(7 ,nBG,ch)=b;
+    out(8 ,nBG,ch)=sb;
+    out(9 ,nBG,ch)=ndf;
+    out(10,nBG,ch)=a;
+    out(11,nBG,ch)=sa;
+  
+    % Verify if root is in [bg1, bg] or [bg, bg2]
+    if (nBG==1)
+      f1=b;
+    elseif (nBG==2)
+      f2=b;
+    else
+      ['bg1 ' num2str(bg1) ' f1 ' num2str(f1) ' bg2 ' num2str(bg2) ...
+       ' f2 ' num2str(f2) ' bg ' num2str(bg) ' f ' num2str(b) ]
+      if (f1*b<0)
+	f2=b;
+	bg2=bg;
+      else
+	f1=b;
+	bg1=bg;
+      end
+    end
+    nBG=nBG+1;
+
+    figure(25);
+    plot( out(7,:,ch)); hold on;
+    plot( out(8,:,ch),'r');
+    plot(-out(8,:,ch),'r');
+    plot( out(1,:,ch),'g'); hold off;
+    legend('b','+sig','-sig','bg');
+  
+  end % bg convergence loop
+  
+  %% APPLY THE CALCULATED BG
+  P  (:,ch) = P(:,ch)-(bg1+bg2)*0.5;
+  Pr2(:,ch) = P(:,ch).*altsq(:);
+
+  %% SET THE REFERENCE BIN
+  RefBin(ch) = out(6,nBG-1,ch); % heightest used bin
+  
+  %% SAVE MOLECULAR MASK
+  mask_mol(1:maxbin,ch)=~isnan(tmpY);
+  
+  %% SAVE SCALLING
+  scale_mol(ch)=a;
+  
+end % channel loop
 
 %------------------------------------------------------------------------
 %  Plots
@@ -316,7 +288,7 @@ ylabel('height / km','fontsize',12)
 title('Rayleigh Fit 355','fontsize',14)
 grid on
 hold on
-plot(Pr2_mol(1:maxbin,1)*a, alt(1:maxbin)*1e-3,'g','LineWidth',2); 
+plot(Pr2_mol(1:maxbin,1)*scale_mol(1), alt(1:maxbin)*1e-3,'g','LineWidth',2); 
 plot(Pr2(RefBin(1),1), alt(RefBin(1))*1e-3,'r*');
 hold off
 legend('Lidar', 'Rayleigh Fit', 'Reference Bin'); 
@@ -327,7 +299,7 @@ xlabel('range smooth bg-corr signal','fontsize',[10])
 title('Rayleigh Fit 387','fontsize',14)
 grid on
 hold on
-plot(Pr2_mol(1:maxbin,2)*a, alt(1:maxbin)*1e-3,'g','LineWidth',2); 
+plot(Pr2_mol(1:maxbin,2)*scale_mol(2), alt(1:maxbin)*1e-3,'g','LineWidth',2); 
 plot(Pr2(RefBin(2),2), alt(RefBin(2))*1e-3,'r*');
 legend('Lidar', 'Rayleigh Fit', 'Reference Bin'); 
 %
@@ -337,24 +309,24 @@ figure(7)
 xx=xx0+3*wdx; yy=yy0+3*wdy;
 set(gcf,'position',[xx,yy,2*wsx,wsy]); % units in pixels!
 subplot(1,2,1)
-plot(log_Pr2(1:maxbin,1),alt(1:maxbin)*1e-3,'b');    
+plot(log(Pr2(1:maxbin,1)),alt(1:maxbin)*1e-3,'b');    
 xlabel('ln range smooth bg-corr signal','fontsize',[10])  
 ylabel('height / km','fontsize',12)
 title('Rayleigh fit Ln 355' ,'fontsize',14) 
 grid on 
 hold on
-plot(Ray_Fit(1,1:maxbin),alt(1:maxbin)*1e-3,'g','LineWidth',2);   
-plot(log_Pr2(RefBin(1),1), alt(RefBin(1))*1e-3,'r*');
+plot(log(Pr2_mol(1:maxbin,1)*scale_mol(1)),alt(1:maxbin)*1e-3,'g','LineWidth',2);   
+plot(log(Pr2(RefBin(1),1)), alt(RefBin(1))*1e-3,'r*');
 hold off
 %
 subplot(1,2,2)
-plot(log_Pr2(1:maxbin,2),alt(1:maxbin)*1e-3,'b');  
+plot(log(Pr2(1:maxbin,2)),alt(1:maxbin)*1e-3,'b');  
 xlabel('ln range smooth bg-corr signal','fontsize',[10])  
 title('Rayleigh fit Ln 387' ,'fontsize',14) 
 grid on
 hold on
-plot(Ray_Fit(2,1:maxbin),alt(1:maxbin)*1e-3,'g','LineWidth',2);   
-plot(log_Pr2(RefBin(2),2), alt(RefBin(2))*1e-3,'r*');
+plot(log(Pr2_mol(1:maxbin,2)*scale_mol(2)),alt(1:maxbin)*1e-3,'g','LineWidth',2);   
+plot(log(Pr2(RefBin(2),2)), alt(RefBin(2))*1e-3,'r*');
 hold off
 %
 disp('End of program: rayleigh_fit_Manaus.m, Vers. 1.0 06/12')
