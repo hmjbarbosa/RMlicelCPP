@@ -5,6 +5,12 @@
 % as a matlab-structure that span all channels. There are separate
 % output for physical and raw units. Headers are also returned.
 %
+% A test is made to weather all files are in chronological order but
+% only a warning is given on the screen! It is also verified if all
+% file have the same number of channels or if all channels have the
+% same number of bins! In case of differences, empty channels and
+% NaN data are added to the smaller files.
+%
 % Input:
 % 
 %    list: cell array of full path to each data file
@@ -31,11 +37,6 @@
 %
 %   chraw: Same as chphy, but with raw data. 
 %
-% Note:
-%
-% No test is made to weather all files are in chronological order!
-% or even if they all have the same number of channels!! or
-% even more, if all channels have the same number of bins!!!
 %
 % Usage:
 %
@@ -120,8 +121,33 @@ for nf=1:nfile
   % separate data by channel
   % struct variable 'phy' is nz:nfile
   for ch=1:head(nf).nch
-    % NOTE: nf is the index of the file just read. User must pay
-    % atention and provide a list of files in chronological order!
+    if (nf>1)
+      
+      % VERIFY: If number of channels increased
+      if (head(nf).nch > head(nf-1).nch)
+        % If so, add empty channels to each previous file read
+        for t=1:nf-1
+          for i=head(t).nch+1:head(nf).nch
+            head(t).ch(i).active=0;
+            head(t).ch(i).ndata=head(nf-1).ch(1).ndata;
+            chphy(i).data(1:head(t).ch(i).ndata, t)=NaN;
+            chraw(i).data(1:head(t).ch(i).ndata, t)=NaN;
+          end
+          head(t).nch=head(nf).nch;
+        end
+      end
+
+      % VERIFY: If the vector size changes during the day...
+      a=head(nf).ch(ch).ndata;
+      b=head(nf-1).ch(ch).ndata;
+      if (a > b)
+        chphy(ch).data(b+1:a,1:nf-1)=NaN;
+        chraw(ch).data(b+1:a,1:nf-1)=NaN;
+        for t=1:nf-1
+          head(t).ch(ch).ndata=head(nf).ch(ch).ndata;
+        end
+      end
+    end
     chphy(ch).data(:,nf) = tmpphy(:,ch);
     chraw(ch).data(:,nf) = tmpraw(:,ch);
   end
