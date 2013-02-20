@@ -1,4 +1,4 @@
-#!/usr/bin/ksh 
+#!/usr/bin/ksh
 #
 # Search for directories of RM files, which is organized as
 # year/month/day/rm_files, and convert each file there into
@@ -12,8 +12,8 @@
 #
 HOME=/home/hbarbosa/Programs/RMlicelUSP
 
-LIDAR=/media/work/EMBRAPA/lidar
-#LIDAR=/lfa-data/lidar
+#LIDAR=/media/work/EMBRAPA/lidar
+LIDAR=/lfa-data/lidar
 erasefirst='no'
 
 DATA=$LIDAR/data
@@ -31,7 +31,14 @@ for daypath in `find */*/* -type d` ; do
     base=`echo "RM_20${yy}_${mm}_${dd}" `
 
     cd $DATA/$daypath
+
+    # delete any expurious netcdf files in the input directory
     rm -f RM*.nc
+    # if requested, delete files in output directoy
+    if [[ $erasefirst == "yes" ]] ; then
+        rm -f $OUT/$daypath/*.nc
+    fi
+
     for arq in `/bin/ls RM*.???` ; do 
 
         hh=`echo $arq | awk '{print substr($1,8,2)}'`
@@ -39,15 +46,9 @@ for daypath in `find */*/* -type d` ; do
 
         name="${base}_${hh}h${mn}.nc"
 
-        if [[ $erasefirst == "yes" ]] ; then
-            rm -f $OUT/$daypath/${name}
-        fi
-
-        if [ ! -e $OUT/$daypath/${name} ] ; then
-            echo -n "."
-            ${HOME}/rm2nc $arq
-            mv ${name} $OUT/$daypath/
-        fi
+        echo -n "."
+        ${HOME}/rm2nc $arq
+        mv *.nc $OUT/$daypath/
     done
     echo
 done

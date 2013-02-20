@@ -10,7 +10,7 @@
 # User MUST set LIDAR directory, i.e., where to find the lidar files,
 # and HOME dir, i.e., where to find RMlicelUSP files.
 #
-HOME=/home/hbarbosa/Programs/RMlicelUSP
+HOME=/home/hbarbosa/Programs/RMlicelUSP/scripts
 
 #LIDAR=/media/work/EMBRAPA/lidar
 LIDAR=/lfa-data/lidar
@@ -57,7 +57,7 @@ for daypath in `find */*/* -type d` ; do
     fjd=`date -d "$ftime" +%s`
 
     # difference in minutes will give the number of timesteps in CTL
-    minute=`echo "scale=2; ($fjd-$ijd)/60" | bc `
+    minute=`echo "scale=2; ($fjd-$ijd)/60+1" | bc `
     minute=`printf "%.0f\n" $minute`
 
     # create CTL
