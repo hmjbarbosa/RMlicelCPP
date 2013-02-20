@@ -1,3 +1,8 @@
+% Makes a 2D color shaded plot from a matrix. If not give, it will
+% comput the X- and Y-axis automatically, as well as the contour
+% levels. Because built-in contourf() function is VERY slow with
+% large matrices, now we use imsc:
+% http://www.mathworks.com/matlabcentral/fileexchange/16233-sc-powerful-image-rendering
 function [C, h, bar] = gplot2(mat2d, clev, X, Y)
 
 [nz nt] = size(mat2d);
@@ -11,18 +16,17 @@ if ~exist('X','var') X=[1:nt]; end;
 if ~exist('Y','var') Y=[1:nz]; end;
 
 if ~exist('clev','var') || numel(clev)==0
-  q=quantile(max(mat2d), [0.5 0.75]);
-%  dv=(q(2)-q(1))/5;
+  q=quantile(nanmax(mat2d), [0.5 0.75]);
   vmax=q(2);
   dv=vmax/50.;
   clev=[0:dv:vmax];
-%  clev=unique(quantile(reshape(mat2d,nz*nt,1), (0:0.02:0.9)));
 end
-
 [cmap, clim]=cmapclim(clev);
 
-[C, h]=contourf(X, Y, mat2d,clev);
-set(h,'edgecolor','none');
+%[C, h]=contourf(X, Y, mat2d,clev);
+%set(h,'edgecolor','none');
+imsc(X, Y, mat2d,clim,cmap,[1 1 1]);
+set(gca,'YDir','normal');
 
 colormap(min(max(cmap,0),1));
 caxis(clim);
