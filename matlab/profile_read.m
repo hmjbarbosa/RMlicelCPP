@@ -37,42 +37,48 @@ if ~exist('ach','var') ach=0; allch=true; else allch=false; end
 %% OPEN FILE
 fp=fopen(fname,'r');
 
-%% READ HEADER (3 LINES)
+%% READ HEADER LINE #1
 head.file=fscanf(fp,'%s',[1,1]);
+
+%% LINE #2
 head.site=fscanf(fp,'%s',[1,1]);
+
 head.datei=fscanf(fp,'%2d/%2d/%4d',[1,3]); %% DD MM YY
 head.houri=fscanf(fp,'%2d:%2d:%2d',[1,3]); %% hh mn ss
 head.datef=fscanf(fp,'%2d/%2d/%4d',[1,3]); %% DD MM YY
 head.hourf=fscanf(fp,'%2d:%2d:%2d',[1,3]); %% hh mn ss
+head.jdi=datenum([head.datei(3:-1:1) head.houri]);
+head.jdf=datenum([head.datef(3:-1:1) head.hourf]);
+
 head.alt=fscanf(fp,'%d',[1,1]);
-head.lon=fscanf(fp,'%f',[1,1]);
-head.lat=fscanf(fp,'%f',[1,1]);
-head.zen=fscanf(fp,'%d',[1,1]);
-head.idum=fscanf(fp,'%d',[1,1]);
-head.T0=fscanf(fp,'%f',[1,1]);
-head.P0=fscanf(fp,'%f',[1,1]);
+lon=fscanf(fp,'%s',[1,1]);  lon(lon==',')='.'; head.lon=str2num(lon);    
+lat=fscanf(fp,'%s',[1,1]);  lat(lat==',')='.'; head.lat=str2num(lat);    
+zen=fscanf(fp,'%s',[1,1]);  zen(zen==',')='.'; head.zen=str2num(zen);    
+idum=fscanf(fp,'%s',[1,1]); idum(idum==',')='.'; head.idum=str2num(idum);
+T0=fscanf(fp,'%s',[1,1]);   T0(T0==',')='.'; head.T0=str2num(T0);        
+P0=fscanf(fp,'%s',[1,1]);   P0(P0==',')='.'; head.P0=str2num(P0);        
+
+%% LINE #3
 head.nshoots=fscanf(fp,'%d',[1,1]);
 head.nhz=fscanf(fp,'%d',[1,1]);
 head.nshoots2=fscanf(fp,'%d',[1,1]);
 head.nhz2=fscanf(fp,'%d',[1,1]);
 head.nch=fscanf(fp,'%d',[1,1]);
-head.jdi=datenum([head.datei(3:-1:1) head.houri]);
-head.jdf=datenum([head.datef(3:-1:1) head.hourf]);
 
 %% READ CHANNEL LINES
 for i = 1:head.nch
-  head.active (i)=fscanf(fp,'%d',[1,1]);             
-  head.photons(i)=fscanf(fp,'%d',[1,1]);             
-  head.elastic(i)=fscanf(fp,'%d',[1,1]);             
-  head.ndata  (i)=fscanf(fp,'%d 1',[1,1]);           
-  head.pmtv   (i)=fscanf(fp,'%d',[1,1]);             
-  head.binw   (i)=fscanf(fp,'%f',[1,1]);             
-  head.wlen   (i)=fscanf(fp,'%5d.',[1,1]);            
-  head.pol    (i)=fscanf(fp,'%1c 0 0 00 000 ',[1,1]);
-  head.bits   (i)=fscanf(fp,'%d',[1,1]);             
-  head.nshoots(i)=fscanf(fp,'%d',[1,1]);             
-  head.discr  (i)=fscanf(fp,'%f',[1,1]);             
-  head.tr     (i)={fscanf(fp,'%s',[1,1])};
+  head.ch(i).active =fscanf(fp,'%d',[1,1]);             
+  head.ch(i).photons=fscanf(fp,'%d',[1,1]);             
+  head.ch(i).elastic=fscanf(fp,'%d',[1,1]);             
+  head.ch(i).ndata  =fscanf(fp,'%d 1',[1,1]);           
+  head.ch(i).pmtv   =fscanf(fp,'%d',[1,1]);             
+  head.ch(i).binw   =fscanf(fp,'%f',[1,1]);             
+  head.ch(i).wlen   =fscanf(fp,'%5d.',[1,1]);            
+  head.ch(i).pol    =fscanf(fp,'%1c 0 0 00 000 ',[1,1]);
+  head.ch(i).bits   =fscanf(fp,'%d',[1,1]);             
+  head.ch(i).nshoots=fscanf(fp,'%d',[1,1]);             
+  head.ch(i).discr  =fscanf(fp,'%f',[1,1]);             
+  head.ch(i).tr     ={fscanf(fp,'%s',[1,1])};
 end
 
 %% FIND FIRST END OF LINE
@@ -81,8 +87,8 @@ while (a~=10)
   a=fread(fp,1,'schar'); 
 end
 
-nz=head.ndata(1);
 for ch = 1:head.nch
+  nz=head.ch(ch).ndata;
   trash=fread(fp,2,'schar'); 
 
   %% READ RAW CHANNELS
@@ -90,10 +96,10 @@ for ch = 1:head.nch
   
   if (ch==ach | allch)
     % conversion factor from raw to physical units
-    if (head.photons(1,ch)==0)
-      dScale = head.nshoots(1,ch)*2^head.bits(1,ch)/(head.discr(1,ch)*1.e3);
+    if (head.ch(ch).photons==0)
+      dScale = head.ch(ch).nshoots*2^head.ch(ch).bits/(head.ch(ch).discr*1.e3);
     else 
-      dScale = head.nshoots(1,ch)/20.;
+      dScale = head.ch(ch).nshoots/20.;
     end
     tmpphy=tmpraw/dScale;
     
@@ -123,32 +129,32 @@ end
 
 % erase uncessary header
 if ~allch
-  head.active (1)=head.active (ach);
-  head.photons(1)=head.photons(ach);
-  head.elastic(1)=head.elastic(ach);
-  head.ndata  (1)=head.ndata  (ach);
-  head.pmtv   (1)=head.pmtv   (ach);
-  head.binw   (1)=head.binw   (ach);
-  head.wlen   (1)=head.wlen   (ach);
-  head.pol    (1)=head.pol    (ach);
-  head.bits   (1)=head.bits   (ach);
-  head.nshoots(1)=head.nshoots(ach);
-  head.discr  (1)=head.discr  (ach);
-  head.tr     (1)=head.tr     (ach);
+  head.ch(1).active  = head.ch(ach).active ;
+  head.ch(1).photons = head.ch(ach).photons;
+  head.ch(1).elastic = head.ch(ach).elastic;
+  head.ch(1).ndata   = head.ch(ach).ndata  ;
+  head.ch(1).pmtv    = head.ch(ach).pmtv   ;
+  head.ch(1).binw    = head.ch(ach).binw   ;
+  head.ch(1).wlen    = head.ch(ach).wlen   ;
+  head.ch(1).pol     = head.ch(ach).pol    ;
+  head.ch(1).bits    = head.ch(ach).bits   ;
+  head.ch(1).nshoots = head.ch(ach).nshoots;
+  head.ch(1).discr   = head.ch(ach).discr  ;
+  head.ch(1).tr      = head.ch(ach).tr     ;
 
   for i = head.nch:-1:2
-    head.active (i)=[];             
-    head.photons(i)=[];             
-    head.elastic(i)=[];             
-    head.ndata  (i)=[];           
-    head.pmtv   (i)=[];             
-    head.binw   (i)=[];             
-    head.wlen   (i)=[];            
-    head.pol    (i)=[];
-    head.bits   (i)=[];             
-    head.nshoots(i)=[];             
-    head.discr  (i)=[];             
-    head.tr     (i)=[];
+    head.ch(i).active  = [];             
+    head.ch(i).photons = [];             
+    head.ch(i).elastic = [];             
+    head.ch(i).ndata   = [];           
+    head.ch(i).pmtv    = [];             
+    head.ch(i).binw    = [];             
+    head.ch(i).wlen    = [];            
+    head.ch(i).pol     = [];
+    head.ch(i).bits    = [];             
+    head.ch(i).nshoots = [];             
+    head.ch(i).discr   = [];             
+    head.ch(i).tr      = [];
   end
   head.nch=1;
 end
