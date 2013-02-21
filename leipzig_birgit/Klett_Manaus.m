@@ -27,7 +27,6 @@ clear alpha_aero
 % 
 zet_0 = 2;   % bin
 sm_span = 11;  % Range for Savitzky-Golay smoothing  * r_bin
-%hmjb ja definido em read_sonde_Manaus maxbin = 3000; 
 %
 % ***************************************************
 %  set reference values for alpha und beta Particle 
@@ -43,17 +42,14 @@ for j=1:1
   % ----------------------------                
   %  use range corrected signal
   % ----------------------------
-  rc_signal(j,:) = Pr2(:,j);
+  rc_signal(:,j) = Pr2(:,j);
   %  
-  %  Ref_Bin = min(RefBin); 
-  Ref_Bin = RefBin(j); 
-  %
   % ***********************************
   %  Backscatter coefficient: beta_par
   % ***********************************
   %   
-  beta_par(j,Ref_Bin-1) = beta_par(j,Ref_Bin); 
-  beta_bv(j) = beta_par(j,Ref_Bin)+ beta_mol(Ref_Bin,j);
+  beta_par(j,RefBin(1)-1) = beta_par(j,RefBin(1)); 
+  beta_bv(j) = beta_par(j,RefBin(1))+ beta_mol(RefBin(1),j);
 
   % -------------------------------------------------------------------------
   %  Klett (Equ. 20; 1985):
@@ -62,14 +58,14 @@ for j=1:1
   % -------------------------------------------------------------------------
   %  Fernald, AO, 1984
   %
-  ext_ave =(alpha_mol(Ref_Bin,j) + alpha_mol(Ref_Bin-1,j)) * r_bin;
-  fkt1(Ref_Bin) = ext_ave; 
-  fkt2(Ref_Bin) = ext_ave/LR_mol(j) * LR_par(j,Ref_Bin); 
+  ext_ave =(alpha_mol(RefBin(1),j) + alpha_mol(RefBin(1)-1,j)) * r_bin;
+  fkt1(RefBin(1)) = ext_ave; 
+  fkt2(RefBin(1)) = ext_ave/LR_mol(j) * LR_par(j,RefBin(1)); 
   % 
   %  +++++++++++++++++++++++
   %   backward integration
   %  +++++++++++++++++++++++
-  for i=Ref_Bin-1 : -1 : zet_0
+  for i=RefBin(1)-1 : -1 : zet_0
     ext_ave = (alpha_mol(i,j) + alpha_mol(i-1,j)) * r_bin; 
     fkt1(i) = fkt1(i+1) + ext_ave; 
     fkt2(i) = fkt2(i+1) + ext_ave/LR_mol(j) * LR_par(j,i); 
@@ -79,28 +75,28 @@ for j=1:1
   % -----------------------------------------------------------------------
   %  zfkt: exp(S'-Sm') after Klett (Equ. 22)(Paper 1985) = S-Sm+fkt1-fkt2 
   % -----------------------------------------------------------------------
-  for i=zet_0:Ref_Bin
-    zfkt(i)=rc_signal(j,i)/rc_signal(j,Ref_Bin)/exp(fkt1(i))*exp(fkt2(i));
+  for i=zet_0:RefBin(1)
+    zfkt(i)=rc_signal(i,j)/rc_signal(RefBin(1),j)/exp(fkt1(i))*exp(fkt2(i));
   end
   %
   % Integral in denominator (2. summand); 2 cancels with 1/2 mean value 
   
-%hmjb nfkt(Ref_Bin)=zfkt(Ref_Bin)*r_bin/LR_par(j,Ref_Bin); 
-  nfkt(Ref_Bin)=(zfkt(Ref_Bin)+zfkt(Ref_Bin-1))*r_bin/LR_par(j,Ref_Bin); 
-  for i=Ref_Bin-1: -1 : zet_0
+%hmjb nfkt(RefBin(1))=zfkt(RefBin(1))*r_bin/LR_par(j,RefBin(1)); 
+  nfkt(RefBin(1))=(zfkt(RefBin(1))+zfkt(RefBin(1)-1))*r_bin/LR_par(j,RefBin(1)); 
+  for i=RefBin(1)-1: -1 : zet_0
     nfkt(i)=nfkt(i+1)+(zfkt(i)+zfkt(i+1))*r_bin*LR_par(j,i); 
   end
   % 
   % Klett 1985, Equ. (22)
   %
-  for i=Ref_Bin-1 : -1 : zet_0+1
+  for i=RefBin(1)-1 : -1 : zet_0+1
     beta_aero(j,i) = zfkt(i)/(1./beta_bv(j) + nfkt(i)); 
   end
   %  
   %  +++++++++++++++++++++++
   %    forward integration
   %  +++++++++++++++++++++++
-  for i=Ref_Bin : maxbin-1
+  for i=RefBin(1) : maxbin-1
     ext_ave = (alpha_mol(i,j) + alpha_mol(i+1,j)) * r_bin; 
     fkt1(i) = fkt1(i-1) + ext_ave; 
     fkt2(i) = fkt2(i-1) + ext_ave/LR_mol(j) * LR_par(j,i); 
@@ -109,28 +105,28 @@ for j=1:1
   % -----------------------------------------------------------------------
   %  zfkt: exp(S'-Sm') after Klett (Equ. 22)(Paper 1985) = S-Sm+fkt1-fkt2 
   % -----------------------------------------------------------------------
-  for i=Ref_Bin : maxbin-1
-    zfkt(i)=rc_signal(j,i)/rc_signal(j,Ref_Bin)/exp(fkt1(i))*exp(fkt2(i));
+  for i=RefBin(1) : maxbin-1
+    zfkt(i)=rc_signal(i,j)/rc_signal(RefBin(1),j)/exp(fkt1(i))*exp(fkt2(i));
   end
   %
   % Integral in denominator (2. summand); 2 cancels with 1/2 mean value 
   
-%hmjb nfkt(Ref_Bin)=zfkt(Ref_Bin)*r_bin/LR_par(j,Ref_Bin); 
-  nfkt(Ref_Bin)=(zfkt(Ref_Bin)+zfkt(Ref_Bin-1))*r_bin/LR_par(j,Ref_Bin); 
-  for i=Ref_Bin : maxbin-1
+%hmjb nfkt(RefBin(1))=zfkt(RefBin(1))*r_bin/LR_par(j,RefBin(1)); 
+  nfkt(RefBin(1))=(zfkt(RefBin(1))+zfkt(RefBin(1)-1))*r_bin/LR_par(j,RefBin(1)); 
+  for i=RefBin(1) : maxbin-1
     nfkt(i)=nfkt(i-1)+(zfkt(i)+zfkt(i-1))*r_bin*LR_par(j,i); 
   end
   % 
   % Klett 1985, Equ. (22)
   %
-  for i=Ref_Bin : maxbin-1
+  for i=RefBin(1) : maxbin-1
     beta_aero(j,i) = zfkt(i)/(1./beta_bv(j) + nfkt(i)); 
   end
   % +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   % ---------------------
   % Backscatter profile
   % ---------------------
-  %for i=1:Ref_Bin-1
+  %for i=1:RefBin(1)-1
   for i=1:maxbin-1
     if i <= zet_0
       beta_aerosol(j,i) = NaN; 
@@ -154,7 +150,7 @@ end
 %----------
 %  Plots
 %----------
-rb = Ref_Bin; 
+rb = RefBin(1); 
 %
 %----------
 %   355

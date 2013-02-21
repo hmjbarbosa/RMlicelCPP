@@ -9,11 +9,10 @@
 %       read_ascii_Manaus.m 
 %       read_sonde_Manaus.m
 % ---------------------------------------------------
-clear maxbin beta_mol alpha_mol out nn 
-clear xl_scal_1 xu_scal_1 xl_scal_2 xu_scal_2 xl_scal_3 xu_scal_3
-clear meanRaySig meanPr2 SigFak RaySig log_Pr2 Ray_Fit
-clear RefBin diff_1 abst_1 diff_2 abst_2 diff_3 abst_3
+clear maxbin beta_mol alpha_mol out nn RefBin
 % ---------------------------------------------------
+
+DEBUG=2;
 
 %%------------------------------------------------------------------------
 %%  INTERPOLATION TO LIDAR SAMPLING ALTITUDES
@@ -60,9 +59,7 @@ for j = 1:2
     if i==1
       tau(i,j) = alpha_mol(i,j)*r_bin; 
     else
-%hmjb try to use trapezium rule
-%      tau(j,i) = tau(j,i-1)+alpha_mol(i,j)*r_bin; 
-      tau(i,j) = tau(i-1,j)+(alpha_mol(i,j)+alpha_mol(i,j))*r_bin/2; 
+      tau(i,j) = tau(i-1,j)+(alpha_mol(i-1,j)+alpha_mol(i,j))*r_bin/2; 
     end
   end
 end
@@ -82,7 +79,7 @@ for j = 1:2
 end
 
 %%------------------------------------------------------------------------
-%% 
+%%  LOOP ON BACKGROUND CORRECTION AND RAYLEIGH FIT
 %%------------------------------------------------------------------------
 
 % for elastic and raman channels
@@ -91,10 +88,10 @@ for ch=1:2
   % LOOP ON BACKGROUND CORRECTION
   %
   % This is a 1-D numerical algorithm for finding a root, ie, b=0
-  % after the rayleigh by changing the parameter BG. First step is to
-  % bracket the function, ie, to find limits for our parameter such
-  % that func(param1) < 0 and func(param2) > 0 or vice-versa. If
-  % this is the case, we know the root is between these values.
+  % after the rayleigh fit, by changing the parameter BG. First step is
+  % to bracket the function, ie, to find limits for our parameter such
+  % that func(param1) < 0 and func(param2) > 0 or vice-versa. If this
+  % is the case, we know the root is between these values.
   pmin=nanmin(P(rangebins-100:rangebins,ch));
   pmax=nanmax(P(rangebins-100:rangebins,ch));
   pave=nanmean(P(rangebins-100:rangebins,ch));
@@ -143,8 +140,8 @@ for ch=1:2
     % Initialize counters for the number of NaN data points
     nmask=sum(isnan(tmpY)); nmask_old=-1;
 
-    % LOOP ON MOLECULAR REGION
-    % Convergence will stop when not more points are removed base
+    % LOOP ON RAYLEIGH FIT
+    % Convergence will stop when no more points are removed based
     % on the criteria stablished below
     iter=0;
     while(nmask_old ~= nmask)
@@ -174,6 +171,11 @@ for ch=1:2
       iter=iter+1; 
     end
     
+    disp(['iter= ' num2str(iter) ' nmask=' num2str(nmask) ...
+	  ' a=' num2str(a) ' sa=' num2str(sa) ... 
+	  ' b=' num2str(b) ' sb=' num2str(sb) ... 
+	  ' chi2red=' num2str(chi2red) ' ndf=' num2str(ndf) ]); 
+
     figure(24); clf; hold off;
     scatter(tmpX(~isnan(tmpY)),tmpY(~isnan(tmpY)),10,tmpZ(~isnan(tmpY)));
     hold on; grid on;
@@ -198,7 +200,8 @@ for ch=1:2
     % need to check if the BG*R^2 term which is missing from the
     % previous fit will not cause problem when data has too much
     % noise.
-    [a, b, fval, sa, sb, chi2red, ndf] = fastfit(tmpXX(~isnan(tmpY)),tmpYY(~isnan(tmpY)));
+    [a, b, fval, sa, sb, chi2red, ndf] = fastfit(...
+	tmpXX(~isnan(tmpY)),tmpYY(~isnan(tmpY)));
     disp(['iter= ' num2str(iter) ' nmask=' num2str(nmask) ...
 	  ' a=' num2str(a) ' sa=' num2str(sa) ... 
 	  ' b=' num2str(b) ' sb=' num2str(sb) ... 
