@@ -91,8 +91,8 @@ hold on
 % Raman 
 plot(aero_ext_raman(bin1st:rb),alt(bin1st:rb)*1e-3,'b','LineWidth',2);
 plot(aero_ext_raman_sm(bin1st:rb),alt(bin1st:rb)*1e-3,'r');
-plot(alpha_aerosol(RefBin(1)), alt(RefBin(1))*1e-3,'r*');
-plot(alpha_aerosol(RefBin(2)), alt(RefBin(2))*1e-3,'g*');
+%plot(alpha_aerosol(RefBin(1)), alt(RefBin(1))*1e-3,'r*');
+%plot(alpha_aerosol(RefBin(2)), alt(RefBin(2))*1e-3,'g*');
 legend('Klett', 'Raman', 'RefBin 355', 'RefBin 387')
 hold off
 %

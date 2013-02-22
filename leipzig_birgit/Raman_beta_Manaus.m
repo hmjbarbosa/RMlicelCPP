@@ -115,8 +115,8 @@ grid on
 hold on
 % Raman
 plot(beta_raman_sm(bin1st:rbbr(1)), alt(bin1st:rbbr(1)).*1e-3,'b','LineWidth',2)
-plot(beta_aerosol_sm(RefBin(1)), alt(RefBin(1))*1e-3,'r*');
-plot(beta_aerosol_sm(RefBin(2)), alt(RefBin(2))*1e-3,'g*');
+%plot(beta_aerosol_sm(RefBin(1)), alt(RefBin(1))*1e-3,'r*');
+%plot(beta_aerosol_sm(RefBin(2)), alt(RefBin(2))*1e-3,'g*');
 legend('Klett', 'Raman', 'RefBin 355', 'RefBin 387')
 hold off
 %  

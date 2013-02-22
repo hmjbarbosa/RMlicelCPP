@@ -103,8 +103,8 @@ for ch=1:2
   % convergence criteria is meet when size of this interval
   % (i.e. uncertainty in the value of BG, our parameter) becomes small
   % enough compared to BG itself.
-  nBG=1;
-  while(abs((bg1-bg2)/(bg1+bg2)) > 1e-3)
+  nBG=1; sb=1e-10;
+  while(abs((bg1-bg2)/(bg1+bg2)) > 1e-3 & abs(bg1-bg2) > sb)
 
     % At this point we do not know yet f1=func(bg1) or f2=func(bg2)
     % In principle, the estimation above should do it, but right
