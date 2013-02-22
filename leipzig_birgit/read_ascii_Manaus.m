@@ -59,7 +59,7 @@ disp(['Number of files found: ' int2str(nfiles)]);
 
 % loop over each file to be read
 tic
-for i=1:1
+for i=36:36
 %for i=1:nfiles
   clear M;
   disp (['File #' int2str(i) ' ' filenames{i}]);

@@ -9,7 +9,11 @@
 %       read_ascii_Manaus.m 
 %       read_sonde_Manaus.m
 % ---------------------------------------------------
-clear maxbin beta_mol alpha_mol out nn RefBin
+clear maxbin beta_mol alpha_mol tau P_mol Pr2_mol
+clear pmin pmax pave bg1 bg2 nBG 
+clear tmpX tmpY tmpZ tmpXX tmpYY
+clear fval a b sa sb chi2red ndf distance nmask
+clear out nn RefBin
 % ---------------------------------------------------
 
 DEBUG=2;
@@ -20,15 +24,17 @@ DEBUG=2;
 
 toextrapolate=0;
 
+lidar_altitude=100;
+
 if toextrapolate==0
   % Set maximum lidar bin to highest altitude of sounding 
-  maxbin=floor(alt_snd(nlev_snd)*1e-3/r_bin);
+  maxbin=floor((alt_snd(nlev_snd)-lidar_altitude)*1e-3/r_bin);
 
   % Simple linear interpolation within the souding range
   beta_mol(:,1) = interp1(alt_snd, beta_mol_snd(:,1), ... 
-			      alt(1:maxbin),'linear','extrap');
+			  alt(1:maxbin)+lidar_altitude,'linear','extrap');
   beta_mol(:,2) = interp1(alt_snd, beta_mol_snd(:,2), ...
-			      alt(1:maxbin),'linear','extrap');
+			  alt(1:maxbin)+lidar_altitude,'linear','extrap');
 else
   % Set maximum lidar bin to total number of bins
   maxbin = size(Pr2,1);
@@ -38,9 +44,9 @@ else
   % lead to negative (unphysical) values. Hence interpolation is done in
   % log() and then the exp() of the result is taken.
   beta_mol(:,1) = exp(interp1(alt_snd, log(beta_mol_snd(:,1)), ... 
-			      alt(1:maxbin),'linear','extrap'));
+			      alt(1:maxbin)+lidar_altitude,'linear','extrap'));
   beta_mol(:,2) = exp(interp1(alt_snd, log(beta_mol_snd(:,2)), ...
-			      alt(1:maxbin),'linear','extrap'));
+			      alt(1:maxbin)+lidar_altitude,'linear','extrap'));
 end
 
 %%------------------------------------------------------------------------
@@ -124,7 +130,7 @@ for ch=1:2
     tmpYY=P      (1:maxbin,ch)-bg;
     tmpX =Pr2_mol(1:maxbin,ch);
     tmpY =Pr2    (1:maxbin,ch)-bg*altsq(1:maxbin);
-    tmpZ =       (1:maxbin);
+    tmpZ =alt    (1:maxbin)*1e-3;
 
     figure(23); clf;
     scatter(tmpX,tmpY,10,tmpZ);
@@ -132,7 +138,7 @@ for ch=1:2
     hold on; grid on; colorbar;
 
     % Calculate the local derivative using a running linear fit
-    pathlen=500; % meters
+    pathlen=1000; % meters
     npath=floor(pathlen*1e-3/2/r_bin);
     [fval, a]=runfit2(tmpY, tmpX, npath, npath);
     slope=atan(a);
@@ -151,9 +157,9 @@ for ch=1:2
       [a, b, fval, sa, sb, chi2red, ndf] = fastfit(tmpX,tmpY);
       % For each point, exclude those which are too far away
       distance=abs(tmpY-fval)./sqrt(chi2red); 
-      tmpY(distance>2)=nan;
+      tmpY(distance>2.5)=nan;
       % For each point, exclude those not aligned
-      tmpY(abs(slope-atan(a))>pi/2.)=nan;
+%      tmpY(abs(slope-atan(a))>pi/2.)=nan;
       % Recompute the mask counter
       nmask=sum(isnan(tmpY));
     
@@ -162,11 +168,11 @@ for ch=1:2
 	    ' b=' num2str(b) ' sb=' num2str(sb) ... 
 	    ' chi2red=' num2str(chi2red) ' ndf=' num2str(ndf) ]); 
     
-      figure(24); clf; hold off;
-      scatter(tmpX(~isnan(tmpY)),tmpY(~isnan(tmpY)),10,tmpZ(~isnan(tmpY)));
-      hold on; grid on;
-      plot(tmpX(~isnan(tmpY)),tmpX(~isnan(tmpY))*a+b,'r');
-      xlabel('Pr2 mol'); ylabel('Pr2 and Fit');
+%      figure(24); clf; hold off;
+%      scatter(tmpX(~isnan(tmpY)),tmpY(~isnan(tmpY)),10,tmpZ(~isnan(tmpY)));
+%      hold on; grid on;
+%      plot(tmpX(~isnan(tmpY)),tmpX(~isnan(tmpY))*a+b,'r');
+%      xlabel('Pr2 mol'); ylabel('Pr2 and Fit');
       
       iter=iter+1; 
     end
@@ -187,8 +193,8 @@ for ch=1:2
   
     % Save some info about the Pr2 fit for future analysis
     tmpZ(isnan(tmpY))=NaN;
-    ['lowest used bin #' num2str(min(tmpZ)) ' at height=' num2str(alt(min(tmpZ))) ]
-    ['highest used bin #' num2str(max(tmpZ)) ' at height=' num2str(alt(max(tmpZ))) ]
+    ['lowest used bin #' num2str(min(tmpZ)) ' at height=' num2str((min(tmpZ))) ]
+    ['highest used bin #' num2str(max(tmpZ)) ' at height=' num2str((max(tmpZ))) ]
     out(1,nBG,ch)=bg;
     out(2,nBG,ch)=iter;
     out(3,nBG,ch)=nmask;
@@ -244,15 +250,16 @@ for ch=1:2
   %% APPLY THE CALCULATED BG
   P  (:,ch) = P(:,ch)-(bg1+bg2)*0.5;
   Pr2(:,ch) = P(:,ch).*altsq(:);
+  
+  %% APPLY THE CALCULATED SCALLING
+  P_mol(1:maxbin,ch) = P_mol(1:maxbin,ch)*a;
+  Pr2_mol(1:maxbin,ch) = P_mol(1:maxbin,ch).*altsq(1:maxbin);
 
   %% SET THE REFERENCE BIN
-  RefBin(ch) = out(6,nBG-1,ch); % heightest used bin
+  RefBin(ch) = floor((out(5,nBG-1,ch)+out(6,nBG-1,ch))*0.5/r_bin); 
   
   %% SAVE MOLECULAR MASK
   mask_mol(1:maxbin,ch)=~isnan(tmpY);
-  
-  %% SAVE SCALLING
-  scale_mol(ch)=a;
   
 end % channel loop
 
@@ -291,7 +298,7 @@ ylabel('height / km','fontsize',12)
 title('Rayleigh Fit 355','fontsize',14)
 grid on
 hold on
-plot(Pr2_mol(1:maxbin,1)*scale_mol(1), alt(1:maxbin)*1e-3,'g','LineWidth',2); 
+plot(Pr2_mol(1:maxbin,1), alt(1:maxbin)*1e-3,'g','LineWidth',2); 
 plot(Pr2(RefBin(1),1), alt(RefBin(1))*1e-3,'r*');
 hold off
 legend('Lidar', 'Rayleigh Fit', 'Reference Bin'); 
@@ -302,7 +309,7 @@ xlabel('range smooth bg-corr signal','fontsize',[10])
 title('Rayleigh Fit 387','fontsize',14)
 grid on
 hold on
-plot(Pr2_mol(1:maxbin,2)*scale_mol(2), alt(1:maxbin)*1e-3,'g','LineWidth',2); 
+plot(Pr2_mol(1:maxbin,2), alt(1:maxbin)*1e-3,'g','LineWidth',2); 
 plot(Pr2(RefBin(2),2), alt(RefBin(2))*1e-3,'r*');
 legend('Lidar', 'Rayleigh Fit', 'Reference Bin'); 
 %
@@ -318,7 +325,7 @@ ylabel('height / km','fontsize',12)
 title('Rayleigh fit Ln 355' ,'fontsize',14) 
 grid on 
 hold on
-plot(log(Pr2_mol(1:maxbin,1)*scale_mol(1)),alt(1:maxbin)*1e-3,'g','LineWidth',2);   
+plot(log(Pr2_mol(1:maxbin,1)),alt(1:maxbin)*1e-3,'g','LineWidth',2);   
 plot(log(Pr2(RefBin(1),1)), alt(RefBin(1))*1e-3,'r*');
 hold off
 %
@@ -328,7 +335,7 @@ xlabel('ln range smooth bg-corr signal','fontsize',[10])
 title('Rayleigh fit Ln 387' ,'fontsize',14) 
 grid on
 hold on
-plot(log(Pr2_mol(1:maxbin,2)*scale_mol(2)),alt(1:maxbin)*1e-3,'g','LineWidth',2);   
+plot(log(Pr2_mol(1:maxbin,2)),alt(1:maxbin)*1e-3,'g','LineWidth',2);   
 plot(log(Pr2(RefBin(2),2)), alt(RefBin(2))*1e-3,'r*');
 hold off
 %
