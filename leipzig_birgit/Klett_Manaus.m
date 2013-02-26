@@ -33,18 +33,18 @@ sm_span = 11;  % Range for Savitzky-Golay smoothing  * r_bin
 LR_par(1,1:maxbin) = 55;
 LR_par(2,1:maxbin) = 55;
 
-j=1; n=0;   
-for k=1:maxbin-1
-  if (mask_mol(k,1)==0)
-    trychi2(k)=nan;
-    continue;
-  else
-    n=n+1;
-    RefBin(1)=k;
-    trybin(n)=k;
-  end
-%for k=1:1
-%RefBin(1)=2200;
+%j=1; n=0;   
+%for k=1:maxbin-1
+%  if (mask_mol(k,1)==0)
+%    trychi2(k)=nan;
+%    continue;
+%  else
+%    n=n+1;
+%    RefBin(1)=k;
+%    trybin(n)=k;
+%  end
+for k=1:1
+RefBin(1)=1800;
   
   % -------------------------------------------------------------------------
   %  Klett (Equ. 20; 1985):
