@@ -9,7 +9,7 @@ wdy=0;   yy0=50;
 % read physics constants
 constants
 
-read_ascii_Manaus
+read_ascii_Manaus2
 read_sonde_Manaus
 molecular
 rayleigh_fit_Manaus
