@@ -187,7 +187,7 @@ plot(beta_mol (1:maxbin-1,1), alt(1:maxbin-1).*1e-3,'g','Linewidth',1);
 plot(beta_aerosol_sm(1,1:maxbin-1), alt(1:maxbin-1).*1e-3,'b','Linewidth',1); 
 plot(beta_aerosol(1,RefBin(1)), alt(RefBin(1)).*1e-3,'r*');
 legend('Total', 'Molecular', 'Klett', 'Reference Bin'); 
-plot(bb(1:maxbin-1), alt(1:maxbin-1).*1e-3,'k','Linewidth',2);
+%plot(bb(1:maxbin-1), alt(1:maxbin-1).*1e-3,'k','Linewidth',2);
 hold off
 %  end of program
 disp('End of program: Klett_Manaus.m, Vers. 1.0 06/12')

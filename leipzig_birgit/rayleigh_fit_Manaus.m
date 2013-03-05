@@ -103,6 +103,7 @@ for ch=1:2
   pave=nanmean(P(rangebins-100:rangebins,ch));
   bg1=pave+10*(pmax-pmin);
   bg2=pave-10*(pmax-pmin);
+%  bg2=50;
 
   % In each step of the loop, we will divide the interval in half, and
   % calculate the function in between, and then choose one side. The
@@ -110,7 +111,8 @@ for ch=1:2
   % (i.e. uncertainty in the value of BG, our parameter) becomes small
   % enough compared to BG itself.
   nBG=1; sb=1e-10;
-  while(abs((bg1-bg2)/(bg1+bg2)) > 1e-3 & abs(bg1-bg2) > sb)
+  while(abs((bg1-bg2)/(bg1+bg2)) > 1e-4 & abs(bg1-bg2) > sb)
+%  while(nBG<20)
 
     % At this point we do not know yet f1=func(bg1) or f2=func(bg2)
     % In principle, the estimation above should do it, but right
@@ -124,6 +126,12 @@ for ch=1:2
     else
       bg=(bg1+bg2)*0.5;
     end
+    
+%    bg=49+nBG/10;
+    
+    disp(['%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%']);
+    disp(['% ch= ' num2str(ch) '  trying BG= ' num2str(bg) ]);
+    disp(['%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%']);
 
     % Select data from a channel and apply the correction
     tmpXX=P_mol  (1:maxbin,ch);
@@ -132,17 +140,19 @@ for ch=1:2
     tmpY =Pr2    (1:maxbin,ch)-bg*altsq(1:maxbin);
     tmpZ =alt    (1:maxbin)*1e-3;
 
+    tmpY(1:1800)=NaN;
+    
     figure(23); clf;
     scatter(tmpX,tmpY,10,tmpZ);
     xlabel('Pr2 molecular'); ylabel('Pr2 lidar');
     hold on; grid on; colorbar;
 
-    % Calculate the local derivative using a running linear fit
-    pathlen=1000; % meters
-    npath=floor(pathlen*1e-3/2/r_bin);
-    [fval, a]=runfit2(tmpY, tmpX, npath, npath);
-    slope=atan(a);
-  
+%    % Calculate the local derivative using a running linear fit
+%    pathlen=1000; % meters
+%    npath=floor(pathlen*1e-3/2/r_bin);
+%    [fval, a]=runfit2(tmpY, tmpX, npath, npath);
+%    slope=atan(a);
+%  
     % Initialize counters for the number of NaN data points
     nmask=sum(isnan(tmpY)); nmask_old=-1;
 
@@ -216,7 +226,7 @@ for ch=1:2
     % Save some info about the P fit for future analysis
     out(7 ,nBG,ch)=b;
     out(8 ,nBG,ch)=sb;
-    out(9 ,nBG,ch)=ndf;
+    out(9 ,nBG,ch)=chi2red;
     out(10,nBG,ch)=a;
     out(11,nBG,ch)=sa;
   
