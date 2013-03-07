@@ -17,6 +17,7 @@ clear out nn RefBin
 % ---------------------------------------------------
 
 DEBUG=2;
+error=0;
 
 %%------------------------------------------------------------------------
 %%  INTERPOLATION TO LIDAR SAMPLING ALTITUDES
@@ -101,8 +102,9 @@ for ch=1:2
   pmin=nanmin(P(rangebins-100:rangebins,ch));
   pmax=nanmax(P(rangebins-100:rangebins,ch));
   pave=nanmean(P(rangebins-100:rangebins,ch));
-  bg1=pave+10*(pmax-pmin);
-  bg2=pave-10*(pmax-pmin);
+  bg1=pave-10*(pmax-pmin);
+  bg2=pave;
+  bg3=pave+10*(pmax-pmin);
 %  bg2=50;
 
   % In each step of the loop, we will divide the interval in half, and
@@ -111,7 +113,8 @@ for ch=1:2
   % (i.e. uncertainty in the value of BG, our parameter) becomes small
   % enough compared to BG itself.
   nBG=1; sb=1e-10;
-  while(abs((bg1-bg2)/(bg1+bg2)) > 1e-4 & abs(bg1-bg2) > sb)
+  while(abs((bg1-bg2)/(bg1+bg2)) > 1e-6)
+%  while(abs((bg1-bg2)/(bg1+bg2)) > 1e-4 & abs(bg1-bg2) > sb)
 %  while(nBG<20)
 
     % At this point we do not know yet f1=func(bg1) or f2=func(bg2)
@@ -123,11 +126,17 @@ for ch=1:2
       bg=bg1;
     elseif(nBG==2)
       bg=bg2;
+    elseif(nBG==3)
+      bg=bg3;
     else
-      bg=(bg1+bg2)*0.5;
+      if (bg2-bg1 < bg3-bg2)
+        bg=bg2+0.38*(bg3-bg2);
+      else
+        bg=bg2-0.38*(bg2-bg1);
+      end
     end
     
-%    bg=49+nBG/10;
+%    bg=49.8+0.4*nBG/20;
     
     disp(['%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%']);
     disp(['% ch= ' num2str(ch) '  trying BG= ' num2str(bg) ]);
@@ -178,11 +187,11 @@ for ch=1:2
 	    ' b=' num2str(b) ' sb=' num2str(sb) ... 
 	    ' chi2red=' num2str(chi2red) ' ndf=' num2str(ndf) ]); 
     
-%      figure(24); clf; hold off;
-%      scatter(tmpX(~isnan(tmpY)),tmpY(~isnan(tmpY)),10,tmpZ(~isnan(tmpY)));
-%      hold on; grid on;
-%      plot(tmpX(~isnan(tmpY)),tmpX(~isnan(tmpY))*a+b,'r');
-%      xlabel('Pr2 mol'); ylabel('Pr2 and Fit');
+      figure(24); clf; hold off;
+      scatter(tmpX(~isnan(tmpY)),tmpY(~isnan(tmpY)),10,tmpZ(~isnan(tmpY)));
+      hold on; grid on;
+      plot(tmpX(~isnan(tmpY)),tmpX(~isnan(tmpY))*a+b,'r');
+      xlabel('Pr2 mol'); ylabel('Pr2 and Fit');
       
       iter=iter+1; 
     end
@@ -200,7 +209,7 @@ for ch=1:2
     colorbar;
     
     figure(23); plot(Pr2_mol(1:maxbin,ch),Pr2_mol(1:maxbin,ch)*a+b,'r');
-  
+
     % Save some info about the Pr2 fit for future analysis
     tmpZ(isnan(tmpY))=NaN;
     ['lowest used bin #' num2str(min(tmpZ)) ' at height=' num2str((min(tmpZ))) ]
@@ -222,7 +231,15 @@ for ch=1:2
 	  ' a=' num2str(a) ' sa=' num2str(sa) ... 
 	  ' b=' num2str(b) ' sb=' num2str(sb) ... 
 	  ' chi2red=' num2str(chi2red) ' ndf=' num2str(ndf) ]);     
-  
+
+    figure(26); clf;
+    scatter(tmpXX(~isnan(tmpY)),tmpYY(~isnan(tmpY)),10,tmpZ(~isnan(tmpY)));
+    xlabel('P molecular'); ylabel('P lidar');
+    hold on; grid on; colorbar;
+    plot(tmpXX(~isnan(tmpY)),tmpXX(~isnan(tmpY))*a+b,'r');
+    tmp=axis(); tmp(3)=-0.2; tmp(4)=0.8;
+    axis(tmp); 
+
     % Save some info about the P fit for future analysis
     out(7 ,nBG,ch)=b;
     out(8 ,nBG,ch)=sb;
@@ -231,19 +248,39 @@ for ch=1:2
     out(11,nBG,ch)=sa;
   
     % Verify if root is in [bg1, bg] or [bg, bg2]
+    f=out(4,nBG,ch);
     if (nBG==1)
-      f1=b;
+      f1=f;
     elseif (nBG==2)
-      f2=b;
+      f2=f;
+    elseif (nBG==3)
+      f3=f;
     else
-      ['bg1 ' num2str(bg1) ' f1 ' num2str(f1) ' bg2 ' num2str(bg2) ...
-       ' f2 ' num2str(f2) ' bg ' num2str(bg) ' f ' num2str(b) ]
-      if (f1*b<0)
-	f2=b;
-	bg2=bg;
+      [' bg1 ' num2str(bg1) ' f1 ' num2str(f1) ...
+       ' bg2 ' num2str(bg2) ' f2 ' num2str(f2) ....
+       ' bg3 ' num2str(bg2) ' f3 ' num2str(f3) ....
+       ' bg  ' num2str(bg)  ' f '  num2str(f) ]
+
+      if (bg2-bg1 < bg3-bg2)
+        if (f2 < f)
+          bg3=bg;
+          f3=f;
+        else
+          bg1=bg2;
+          f1=f2;
+          bg2=bg;
+          f2=f;
+        end
       else
-	f1=b;
-	bg1=bg;
+        if (f2 < f)
+          bg1=bg;
+          f1=f;
+        else
+          bg3=bg2;
+          f3=f2;
+          bg2=bg;
+          f2=f;
+        end
       end
     end
     nBG=nBG+1;
@@ -257,6 +294,10 @@ for ch=1:2
   
   end % bg convergence loop
   
+  disp(['%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%']);
+  disp(['% ch= ' num2str(ch) '  last BG= ' num2str(bg1) ' ' num2str(bg2) ]);
+  disp(['%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%']);
+
   %% APPLY THE CALCULATED BG
   P  (:,ch) = P(:,ch)-(bg1+bg2)*0.5;
   Pr2(:,ch) = P(:,ch).*altsq(:);
