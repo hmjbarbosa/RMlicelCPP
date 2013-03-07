@@ -90,7 +90,7 @@ end
 %%------------------------------------------------------------------------
 
 % for elastic and raman channels
-for ch=1:2
+for ch=1:1
   
   % LOOP ON BACKGROUND CORRECTION
   %
@@ -113,9 +113,9 @@ for ch=1:2
   % (i.e. uncertainty in the value of BG, our parameter) becomes small
   % enough compared to BG itself.
   nBG=1; sb=1e-10;
-  while(abs((bg1-bg2)/(bg1+bg2)) > 1e-6)
+%  while(abs((bg1-bg2)/(bg1+bg2)) > 1e-6)
 %  while(abs((bg1-bg2)/(bg1+bg2)) > 1e-4 & abs(bg1-bg2) > sb)
-%  while(nBG<20)
+  while(nBG<40)
 
     % At this point we do not know yet f1=func(bg1) or f2=func(bg2)
     % In principle, the estimation above should do it, but right
@@ -136,7 +136,7 @@ for ch=1:2
       end
     end
     
-%    bg=49.8+0.4*nBG/20;
+    bg=0+100*nBG/40;
     
     disp(['%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%']);
     disp(['% ch= ' num2str(ch) '  trying BG= ' num2str(bg) ]);
@@ -145,11 +145,11 @@ for ch=1:2
     % Select data from a channel and apply the correction
     tmpXX=P_mol  (1:maxbin,ch);
     tmpYY=P      (1:maxbin,ch)-bg;
-    tmpX =Pr2_mol(1:maxbin,ch);
-    tmpY =Pr2    (1:maxbin,ch)-bg*altsq(1:maxbin);
+    tmpX =tmpXX;%Pr2_mol(1:maxbin,ch);
+    tmpY =tmpYY;%Pr2    (1:maxbin,ch)-bg*altsq(1:maxbin);
     tmpZ =alt    (1:maxbin)*1e-3;
 
-    tmpY(1:1800)=NaN;
+    tmpY(1:150)=NaN;
     
     figure(23); clf;
     scatter(tmpX,tmpY,10,tmpZ);
@@ -161,7 +161,7 @@ for ch=1:2
 %    npath=floor(pathlen*1e-3/2/r_bin);
 %    [fval, a]=runfit2(tmpY, tmpX, npath, npath);
 %    slope=atan(a);
-%  
+  
     % Initialize counters for the number of NaN data points
     nmask=sum(isnan(tmpY)); nmask_old=-1;
 
@@ -176,7 +176,7 @@ for ch=1:2
       [a, b, fval, sa, sb, chi2red, ndf] = fastfit(tmpX,tmpY);
       % For each point, exclude those which are too far away
       distance=abs(tmpY-fval)./sqrt(chi2red); 
-      tmpY(distance>2.5)=nan;
+      tmpY(distance>2)=nan;
       % For each point, exclude those not aligned
 %      tmpY(abs(slope-atan(a))>pi/2.)=nan;
       % Recompute the mask counter
