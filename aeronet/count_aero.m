@@ -5,10 +5,14 @@ days=aero.jd-jd1+1;
 
 % number of measurements in each day
 hh=histc(days,[1:floor(max(days))+1]);
-figure(1); plot(hh); title('meas. per day');
+figure(1); 
+subplot(2,1,1);
+plot(hh); ylabel('meas. per day'); xlabel('days');
 
 % days with a minimum number of measurements in
-good=hh>10;
+mperd=6;
+disp(['Measurements per day= ' num2str(mperd)]);
+good=hh>=mperd;
 
 % cound sequency of good days
 period(1)=0;
@@ -16,12 +20,17 @@ for i=2:size(good,1)
   if good(i)
     period(i)=period(i-1)+1;
   else
-    if period(i-1)>7
-      disp(['Days: ' num2str(period(i-1)) ' start: ' da ' end: ']);
+    if period(i-1)>=4
+      disp(['Days: ' num2str(period(i-1)) ' start: ' ...
+            datestr(jd1+i-1-1-period(i-1)) ' end: ' datestr(jd1+i-1-1)]);
     end
     period(i)=0;
   end
 end
 
+subplot(2,1,2);
+plot(period); ylabel(['Acc. days with meas. => ' num2str(mperd)]); 
+xlabel('days');
 
+%
 

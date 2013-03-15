@@ -30,10 +30,10 @@ sm_span = 11;  % Range for Savitzky-Golay smoothing  * r_bin
 %  set reference values for alpha und beta Particle 
 % ***************************************************
 %
-LR_par(1,1:maxbin) = 55;
-LR_par(2,1:maxbin) = 55;
+LR_par(1,1:maxbin) = 20;
+LR_par(2,1:maxbin) = 20;
 
-%j=1; n=0;   
+%n=0;   
 %for k=1:maxbin-1
 %  if (mask_mol(k,1)==0)
 %    trychi2(k)=nan;
@@ -43,8 +43,9 @@ LR_par(2,1:maxbin) = 55;
 %    RefBin(1)=k;
 %    trybin(n)=k;
 %  end
+j=1; 
 for k=1:1
-RefBin(1)=1800;
+RefBin(1)=3000;
   
   % -------------------------------------------------------------------------
   %  Klett (Equ. 20; 1985):
@@ -133,15 +134,15 @@ RefBin(1)=1800;
     end
   end   
   
-  %%%hmjb
-  ndf=sum(mask_mol(1:maxbin-1,j));
-  trychi2(k)=sqrt(nansum(beta_aerosol(j,1:maxbin-1).*beta_aerosol(j,1:maxbin-1)...
-			 .*mask_mol(1:maxbin-1,j)')/ndf);
-%  ndf=sum(mask_mol(1:RefBin(1),j));
-%  trychi2(k)=sqrt(nansum(beta_aerosol(j,1:RefBin(1)).*beta_aerosol(j,1:RefBin(1))...
-%			 .*mask_mol(1:RefBin(1),j)')/ndf);
-  ['refbin=' num2str(RefBin(1)) ' alt=' num2str(alt(RefBin(1))) ...
-   ' chi2=' num2str(trychi2(k)) ]
+%  %%%hmjb
+%  ndf=sum(mask_mol(1:maxbin-1,j));
+%  trychi2(k)=sqrt(nansum(beta_aerosol(j,1:maxbin-1).*beta_aerosol(j,1:maxbin-1)...
+%			 .*mask_mol(1:maxbin-1,j)')/ndf);
+%%  ndf=sum(mask_mol(1:RefBin(1),j));
+%%  trychi2(k)=sqrt(nansum(beta_aerosol(j,1:RefBin(1)).*beta_aerosol(j,1:RefBin(1))...
+%%			 .*mask_mol(1:RefBin(1),j)')/ndf);
+%  ['refbin=' num2str(RefBin(1)) ' alt=' num2str(alt(RefBin(1))) ...
+%   ' chi2=' num2str(trychi2(k)) ]
    
 %*****************************
 end %  number of wavelength
@@ -158,7 +159,7 @@ end
 %----------
 %  Plots
 %----------
-rb = RefBin(1); 
+%rb = RefBin(1); 
 
 for i=1:maxbin-1
   if (mask_mol(i,1)==1)

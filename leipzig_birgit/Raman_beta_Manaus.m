@@ -38,17 +38,14 @@ clear beta_raman beta_raman_sm
 clear Lidar_Ratio
 %
 % define upper boundary from Raman Ext coeff
-upp = size(aero_ext_raman); 
-up = upp(2)
-%
-Ref_1 = RefBin(2) 
-%
+up = RefBin(2);
+
 %------------------------------------
 % reference value for beta particle
 %------------------------------------
 Ref_1=up;
-beta_par(1,Ref_1)= 1e-12;  % in km
-% beta_par(1,cir)= 8e-3; % in case of cirrus
+beta_par(1,Ref_1)= 5e-5;  % in km
+%beta_par(1,Ref_1)= 8e-3; % in case of cirrus
 %
 p_ave_raman_1(up)=0;
 m_ave_raman_1(up)=0;
@@ -80,6 +77,7 @@ for i=up : -1 : bin1st
   beta_raman(i)= -beta_mol(i,1)+(beta_par(1,Ref_1)+ ...
                                  beta_mol(Ref_1,1))*signals_1(i)*exp_z_1(i)/exp_n_1(i);
 end
+
 %  
 % --------------------------------------
 %  smoothing 7.5 m * smothing length sl
@@ -105,9 +103,9 @@ rbbr = size(beta_raman_sm(:));
 figure(10); 
 xx=xx0+3*wdx; yy=yy0+3*wdy;
 % Klett
-plot(beta_aerosol_sm(1,bin1st:rbbr(1)), alt(bin1st:rbbr(1)).*1e-3,'b--');
+plot(beta_aerosol_sm(1,bin1st:maxbin-1), alt(bin1st:maxbin-1).*1e-3,'b--');
 set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
-axis([-0.2e-3 10e-3 0 alt(up)*1e-3*1.2]); 
+axis([-2e-3 10e-3 0 alt(maxbin-1)*1e-3*1.1]);
 xlabel('BSC km-1 sr-1','fontsize',[12])  
 ylabel('Height agl / km','fontsize',[12])
 title(['Raman'],'fontsize',[14]) 
@@ -129,7 +127,7 @@ figure(11);
 xx=xx0+2*wdx; yy=yy0+2*wdy;
 plot(Lidar_Ratio_sm(bin1st:rLR_1(2)),alt(bin1st:rLR_1(2)).*1e-3,'b')
 set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
-axis([0 100 0 alt(up)*1e-3*1.2]); 
+axis([0 100 0 alt(maxbin-1)*1e-3*1.1]); 
 xlabel('Lidar Ratio / sr','fontsize',[12])  
 ylabel('Height agl / km','fontsize',[12])
 title(['Raman'],'fontsize',[14])

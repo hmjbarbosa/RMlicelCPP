@@ -90,7 +90,7 @@ end
 %%------------------------------------------------------------------------
 
 % for elastic and raman channels
-for ch=1:1
+for ch=1:2
   
   % LOOP ON BACKGROUND CORRECTION
   %
@@ -105,38 +105,24 @@ for ch=1:1
   bg1=pave-10*(pmax-pmin);
   bg2=pave;
   bg3=pave+10*(pmax-pmin);
-%  bg2=50;
 
   % In each step of the loop, we will divide the interval in half, and
   % calculate the function in between, and then choose one side. The
   % convergence criteria is meet when size of this interval
   % (i.e. uncertainty in the value of BG, our parameter) becomes small
   % enough compared to BG itself.
-  nBG=1; sb=1e-10;
-  while(abs((bg1-bg2)/(bg1+bg2)) > 1e-6)
-%  while(abs((bg1-bg2)/(bg1+bg2)) > 1e-4 & abs(bg1-bg2) > sb)
-%  while(nBG<40)
+  nBG=1; b=1; sb=1e-10;
+  bg=bg3;
+  while(nBG==1 || b>sb || abs(b/bg) > 1e-6)
 
     % At this point we do not know yet f1=func(bg1) or f2=func(bg2)
     % In principle, the estimation above should do it, but right
     % now we only have a wild guess. Therefore the first two steps
     % are just to calculate b(bg1) and b(bg2), and after that we
     % start dividing the interval in half.
-    if (nBG==1)
-      bg=bg1;
-    elseif(nBG==2)
-      bg=bg2;
-    elseif(nBG==3)
-      bg=bg3;
-    else
-      if (bg2-bg1 < bg3-bg2)
-        bg=bg2+0.38*(bg3-bg2);
-      else
-        bg=bg2-0.38*(bg2-bg1);
-      end
+    if (nBG>1)
+      bg=bg+b;
     end
-    
-%    bg=0+100*nBG/40;
     
     disp(['%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%']);
     disp(['% ch= ' num2str(ch) '  trying BG= ' num2str(bg) ]);
@@ -149,19 +135,13 @@ for ch=1:1
     tmpY =tmpYY;%Pr2    (1:maxbin,ch)-bg*altsq(1:maxbin);
     tmpZ =alt    (1:maxbin)*1e-3;
 
-    tmpY(1:150)=NaN;
+    tmpY(1:1800)=NaN;
     
     figure(23); clf;
     scatter(tmpX,tmpY,10,tmpZ);
     xlabel('Pr2 molecular'); ylabel('Pr2 lidar');
     hold on; grid on; colorbar;
 
-%    % Calculate the local derivative using a running linear fit
-%    pathlen=1000; % meters
-%    npath=floor(pathlen*1e-3/2/r_bin);
-%    [fval, a]=runfit2(tmpY, tmpX, npath, npath);
-%    slope=atan(a);
-  
     % Initialize counters for the number of NaN data points
     nmask=sum(isnan(tmpY)); nmask_old=-1;
 
@@ -177,8 +157,6 @@ for ch=1:1
       % For each point, exclude those which are too far away
       distance=abs(tmpY-fval)./sqrt(chi2red); 
       tmpY(distance>2)=nan;
-      % For each point, exclude those not aligned
-%      tmpY(abs(slope-atan(a))>pi/2.)=nan;
       % Recompute the mask counter
       nmask=sum(isnan(tmpY));
     
@@ -246,43 +224,7 @@ for ch=1:1
     out(9 ,nBG,ch)=chi2red;
     out(10,nBG,ch)=a;
     out(11,nBG,ch)=sa;
-  
-    % Verify if root is in [bg1, bg] or [bg, bg2]
-    f=out(4,nBG,ch);
-    if (nBG==1)
-      f1=f;
-    elseif (nBG==2)
-      f2=f;
-    elseif (nBG==3)
-      f3=f;
-    else
-      [' bg1 ' num2str(bg1) ' f1 ' num2str(f1) ...
-       ' bg2 ' num2str(bg2) ' f2 ' num2str(f2) ....
-       ' bg3 ' num2str(bg2) ' f3 ' num2str(f3) ....
-       ' bg  ' num2str(bg)  ' f '  num2str(f) ]
-
-      if (bg2-bg1 < bg3-bg2)
-        if (f2 < f)
-          bg3=bg;
-          f3=f;
-        else
-          bg1=bg2;
-          f1=f2;
-          bg2=bg;
-          f2=f;
-        end
-      else
-        if (f2 < f)
-          bg1=bg;
-          f1=f;
-        else
-          bg3=bg2;
-          f3=f2;
-          bg2=bg;
-          f2=f;
-        end
-      end
-    end
+ 
     nBG=nBG+1;
 
     figure(25);
@@ -293,13 +235,14 @@ for ch=1:1
     legend('b','+sig','-sig','bg');
   
   end % bg convergence loop
+  bg=0;
   
   disp(['%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%']);
-  disp(['% ch= ' num2str(ch) '  last BG= ' num2str(bg1) ' ' num2str(bg2) ]);
+  disp(['% ch= ' num2str(ch) '  last BG= ' num2str(bg) ]);
   disp(['%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%']);
 
   %% APPLY THE CALCULATED BG
-  P  (:,ch) = P(:,ch)-(bg1+bg2)*0.5;
+  P  (:,ch) = P(:,ch)-bg;
   Pr2(:,ch) = P(:,ch).*altsq(:);
   
   %% APPLY THE CALCULATED SCALLING

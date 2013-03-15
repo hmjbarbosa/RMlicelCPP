@@ -80,10 +80,12 @@ r_bin=(alt(2)-alt(1))*1e-3;
 
 %% GLUE ANALOG+PC
 glue355=glue(chphy(1).data, heads(1).ch(1), chphy(2).data, heads(1).ch(2));
-glue387=glue(chphy(1).data, heads(1).ch(1), chphy(2).data, heads(1).ch(2));
+glue387=glue(chphy(3).data, heads(1).ch(3), chphy(4).data, heads(1).ch(4));
 
-P(:,1)=squeeze(nanmean(glue355,2))+50;
-P(:,2)=squeeze(nanmean(glue387,2))+50;
+P(:,1)=squeeze(nanmean(glue355,2));
+P(:,2)=squeeze(nanmean(glue387,2));
+%P(:,1)=squeeze(nanmean(chphy(1).data,2));
+%P(:,2)=squeeze(nanmean(chphy(4).data,2));
 
 % range corrected signal Pz2(z, lambda)
 for j = 1:2
