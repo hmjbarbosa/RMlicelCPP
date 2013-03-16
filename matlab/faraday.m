@@ -8,12 +8,14 @@ dataout='./data_5min_ascii';
 %dataout='/media/work/data/EMBRAPA/lidar/data_5min_ascii';
 
 %% FIRST DATE
-jdi=datenum(2011, 7, 29, 0, 0, 0);
+%jdi=datenum(2011, 7, 29, 0, 0, 0);
+jdi=datenum(2011, 12, 14, 0, 0, 0);
 jdf=jdi+7.;
 lastdir='x';
 
 %% READ TIME SLICE
-[nfile, heads, chphy]=profile_read_dates(datain, jdi, jdf, 10, 0.004);
+[nfile, heads, chphy]=profile_read_dates(...
+    datain, jdi, jdf, 10, 0.004, 0, 4000);
 disp(['[1] data reading finished @ ' ' nfile=' num2str(nfile)]); toc
 
 %% SMOOTH OVER TIME

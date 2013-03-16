@@ -82,7 +82,8 @@
 %
 %    >> contourf( (1:253), (1:4000), chphy(3).data );
 %
-function [head, chphy, chraw] = profile_read_many(list, dbin, dtime, ach)
+function [head, chphy, chraw] = ...
+    profile_read_many(list, dbin, dtime, ach, maxz)
 
 % size of file list
 nfile = numel(list);
@@ -92,10 +93,16 @@ end
 
 % if dbin not given, displace by zero
 if ~exist('dbin','var') dbin=0; end
+if isempty(dbin) dbin=0; end
 % if dtime not given, no dead time correction
 if ~exist('dtime','var') dtime=0; end
+if isempty(dtime) dtime=0; end
 % if ach not requested, return all channels
-if ~exist('ach','var') allch=true; else allch=false; end 
+if ~exist('ach','var') ach=0; end 
+if isempty(ach) ach=0; end 
+% if maxz not requested, return all levels
+if ~exist('maxz','var') maxz=0; end
+if isempty(maxz) maxz=0; end
 
 %% READ EACH FILE
 ['READING ' num2str(nfile) ' files']
@@ -105,11 +112,7 @@ for nf=1:nfile
   end
   
   % read file 
-  if allch
-    [head(nf), tmpphy, tmpraw]=profile_read(list{nf}, dbin, dtime);
-  else
-    [head(nf), tmpphy, tmpraw]=profile_read(list{nf}, dbin, dtime, ach);
-  end
+  [head(nf), tmpphy, tmpraw]=profile_read(list{nf}, dbin, dtime, ach, maxz);
 
   % time-stamp of current file
   if (nf>1)

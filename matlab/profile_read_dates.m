@@ -1,5 +1,18 @@
 function [nfile, head, chphy, chraw] = ... 
-    profile_read_dates(basedir, jdi, jdf, dbin, dtime, ach)
+    profile_read_dates(basedir, jdi, jdf, dbin, dtime, ach, maxz)
+
+% if dbin not given, displace by zero
+if ~exist('dbin','var') dbin=0; end
+if isempty(dbin) dbin=0; end
+% if dtime not given, no dead time correction
+if ~exist('dtime','var') dtime=0; end
+if isempty(dtime) dtime=0; end
+% if ach not requested, return all channels
+if ~exist('ach','var') ach=0; end 
+if isempty(ach) ach=0; end 
+% if maxz not requested, return all levels
+if ~exist('maxz','var') maxz=0; end 
+if isempty(maxz) maxz=0; end 
 
 % Directories are organized by days
 % List all files in day-dir from jdi to jdf
@@ -39,17 +52,6 @@ if (nfile < 1)
   return
 end
 
-% if dbin not given, displace by zero
-if ~exist('dbin','var') dbin=0; end
-% if dtime not given, no dead time correction
-if ~exist('dtime','var') dtime=0; end
-% if ach not requested, return all channels
-if ~exist('ach','var') allch=true; else allch=false; end 
-
-if allch
-  [head, chphy, chraw] = profile_read_many(filelist, dbin, dtime);
-else
-  [head, chphy, chraw] = profile_read_many(filelist, dbin, dtime, ach);
-end
+[head, chphy, chraw] = profile_read_many(filelist, dbin, dtime, ach, maxz);
 
 %

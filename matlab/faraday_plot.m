@@ -14,5 +14,10 @@ for i=1:ncrop
 end
 
 gplot2(data,[0:1.e7:1.5e9],yy,zh(1:2000,1)/1e3)
-
+datetick('x','mm/dd')
+ylabel('Altitude agl (km)')
+title('Range and BG Corrected Signal [a.u.] An+PC 355nm')
+tmp=datevec(jdi);
+out=sprintf('faraday_plot_%4d_%02d_%02d.png',tmp(1),tmp(2),tmp(3));
+print(out,'-dpng')
 %

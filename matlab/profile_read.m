@@ -26,14 +26,21 @@
 %     raw: Is a matrix with vertical bins as rows, and channels as
 %          columns. Values are in raw units.
 %
-function [head, phy, raw] = profile_read(fname, dbin, dtime, ach)
+function [head, phy, raw] = profile_read(fname, dbin, dtime, ach, maxz)
 
 % if dbin not given, displace by zero
 if ~exist('dbin','var') dbin=0; end
+if isempty(dbin) dbin=0; end
 % if dtime not given, no dead time correction
 if ~exist('dtime','var') dtime=0; end
+if isempty(dtime) dtime=0; end
 % if ach not requested, return all channels
-if ~exist('ach','var') ach=0; allch=true; else allch=false; end 
+if ~exist('ach','var') ach=0; end 
+if isempty(ach) ach=0; end 
+% if maxz not requested, return all levels
+if ~exist('maxz','var') maxz=0; end
+if isempty(maxz) maxz=0; end
+
 %% OPEN FILE
 fp=fopen(fname,'r');
 
@@ -93,8 +100,8 @@ for ch = 1:head.nch
 
   %% READ RAW CHANNELS
   tmpraw=fread(fp,nz,'int32');
-  
-  if (ch==ach | allch)
+    
+  if (ch==ach | ach==0)
     % conversion factor from raw to physical units
     if (head.ch(ch).photons==0)
       dScale = head.ch(ch).nshoots*2^head.ch(ch).bits/(head.ch(ch).discr*1.e3);
@@ -117,18 +124,24 @@ for ch = 1:head.nch
     end
     
     % copy to final destination
-    if (allch) 
-      phy(1:nz, ch) = tmpphy;
-      raw(1:nz, ch) = tmpraw;
+    if (maxz==0)
+      maxz=nz;
     else
-      phy(1:nz, 1) = tmpphy;
-      raw(1:nz, 1) = tmpraw;
+      maxz=min(nz, maxz);
+      head.ch(ch).ndata=maxz;
+    end
+    if (ach==0) 
+      phy(1:maxz, ch) = tmpphy(1:maxz);
+      raw(1:maxz, ch) = tmpraw(1:maxz);
+    else
+      phy(1:maxz, 1) = tmpphy(1:maxz);
+      raw(1:maxz, 1) = tmpraw(1:maxz);
     end
   end
 end
 
 % erase uncessary header
-if ~allch
+if ~(ach==0)
   head.ch(1).active  = head.ch(ach).active ;
   head.ch(1).photons = head.ch(ach).photons;
   head.ch(1).elastic = head.ch(ach).elastic;
