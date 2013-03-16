@@ -30,8 +30,10 @@ sm_span = 11;  % Range for Savitzky-Golay smoothing  * r_bin
 %  set reference values for alpha und beta Particle 
 % ***************************************************
 %
-LR_par(1,1:maxbin) = 20;
-LR_par(2,1:maxbin) = 20;
+LR_par(1,1:floor(10/r_bin)) = 55;
+LR_par(1,floor(10/r_bin):maxbin) = 55;
+
+LR_par(2,1:maxbin) = 25;
 
 %n=0;   
 %for k=1:maxbin-1
@@ -45,7 +47,7 @@ LR_par(2,1:maxbin) = 20;
 %  end
 j=1; 
 for k=1:1
-RefBin(1)=3000;
+RefBin(1)=1400;
   
   % -------------------------------------------------------------------------
   %  Klett (Equ. 20; 1985):

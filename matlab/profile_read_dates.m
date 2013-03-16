@@ -6,10 +6,9 @@ timef=datevec(datef)
 
 jdi=datenum(timei);
 jdf=datenum(timef);
-if (jdf-jdi)>1
-  error('profile_read_dates::',...
-        'Do not try to read more than a day!');
-end
+%if (jdf-jdi)>1
+%  error('profile_read_dates:: Do not try to read more than a day!');
+%end
 
 d1=sprintf('%s/%02d/%d/%02d',basedir,timei(1)-2000,timei(2),timei(3));
 f1=dirpath(d1,'RM*');
