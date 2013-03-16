@@ -8,11 +8,12 @@ datain='/lfa-data/lidar/data';
 dataout='/lfa-data/lidar/gifs';
 
 %% FIRST DATE
-jdi=datenum(2012, 1, 1, 0, 0, 0);
+%jdi=datenum(2010, 1, 1, 0, 0, 0);
+jdi=datenum(2011, 7, 1, 0, 0, 0);
 jdf=jdi+1.;
 ndays=1;
 
-while(ndays<=366)
+while(ndays<=365*2)
 
   %% VERIFY IF FILES ALREADY PROCESSED (FIGURE CREATED)
   idate=datevec(jdi);
@@ -23,7 +24,7 @@ while(ndays<=366)
                   dataout,yy,mm,dd,ch);
     if exist(fname,'file')
       disp(['SKIP. Figures already created for day: ' datestr(jdi)]);
-      skip=1;
+%      skip=1;
     end
   end
   if (skip)
@@ -149,17 +150,18 @@ while(ndays<=366)
       elseif (ch==5)
         vmax=4e6;
       elseif (ch==6)
-        vmax=4e9;
+        vmax=2e9;
       elseif (ch==7)
-        vmax=4e8;
+        vmax=3e8;
       end
 
-      gplot3(phy(ch).rcs(1:2000,:)./vmax,[0:1/50:1],taxis,zh(1:2000)/1e3);
+      clf;
+      gplot2(phy(ch).rcs(1:2000,:)./vmax,[0:1/50:1],taxis,zh(1:2000)/1e3);
 
       xlabel('Local Time (UTC-4)');
       ylabel('Range above ground (km)');
       tag=sprintf(' %04d-%02d-%02d',yy,mm,dd);
-      if (heads(1).ch(ch).elastic)
+      if (heads(1).ch(ch).elastic==1)
         type=['Elastic '];
       else
         type=['Raman '];
