@@ -52,29 +52,18 @@ clear glue355 glue387 P Pr2
 %%  READ DATA
 %%------------------------------------------------------------------------
 
+addpath('../matlab');
+datain='../../Raymetrics_data';
+jdi=datenum(2011, 8, 31, 20, 0, 0);
+jdf=datenum(2011, 8, 31, 20, 15, 0);
 
-% open list of files to be read
-filepath = '../matlab/data_5min_ascii/';
-filelist = [ filepath 'files.dat'];
-disp(['Reading file list: ' filelist]);
-filenames=importdata([filelist]);
-nfiles = size(filenames,1);
-disp(['Number of files found: ' int2str(nfiles)]);
+[nfile, heads, chphy]=profile_read_dates(datain, jdi, jdf, 10, 0.004);
 
-% loop over each file to be read
-tic
-for i=36:36
-%for i=1:nfiles
-  clear M;
-  disp (['File #' int2str(i) ' ' filenames{i}]);
-  M=importdata([filepath filenames{i}],' ',0);
-  alt = M(:,1); % altitude in meters 
-  % notice: channel(z, lambda, time)
-  channel(:,1,i) = M(:,4); % 355 glued
-  channel(:,2,i) = M(:,7); % 387 glued
+%% RANGE IN METERS
+rangebins=heads(1).ch(1).ndata;
+for i=1:rangebins
+  alt(i,1)=(7.5*i);
 end
-toc
-rangebins=size(channel,1);
 
 %%------------------------------------------------------------------------
 %% RANGE CORRECTION AND OTHER SIGNAL PROCESSING
@@ -88,8 +77,15 @@ r_bin=(alt(2)-alt(1))*1e-3;
 
 % matrix to hold lidar received power P(z, lambda)
 % anything user needs: time average, bg correction, glueing, etc..
-P=squeeze(nanmean(channel,3));%+0.002;%+0.01225-0.0018474;%+0.003214053354444;
-clear channel;
+
+%% GLUE ANALOG+PC
+glue355=glue(chphy(1).data, heads(1).ch(1), chphy(2).data, heads(1).ch(2));
+glue387=glue(chphy(3).data, heads(1).ch(3), chphy(4).data, heads(1).ch(4));
+
+P(:,1)=squeeze(nanmean(glue355,2));
+P(:,2)=squeeze(nanmean(glue387,2));
+%P(:,1)=squeeze(nanmean(chphy(1).data,2));
+%P(:,2)=squeeze(nanmean(chphy(4).data,2));
 
 % range corrected signal Pz2(z, lambda)
 for j = 1:2

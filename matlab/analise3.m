@@ -8,8 +8,8 @@ dataout='./data_5min_ascii';
 %dataout='/media/work/data/EMBRAPA/lidar/data_5min_ascii';
 
 %% FIRST DATE
-jdi=datenum(2011, 8, 31, 12, 0, 0);
-jdf=jdi+1.;
+jdi=datenum(2011, 7, 9, 0, 0, 0);
+jdf=jdi+10.;
 ndays=1;
 lastdir='x';
 

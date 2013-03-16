@@ -59,8 +59,9 @@
 %------------------------------------------------------------------------
 % User definitions
 %------------------------------------------------------------------------
-lambda_rayleigh=0.355; % Elastic [microns]
-lambda_raman=0.387;    % Raman N2 [microns]
+lambda_rayleigh=0.35468; % Elastic [microns]
+lambda_raman=0.38673;    % Raman N2 [microns]
+%tipical: 354.68 386.73 532.06 607.4 1064.09
 
 lambda=[lambda_rayleigh lambda_raman];
 clear lambda_rayleigh lambda_raman;

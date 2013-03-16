@@ -65,7 +65,8 @@ end
 [a, b]=fastfit(anSignal(mask),pcSignal(mask));
 
 % glue vectors
-ig=floor((idxmax+idxmin)/2);
+%ig=floor((idxmax+idxmin)/2);
+ig=idxmin;
 % glued(1:ig)=cfun(anSignal(1:ig));
 glued(1:ig)=bsxfun(@plus, bsxfun(@times,anSignal(1:ig),a), b);
 glued(ig+1:n)=pcSignal(ig+1:n);

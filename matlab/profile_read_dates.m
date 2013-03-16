@@ -1,46 +1,40 @@
 function [nfile, head, chphy, chraw] = ... 
-    profile_read_dates(basedir, datei, datef, dbin, dtime, ach)
+    profile_read_dates(basedir, jdi, jdf, dbin, dtime, ach)
 
-timei=datevec(datei)
-timef=datevec(datef)
-
-jdi=datenum(timei);
-jdf=datenum(timef);
-if (jdf-jdi)>1
-  error('profile_read_dates::',...
-        'Do not try to read more than a day!');
+% Directories are organized by days
+% List all files in day-dir from jdi to jdf
+jd=jdi; ff={};
+while (jd<jdf)
+  time=datevec(jd)
+  dir=sprintf('%s/%02d/%d/%02d',basedir,time(1)-2000,time(2),time(3));
+  tmpf=dirpath(dir,'RM*');
+  ff=[ff,tmpf];
+  jd=jd+1;
 end
 
-d1=sprintf('%s/%02d/%d/%02d',basedir,timei(1)-2000,timei(2),timei(3));
-f1=dirpath(d1,'RM*');
-if (timef(3)>timei(3))
-  d2=sprintf('%s/%02d/%d/%02d',basedir,timef(1)-2000,timef(2),timef(3));
-  f2=dirpath(d2,'RM*');
-  ff={f1{:},f2{:}};
-else
-  ff=f1;
-end
-
+% Check if any files were found
 nfile=numel(ff);
 if (nfile < 1)
-%  error('No files found!');
-  ['No files found!'];
+  disp(['No files found!']);
   head=[]; chphy=[]; chraw=[];
   return
 end
+
+% from all files listed, check those actually in [jdi, jdf]
 j=0;
 filelist={};
 for i=1:nfile
   jd=datenum(RMname2date(ff{i}));
   if (jd>=jdi & jd<=jdf)
     j=j+1;
-    filelist{j}=ff{i};
+    filelist{j}=ff{j};
   end
 end
-nfile=numel(filelist);
+nfile=j;
+
+% Check how many files are left
 if (nfile < 1)
-%  error('No file found in the time interval!');
-  ['No file found in the time interval!'];
+  disp(['No file found in the time interval!']);
   head=[]; chphy=[]; chraw=[];
   return
 end
