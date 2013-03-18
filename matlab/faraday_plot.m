@@ -6,7 +6,7 @@
 
 nslot=(jdf-jdi)*1440/5+1;
 data(1:2000,1:nslot)=NaN;
-yy=((1:nslot)-1)*5/1440+jdi-datenum(2011,1,1,0,0,0);
+yy=((1:nslot)-1)*5/1440+jdi;
 
 for i=1:ncrop
   j=floor((heads_crop(i).jdi-jdi)*1440/5+0.5)+1;
