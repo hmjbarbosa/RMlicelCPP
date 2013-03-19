@@ -21,7 +21,7 @@ end
 %% REMOVE BG if ABOVE noise
 for j=1:ny
   for i=1:nx
-    if (signal(i,j) > bg(j)+nlim*std(j))
+    if (signal(i,j) >= bg(j)+nlim*std(j))
       out(i,j)=signal(i,j)-bg(j);
     else
       out(i,j)=NaN;
