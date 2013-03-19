@@ -1,4 +1,4 @@
-
+addpath('../sc')
 %for i=1:ncrop
 %  tt(i)=heads_crop(i).jdi;   
 %end

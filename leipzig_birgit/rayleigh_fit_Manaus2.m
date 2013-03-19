@@ -106,16 +106,22 @@ for ch=1:2
   tmpZ =alt (1:maxbin)*1e-3;
   
   % plot to know what is going on
-  figure(23); clf;
-  scatter(log10(tmpX),log10(tmpY),10,tmpZ);
-  xlabel('log10(Pmol)'); ylabel('log(P)');
+%  figure(23); clf;
+%  scatter(log10(tmpX),log10(tmpY),10,tmpZ);
+%  xlabel('log10(Pmol)'); ylabel('log(P)');
+%  hold on; grid on; colorbar;
+%  title('ALL POINTS');
+  figure(23); clf; hold on;
+%  scatter(tmpZ,(tmpX),'o');
+  scatter(tmpZ,(tmpY),'.');
+%  xlabel('log10(Pmol)'); ylabel('log(P)');
   hold on; grid on; colorbar;
   title('ALL POINTS');
 
   % crop regions that we know will never be molecular
   % for now: 5km
-  tmpY(1:floor(4/r_bin))=NaN;
-  tmpY(floor(11/r_bin):maxbin)=NaN;
+  tmpY(1:floor(4.5/r_bin))=NaN;
+  tmpY(floor(10/r_bin):maxbin)=NaN;
   
   % Initialize counter for the number of NaN data points
   nmask=sum(isnan(tmpY)); nmask_old=-1;
@@ -139,12 +145,25 @@ for ch=1:2
     distance=abs(tmpY-fval)./sqrt(chi2red); 
     tmpY(distance>2)=nan;
     
+    figure(30); plot(tmpY)
 %    for i=2:maxbin-1
 %      if isnan(tmpY(i-1)) & isnan(tmpY(i+1))
 %	tmpY(i)=nan;
 %      end
 %    end
-    
+    for i=1:maxbin-15
+      if all(~isnan(tmpY(i:i+13)))
+	break
+      end
+    end
+    for j=i:maxbin-15
+      if all(isnan(tmpY(j:j+13)))
+	tmpY(j:end)=nan;
+	break
+      end
+    end
+    figure(31); plot(tmpY)
+
     % Recompute the mask counter
     nmask=sum(isnan(tmpY));
     
@@ -155,25 +174,33 @@ for ch=1:2
 	  ' chi2red=' num2str(chi2red) ' ndf=' num2str(ndf) ]); 
     
     % update the plot window
-    figure(24); clf; hold off;
-    scatter(tmpX(~isnan(tmpY)),tmpY(~isnan(tmpY)),10,tmpZ(~isnan(tmpY)));
+%    figure(24); clf; hold off;
+%    scatter(tmpX(~isnan(tmpY)),tmpY(~isnan(tmpY)),10,tmpZ(~isnan(tmpY)));
+%    hold on; grid on;
+%    plot(tmpX(~isnan(tmpY)),tmpX(~isnan(tmpY))*a+b,'r');
+%    xlabel('Pmol'); ylabel('P and Fit');
+
+    figure(24); clf; hold on;
+    scatter(tmpZ(~isnan(tmpY)),tmpX(~isnan(tmpY))*a+b,'o');
+    scatter(tmpZ(~isnan(tmpY)),tmpY(~isnan(tmpY)),'.');
     hold on; grid on;
-    plot(tmpX(~isnan(tmpY)),tmpX(~isnan(tmpY))*a+b,'r');
-    xlabel('Pmol'); ylabel('P and Fit');
-    
+    plot(tmpZ(~isnan(tmpY)),tmpX(~isnan(tmpY))*a+b,'r');
+    xlabel('Z'); ylabel('P, Pmol and Fit');
+
     iter=iter+1; 
   end
 
-  figure(24); clf; hold off;
-  scatter(tmpX(~isnan(tmpY)),tmpY(~isnan(tmpY)),10,tmpZ(~isnan(tmpY)));
-  hold on; grid on;
-  plot(tmpX(~isnan(tmpY)),tmpX(~isnan(tmpY))*a+b,'r');
-  xlabel('Pmol'); ylabel('P and Fit');
+%  figure(24); clf; hold off;
+%  scatter(tmpX(~isnan(tmpY)),tmpY(~isnan(tmpY)),10,tmpZ(~isnan(tmpY)));
+%  hold on; grid on;
+%  plot(tmpX(~isnan(tmpY)),tmpX(~isnan(tmpY))*a+b,'r');
+%  xlabel('Pmol'); ylabel('P and Fit');
   title('MOLECULAR POINTS');
   colorbar;
 
-  figure(23); plot(log10(P_mol(1:maxbin,ch)),...
-		   log10(P_mol(1:maxbin,ch)*a+b),'r');
+%  figure(23); plot(log10(P_mol(1:maxbin,ch)),...
+%		   log10(P_mol(1:maxbin,ch)*a+b),'r');
+  figure(23); plot(tmpZ(200:maxbin), (P_mol(200:maxbin,ch)*a+b),'r');
   
   %% SET THE REFERENCE BIN
   tmpZ(isnan(tmpY))=NaN;

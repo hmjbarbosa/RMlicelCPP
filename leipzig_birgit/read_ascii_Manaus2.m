@@ -53,11 +53,13 @@ clear glue355 glue387 P Pr2
 %%------------------------------------------------------------------------
 
 addpath('../matlab');
-datain='../../Raymetrics_data';
-jdi=datenum(2011, 8, 31, 20, 0, 0);
-jdf=datenum(2011, 8, 31, 20, 15, 0);
+%datain='../../Raymetrics_data';
+datain='/home/lidar_data/data';
+jdi=datenum(2012, 1, 20, 23,  0, 0);
+jdf=datenum(2012, 1, 20, 23, 60, 0);
 
-[nfile, heads, chphy]=profile_read_dates(datain, jdi, jdf, 10, 0.004);
+[nfile, heads, chphy]=profile_read_dates(datain, jdi, jdf, 10, 0.004, ...
+					 0, 4000);
 
 %% RANGE IN METERS
 rangebins=heads(1).ch(1).ndata;
@@ -81,6 +83,20 @@ r_bin=(alt(2)-alt(1))*1e-3;
 %% GLUE ANALOG+PC
 glue355=glue(chphy(1).data, heads(1).ch(1), chphy(2).data, heads(1).ch(2));
 glue387=glue(chphy(3).data, heads(1).ch(3), chphy(4).data, heads(1).ch(4));
+
+figure(100)
+tmp=remove_bg(glue355, 500, -10);
+for j=1:nfile
+  tmp(:,j)=tmp(:,j).*altsq(:);
+end
+gplot2(tmp);
+
+figure(200)
+tmp2=remove_bg(glue387, 500, -10);
+for j=1:nfile
+  tmp2(:,j)=tmp2(:,j).*altsq(:);
+end
+gplot2(tmp2);
 
 P(:,1)=squeeze(nanmean(glue355,2));
 P(:,2)=squeeze(nanmean(glue387,2));

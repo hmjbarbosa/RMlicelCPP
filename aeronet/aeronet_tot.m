@@ -1,7 +1,7 @@
 clear 
 tic
 
-fid=fopen('110101_131231_Manaus_EMBRAPA.tot20','r');
+fid=fopen('../../aeronet/110101_131231_Manaus_EMBRAPA.tot20','r');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% READ HEADER 

@@ -12,7 +12,7 @@ read_sonde_Manaus
 molecular
 
 read_ascii_Manaus2
-rayleigh_fit_Manaus
+rayleigh_fit_Manaus2
 Klett_Manaus
 Raman_Manaus
 Raman_beta_Manaus

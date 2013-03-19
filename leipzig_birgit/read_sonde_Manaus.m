@@ -41,7 +41,8 @@ clear temp_snd pres_snd rho_snd alt_snd nlev_snd
 % missing data. usually happens at higher altitudes. the reading
 % mechanism, in this case, must rely on the constant width of the
 % fields. 
-radiofile=['./Manaus/82332_110901_00.dat']
+%radiofile=['./Manaus/82332_110901_00.dat']
+radiofile=['./Manaus/82332_120119_00.dat']
 disp(['*** read radiosounding data ' radiofile]);
 
 fid=fopen(radiofile,'r'); 
@@ -85,7 +86,7 @@ ax1 = gca;
 set(ax1,'XColor','r','YColor','k','XAxisLocation','bottom')
 ylabel(ax1,'Height / km')
 xlabel(ax1,'Temperature / K')
-xlimits = get(ax1,'XLim')
+xlimits = get(ax1,'XLim');
 ylimits = get(ax1,'YLim');
 xinc = (xlimits(2)-xlimits(1))/5;
 yinc = (ylimits(2)-ylimits(1))/5;

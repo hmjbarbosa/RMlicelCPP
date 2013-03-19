@@ -2,17 +2,16 @@
 clear all; 
 ['analysis started @ ' datestr(clock)]; tic
 
-datain='../../Raymetrics_data';
-dataout='./data_5min_ascii';
+%datain='../../Raymetrics_data';
 %datain='/media/work/data/EMBRAPA/lidar/data';
-%dataout='/media/work/data/EMBRAPA/lidar/data_5min_ascii';
+datain='/home/lidar_data/data';
 
 %% FIRST DATE
 %jdi=datenum(2011, 7, 29, 0, 0, 0);
 jdi=datenum(2011, 12, 14, 0, 0, 0);
 jdi=datenum(2011, 12, 21, 0, 0, 0);
 jdi=datenum(2012,  1, 20, 0, 0, 0);
-jdf=jdi+7.;
+jdf=jdi+7;
 lastdir='x';
 
 %% READ TIME SLICE
