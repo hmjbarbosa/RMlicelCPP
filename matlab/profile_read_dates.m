@@ -40,7 +40,7 @@ for i=1:nfile
   jd=datenum(RMname2date(ff{i}));
   if (jd>=jdi & jd<=jdf)
     j=j+1;
-    filelist{j}=ff{j};
+    filelist{j}=ff{i};
   end
 end
 nfile=j;
