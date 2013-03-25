@@ -1,13 +1,13 @@
 addpath('../sc')
 
-nslot=(jdf-jdi)*1440+1;
+nslot=ceil((jdf-jdi)*1440+1);
 data(1:2000,1:nslot)=NaN;
 yy=((1:nslot)-1)/1440+jdi;
 
-for k=1:7
+for k=6:6
 
   for i=1:nfile
-    j=floor((heads(i).jdi-jdi)*1440+0.5)+1;
+    j=floor((heads(i).jdi-jdi)*1440+0.5)+2;
     data(:,j)=chphy(k).rcs(1:2000,i);
   end
   

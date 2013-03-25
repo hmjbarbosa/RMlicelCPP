@@ -111,7 +111,4 @@ for w=1:nw
   save('beta_klett.mat','klett_beta_aero','klett_alpha_aero','totheads')
   totfile=totfile+nfile;
 end
-
-%Raman_Manaus
-%Raman_beta_Manaus
 %
