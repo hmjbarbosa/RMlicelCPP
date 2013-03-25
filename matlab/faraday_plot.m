@@ -1,23 +1,39 @@
 addpath('../sc')
-%for i=1:ncrop
-%  tt(i)=heads_crop(i).jdi;   
-%end
-%yy=(tt-datenum(2011,1,1,0,0,0));     
 
-nslot=(jdf-jdi)*1440/5+1;
+nslot=(jdf-jdi)*1440+1;
 data(1:2000,1:nslot)=NaN;
-yy=((1:nslot)-1)*5/1440+jdi;
+yy=((1:nslot)-1)/1440+jdi;
 
-for i=1:ncrop
-  j=floor((heads_crop(i).jdi-jdi)*1440/5+0.5)+1;
-  data(:,j)=chphy(6).rcs(1:2000,i);
+for k=1:7
+
+  for i=1:nfile
+    j=floor((heads(i).jdi-jdi)*1440+0.5)+1;
+    data(:,j)=chphy(k).rcs(1:2000,i);
+  end
+  
+  if (k==1) tipo='355an'; end
+  if (k==2) tipo='355pc'; end
+  if (k==3) tipo='387an'; end
+  if (k==4) tipo='387pc'; end
+  if (k==5) tipo='408pc'; end
+  if (k==6) tipo='355gl'; end
+  if (k==7) tipo='387gl'; end
+  
+  
+  figure(1); clf
+  set(gcf,'position',[0,0,1500,500]); % units in pixels!
+  set(gcf,'PaperUnits','inches','PaperSize',[12,4],'PaperPosition',[0 0 12 4])
+
+  lim=quantile(reshape(data,[],1),[.98]);
+  gplot2(smooth_time(data,2)/lim*100,[0:1:100],yy,zh(1:2000)/1e3)
+  set(gca,'fontsize',12)
+  datetick('x','mm/dd')
+  ylabel('Altitude agl (km)','fontsize',14)
+  tmp=datevec(jdi);
+  out=sprintf('faraday_plot_%s_%4d_%02d_%02d.png',...
+	      tipo,tmp(1),tmp(2),tmp(3));
+  print(out,'-dpng')
+  eval(['!mogrify -trim ' out])
+  
 end
-
-gplot2(data,[0:1.e7:1.5e9],yy,zh(1:2000,1)/1e3)
-datetick('x','mm/dd')
-ylabel('Altitude agl (km)')
-title('Range and BG Corrected Signal [a.u.] An+PC 355nm')
-tmp=datevec(jdi);
-out=sprintf('faraday_plot_%4d_%02d_%02d.png',tmp(1),tmp(2),tmp(3));
-print(out,'-dpng')
 %

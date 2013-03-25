@@ -70,7 +70,7 @@ datain='/home/lidar_data/data';
 
 
 %% FIRST DATE
-jdi0=datenum(2011, 7, 29, 6, 0, 0);
+jdi0=datenum(2012,  1, 20,  0, 0, 0);
 %jdi0=datenum(2011, 12, 14, 0, 0, 0);
 %jdi0=datenum(2011, 12, 21, 0, 0, 0);
 %jdi0=datenum(2012,  1, 19,12, 0, 0);
@@ -149,6 +149,10 @@ while (nday<=7)
   %
   if (x<jdi)
     step=-step
+  end
+  ym=get(gca,'ylim');
+  if (y>ym(2))
+    break
   end
   nday=nday+step
 end
