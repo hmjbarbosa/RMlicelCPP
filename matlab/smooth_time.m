@@ -7,7 +7,7 @@ for t=1:nt
   p2=t+n1;
   if (p1<1) p1=1; end
   if (p2>nt) p2=nt; end
-  out(1:nz, t)=mean(signal(1:nz, p1:p2),2);
+  out(1:nz, t)=nanmean(signal(1:nz, p1:p2),2);
 end
   
 %
