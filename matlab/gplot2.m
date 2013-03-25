@@ -14,11 +14,11 @@ end
 
 if ~exist('X','var') X=[1:nt]; end;
 if ~exist('Y','var') Y=[1:nz]; end;
-if (size(mat2d,2)~=nt)
+if (size(mat2d,2)~=numel(X))
   disp('Error: X and mat2d must have the same number of columns');
   return
 end
-if (size(mat2d,1)~=nz)
+if (size(mat2d,1)~=numbel(Y))
   disp('Error: Y and mat2d must have the same number of lines');
   return
 end
