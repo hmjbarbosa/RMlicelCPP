@@ -17,9 +17,10 @@ if isempty(maxz) maxz=0; end
 % Directories are organized by days
 % List all files in day-dir from jdi to jdf
 jd=jdi; ff={};
-while (jd<jdf)
+%while (jd<jdf)
+while (floor(jd)<ceil(jdf))
   time=datevec(jd)
-  dir=sprintf('%s/%02d/%d/%02d',basedir,time(1)-2000,time(2),time(3));
+  dir=sprintf('%s/%02d/%d/%02d',basedir,time(1)-2000,time(2),time(3))
   tmpf=dirpath(dir,'RM*');
   ff=[ff,tmpf];
   jd=jd+1;
