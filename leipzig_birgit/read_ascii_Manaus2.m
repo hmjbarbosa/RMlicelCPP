@@ -53,10 +53,12 @@ clear glue355 glue387 P Pr2
 %%------------------------------------------------------------------------
 
 addpath('../matlab');
+addpath('../sc');
 %datain='../../Raymetrics_data';
 datain='/home/lidar_data/data';
 jdi=datenum(2012, 1, 20, 23,  0, 0);
 jdf=datenum(2012, 1, 20, 23, 60, 0);
+jdi=datenum('29-Jul-2011 06:31:30'); jdf=datenum('29-Jul-2011 08:19:47')
 
 [nfile, heads, chphy]=profile_read_dates(datain, jdi, jdf, 10, 0.004, ...
 					 0, 4000);
@@ -82,7 +84,7 @@ r_bin=(alt(2)-alt(1))*1e-3;
 
 %% GLUE ANALOG+PC
 glue355=glue(chphy(1).data, heads(1).ch(1), chphy(2).data, heads(1).ch(2));
-glue387=glue(chphy(3).data, heads(1).ch(3), chphy(4).data, heads(1).ch(4));
+%glue387=glue(chphy(3).data, heads(1).ch(3), chphy(4).data, heads(1).ch(4));
 
 figure(100)
 tmp=remove_bg(glue355, 500, -10);
@@ -91,17 +93,17 @@ for j=1:nfile
 end
 gplot2(tmp);
 
-figure(200)
-tmp2=remove_bg(glue387, 500, -10);
-for j=1:nfile
-  tmp2(:,j)=tmp2(:,j).*altsq(:);
-end
-gplot2(tmp2);
+%figure(200)
+%tmp2=remove_bg(glue387, 500, -10);
+%for j=1:nfile
+%  tmp2(:,j)=tmp2(:,j).*altsq(:);
+%end
+%gplot2(tmp2);
 
 P(:,1)=squeeze(nanmean(glue355,2));
-P(:,2)=squeeze(nanmean(glue387,2));
+%P(:,2)=squeeze(nanmean(glue387,2));
 %P(:,1)=squeeze(nanmean(chphy(1).data,2));
-%P(:,2)=squeeze(nanmean(chphy(4).data,2));
+P(:,2)=squeeze(nanmean(chphy(4).data,2));
 
 % range corrected signal Pz2(z, lambda)
 for j = 1:2

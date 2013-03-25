@@ -43,6 +43,7 @@ clear temp_snd pres_snd rho_snd alt_snd nlev_snd
 % fields. 
 %radiofile=['./Manaus/82332_110901_00.dat']
 radiofile=['./Manaus/82332_120119_00.dat']
+
 disp(['*** read radiosounding data ' radiofile]);
 
 fid=fopen(radiofile,'r'); 

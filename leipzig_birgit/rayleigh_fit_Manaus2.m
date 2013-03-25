@@ -120,8 +120,8 @@ for ch=1:2
 
   % crop regions that we know will never be molecular
   % for now: 5km
-  tmpY(1:floor(4.5/r_bin))=NaN;
-  tmpY(floor(10/r_bin):maxbin)=NaN;
+  tmpY(1:floor(2.0/r_bin))=NaN;
+%  tmpY(floor(10/r_bin):maxbin)=NaN;
   
   % Initialize counter for the number of NaN data points
   nmask=sum(isnan(tmpY)); nmask_old=-1;
@@ -151,18 +151,18 @@ for ch=1:2
 %	tmpY(i)=nan;
 %      end
 %    end
-    for i=1:maxbin-15
-      if all(~isnan(tmpY(i:i+13)))
-	break
-      end
-    end
-    for j=i:maxbin-15
-      if all(isnan(tmpY(j:j+13)))
-	tmpY(j:end)=nan;
-	break
-      end
-    end
-    figure(31); plot(tmpY)
+%    for i=1:maxbin-15
+%      if all(~isnan(tmpY(i:i+13)))
+%	break
+%      end
+%    end
+%    for j=i:maxbin-15
+%      if all(isnan(tmpY(j:j+13)))
+%	tmpY(j:end)=nan;
+%	break
+%      end
+%    end
+%    figure(31); plot(tmpY)
 
     % Recompute the mask counter
     nmask=sum(isnan(tmpY));
@@ -238,8 +238,8 @@ for ch=1:2
   disp(['ch= ' num2str(ch) '  last BG= ' num2str(bg) ]);
 
   %% APPLY THE CALCULATED BG
-%  P  (:,ch) = P(:,ch)-bg;
-%  Pr2(:,ch) = P(:,ch).*altsq(:);
+  P  (:,ch) = P(:,ch)-bg;
+  Pr2(:,ch) = P(:,ch).*altsq(:);
   
   %% APPLY THE SCALLING
   P_mol(1:maxbin,ch) = P_mol(1:maxbin,ch)*a;

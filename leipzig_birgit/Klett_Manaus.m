@@ -30,10 +30,10 @@ sm_span = 11;  % Range for Savitzky-Golay smoothing  * r_bin
 %  set reference values for alpha und beta Particle 
 % ***************************************************
 %
-LR_par(1,1:floor(10/r_bin)) = 20;
-LR_par(1,floor(10/r_bin):maxbin) = 55;
+LR_par(1,1:maxbin) = 55;
+%LR_par(1,1:floor(10/r_bin)) = 20;
+%LR_par(1,floor(4/r_bin):maxbin) = 20;
 
-%LR_par(2,1:maxbin) = 25;
 
 %n=0;   
 %for k=1:maxbin-1
@@ -170,19 +170,19 @@ for i=1:maxbin-1
     bb(i)=nan;
   end
 end
-
+return
 
 %
 %----------
 %   355
 %----------
-top=floor(6/r_bin);
+top=floor(8/r_bin);
 figure(8); hold off
 xx=xx0+5*wdx; yy=yy0+5*wdy;
 %set(gcf,'position',[xx,yy,2*wsx,wsy]); % units in pixels!
 plot(beta_aero(1,1:top), alt(1:top).*1e-3,'r','Linewidth',1); 
 axis([-1e-3 9e-3 0 alt(top)*1e-3]); 
-axis([-1e-3 0.06 0 alt(top)*1e-3]); 
+%axis([-1e-3 0.06 0 alt(top)*1e-3]); 
 xlabel('BSC / km-1 sr-1','fontsize',[14])  
 ylabel('Height / km','fontsize',[14])
 title(['Klett'],'fontsize',[14]) 
