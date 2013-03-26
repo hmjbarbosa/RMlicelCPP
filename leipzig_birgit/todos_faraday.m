@@ -15,7 +15,7 @@ constants
 radio{1}='./Manaus/82332_110901_00.dat'; tag{1}='dry';
 radio{2}='./Manaus/82332_120119_00.dat'; tag{2}='wet';
 
-for z=2:2
+for z=1:1
   radiofile=radio{z};
   read_sonde_Manaus3
   molecular
@@ -108,7 +108,13 @@ for z=2:2
     wjdi(21)=datenum('25-Jan-2012 19:07:14'); wjdf(21)=datenum('25-Jan-2012 19:17:49');
 
   end
-
+%  x=0;
+%  for w=1:nw
+%    jdi=wjdi(w);
+%    jdf=wjdf(w);
+%    x=x+jdf-jdi;
+%  end
+%  return
   totfile=0;
   for w=1:nw
     jdi=wjdi(w);
