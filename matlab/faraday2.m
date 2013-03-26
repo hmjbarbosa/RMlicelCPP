@@ -70,10 +70,8 @@ datain='/home/lidar_data/data';
 
 
 %% FIRST DATE
-jdi0=datenum(2012,  1, 20,  0, 0, 0);
-%jdi0=datenum(2011, 12, 14, 0, 0, 0);
-%jdi0=datenum(2011, 12, 21, 0, 0, 0);
-%jdi0=datenum(2012,  1, 19,12, 0, 0);
+jdi0=datenum(2012,  1, 20, 0, 0, 0);
+%jdi0=datenum(2011,  7, 29, 0, 0, 0);
 
 nsel=0; nday=0; step=0.25;
 while (nday<=7)
@@ -133,14 +131,14 @@ while (nday<=7)
     figure(1)
     [x,y,but]=ginput(1);
     if (but==3)
-      ptf(nsel)=x;
+      ptf(nsel)=max(min(x,jdf),jdi);
       disp(sprintf('endt #%d jdf=%f datef=%s',nsel,ptf(nsel),datestr(ptf(nsel))));
     end
     if (but==1)
       if (last==3 | last==-1)
-	nsel=nsel+1;
+        nsel=nsel+1;
       end
-      pti(nsel)=x;
+      pti(nsel)=max(min(x,jdf),jdi);
       disp(sprintf('start #%d jdi=%f datei=%s',nsel,pti(nsel),datestr(pti(nsel))));
     end
     last=but;
@@ -158,8 +156,8 @@ while (nday<=7)
 end
 
 for i=1:nsel
-  disp(sprintf('jdi=datenum(''%s''); jdf=datenum(''%s'')',...
-	       datestr(pti(i)),datestr(ptf(i))));
+  disp(sprintf('wjdi(%02d)=datenum(''%s''); wjdf(%02d)=datenum(''%s'');',...
+	       i,datestr(pti(i)),i,datestr(ptf(i))));
 end
 
 %

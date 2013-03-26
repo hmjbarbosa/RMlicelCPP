@@ -88,6 +88,7 @@ for j=1:nfile
   tmp(:,j)=tmp(:,j).*altsq(:);
 end
 gplot2(tmp(1:1000,:));
+title([datestr(jdi) ' - ' datestr(jdf)]);
 
 %P(:,1)=squeeze(nanmean(glue355,2));
 %%P(:,2)=squeeze(nanmean(chphy(4).data,2));

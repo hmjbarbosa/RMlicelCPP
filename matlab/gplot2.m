@@ -18,7 +18,7 @@ if (size(mat2d,2)~=numel(X))
   disp('Error: X and mat2d must have the same number of columns');
   return
 end
-if (size(mat2d,1)~=numbel(Y))
+if (size(mat2d,1)~=numel(Y))
   disp('Error: Y and mat2d must have the same number of lines');
   return
 end
