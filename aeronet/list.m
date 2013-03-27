@@ -1,17 +1,23 @@
 clear day mon
 
-fid=fopen('list_days.txt','r');
+fid=fopen('list_days_fulloper.txt','r');
 M=textscan(fid,'%f/%f/%f %f');
 day(:,1)=M{1};
 day(:,2)=M{2};
 day(:,3)=M{3};
 for i=1:size(day,1)
-  day(i,4)=datenum(2000+day(i,1),day(i,2),day(i,3),12,0,0);
+  jd(i)=datenum(2000+day(i,1),day(i,2),day(i,3),12,0,0);
+  day(i,4)=datenum(jd(i));
 end
 day(:,5)=day(:,4)-datenum(2011,1,1,0,0,0);
 day(:,6)=M{4}/1440;
 day=sortrows(day,4);
 fclose(fid);
+
+disp(['first day: ' datestr(min(jd))]);
+disp(['last day: ' datestr(max(jd))]);
+disp(['total number of days: ' num2str(max(jd)-min(jd))]);
+disp(['total number of days with meas: ' num2str(size(day,1)) ]);
 
 % plot
 figure(1); clf; 
