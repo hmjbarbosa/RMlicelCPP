@@ -15,7 +15,7 @@ for k=1:7
     end
   end
 %  lim=quantile(reshape(data,[],1),[.995]);% dry
-  lim=quantile(reshape(data,[],1),[.96]);% wet
+  lim=quantile(reshape(data,[],1),[.98]);% wet
   % 9-min time ave
   data=smooth_time(data,4)/lim*100;
   % mask shutter closed

@@ -15,7 +15,7 @@ constants
 radio{1}='./Manaus/82332_110901_00.dat'; tag{1}='dry';
 radio{2}='./Manaus/82332_120119_00.dat'; tag{2}='wet';
 
-for z=1:1
+for z=2:2
   radiofile=radio{z};
   read_sonde_Manaus3
   molecular
@@ -23,22 +23,6 @@ for z=1:1
   if (z==1)
     %% DRY NO CLOUDS
     nw=36;
-    wjdi( 1)=datenum('29-Jul-2011 06:31:30'); wjdf( 1)=datenum('29-Jul-2011 08:19:47');
-    wjdi( 2)=datenum('29-Jul-2011 17:30:26'); wjdf( 2)=datenum('29-Jul-2011 22:06:01');
-    wjdi( 3)=datenum('30-Jul-2011 06:36:51'); wjdf( 3)=datenum('30-Jul-2011 08:05:22');
-    wjdi( 4)=datenum('30-Jul-2011 09:23:12'); wjdf( 4)=datenum('30-Jul-2011 11:03:40');
-    wjdi( 5)=datenum('30-Jul-2011 14:15:40'); wjdf( 5)=datenum('30-Jul-2011 14:39:33');
-    wjdi( 6)=datenum('30-Jul-2011 15:34:44'); wjdf( 6)=datenum('30-Jul-2011 17:25:30');
-    wjdi( 7)=datenum('30-Jul-2011 21:57:47'); wjdf( 7)=datenum('31-Jul-2011 05:15:37');
-    wjdi( 8)=datenum('31-Jul-2011 06:48:47'); wjdf( 8)=datenum('31-Jul-2011 11:01:12');
-    wjdi( 9)=datenum('31-Jul-2011 21:21:58'); wjdf( 9)=datenum('01-Aug-2011 04:44:44');
-    wjdi(10)=datenum('01-Aug-2011 17:21:22'); wjdf(10)=datenum('01-Aug-2011 17:46:05');
-    wjdi(11)=datenum('01-Aug-2011 21:04:40'); wjdf(11)=datenum('01-Aug-2011 23:20:08');
-    wjdi(12)=datenum('02-Aug-2011 00:24:54'); wjdf(12)=datenum('02-Aug-2011 01:16:22');
-    wjdi(13)=datenum('02-Aug-2011 07:17:37'); wjdf(13)=datenum('02-Aug-2011 09:51:12');
-    wjdi(14)=datenum('02-Aug-2011 22:06:26'); wjdf(14)=datenum('03-Aug-2011 09:04:15');
-    wjdi(15)=datenum('03-Aug-2011 23:09:01'); wjdf(15)=datenum('04-Aug-2011 00:00:54');
-  
     wjdi(01)=datenum('28-Jul-2011 23:59:28'); wjdf(01)=datenum('29-Jul-2011 03:52:24');
     wjdi(02)=datenum('29-Jul-2011 04:06:10'); wjdf(02)=datenum('29-Jul-2011 04:20:17');
     wjdi(03)=datenum('29-Jul-2011 04:40:24'); wjdf(03)=datenum('29-Jul-2011 05:21:42');
@@ -79,12 +63,6 @@ for z=1:1
   else
     %% WET - CEU LIMPO
     nw=21;
-    wjdi( 1)=datenum('20-Jan-2012 17:15:21'); wjdf( 1)=datenum('20-Jan-2012 22:32:17');
-    wjdi( 2)=datenum('21-Jan-2012 08:42:52'); wjdf( 2)=datenum('21-Jan-2012 09:09:21');
-    wjdi( 3)=datenum('23-Jan-2012 08:13:56'); wjdf( 3)=datenum('23-Jan-2012 09:36:52');
-    wjdi( 4)=datenum('24-Jan-2012 19:36:10'); wjdf( 4)=datenum('24-Jan-2012 20:58:45');
-    wjdi( 5)=datenum('24-Jan-2012 20:59:49'); wjdf( 5)=datenum('25-Jan-2012 00:03:00');
-  
     wjdi(01)=datenum('20-Jan-2012 14:06:31'); wjdf(01)=datenum('20-Jan-2012 14:08:17');
     wjdi(02)=datenum('20-Jan-2012 14:36:10'); wjdf(02)=datenum('20-Jan-2012 14:43:14');
     wjdi(03)=datenum('20-Jan-2012 14:57:00'); wjdf(03)=datenum('20-Jan-2012 15:05:28');

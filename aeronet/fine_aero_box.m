@@ -9,24 +9,39 @@ for i=1:size(aot,1)
 end
 boxplot(XX);
 pos=get(gca,'position');
-stats=['mean: ' sprintf('%4.2f',nanmean(aot)) char(10) ...
-       'median: ' sprintf('%4.2f',nanmedian(aot)) char(10) ...
-       'stdev: ' sprintf('%4.2f',nanstd(aot))];
-annotation('textbox', [pos(1), pos(2)+pos(4)-0.18, 0.12, 0.18], ...
+medi(1)=nanmean(reshape(XX,[],1));
+medi(2)=nanmean(reshape(XX(:,7:11),[],1));
+medi(3)=nanmean(reshape([XX(:,1:6) XX(:,12)],[],1));
+desv(1)=nanstd(reshape(XX,[],1));
+desv(2)=nanstd(reshape(XX(:,7:11),[],1));
+desv(3)=nanstd(reshape([XX(:,1:6) XX(:,12)],[],1));
+stats=['avg: ' sprintf('%4.2f',medi(1)) ' \pm ' ...
+       sprintf(' %4.2f',desv(1)) char(10) ...
+       'dry: ' sprintf('%4.2f',medi(2)) ' \pm ' ...
+       sprintf(' %4.2f',desv(2)) char (10) ...
+       'wet: ' sprintf('%4.2f',medi(3)) ' \pm ' ...
+       sprintf(' %4.2f',desv(3)) ];
+annotation('textbox', [pos(1), pos(2)+pos(4)-0.20, 0.15, 0.199], ...
            'string', stats, 'backgroundcolor','w')
 ylim([0 1]); 
-%xlabel('Months','fontsize',12)  
+xlabel('Months','fontsize',12)  
 ylabel(title,'fontsize',12)
 grid on;
 sub=subplot('position',[0.83 pos(2)+0.005 0.15 pos(4)-0.005]);
 bins=[0:0.025:1];
-counts=histc(aot(:,1),bins);
-b=barh(bins+bins(2)/2,counts/sum(counts),1,'w'); 
-set(b,'facecolor',[0.7 0.7 0.7]);
-ylim([0 1]); %xlabel('freq');
+
+%counts=histc(aot(:,1),bins);
+%b=barh(bins+bins(2)/2,counts/sum(counts),1,'w'); 
+dry=histc(XX(:,7:11),bins);
+plot(dry/sum(dry),bins+bins(2)/2,'r-'); 
+%set(b,'facecolor',[0.7 0.6 0.6]);
+ylim([0 1]); xlabel('freq');
 xlim([min(xtic) max(xtic)]);
 set(gca,'XTick',xtic);
 set(gca,'xticklabel',xticl);
 set(gca,'yticklabel','');
-grid on;
+grid on; hold on;
+wet=histc([XX(:,1:6) XX(:,12)],bins);
+plot(wet/sum(wet),bins+bins(2)/2,'b-'); 
+%set(b,'facecolor',[0.6 0.6 0.7]);
 %
