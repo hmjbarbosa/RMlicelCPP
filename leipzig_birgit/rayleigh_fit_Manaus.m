@@ -179,6 +179,11 @@ for ch=1:1
       tmpY(distance>2)=nan;
       % For each point, exclude those not aligned
 %      tmpY(abs(slope-atan(a))>pi/2.)=nan;
+    for i=2:maxbin-1
+      if isnan(tmpY(i-1)) & isnan(tmpY(i+1))
+	tmpY(i)=nan;
+      end
+    end
       % Recompute the mask counter
       nmask=sum(isnan(tmpY));
     

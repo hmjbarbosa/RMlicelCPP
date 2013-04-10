@@ -75,7 +75,7 @@ r_bin=(alt(2)-alt(1))*1e-3;
 % matrix to hold lidar received power P(z, lambda)
 % anything user needs: time average, bg correction, glueing, etc..
 P=smooth_region(squeeze(nanmean(channel,3)), 3, 400, 7, 800, 10);
-clear channel;
+%clear channel;
 
 % range bg-corrected signal Pr2(z, lambda)
 for j = 1:2

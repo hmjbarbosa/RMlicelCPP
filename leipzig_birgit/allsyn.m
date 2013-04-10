@@ -1,4 +1,8 @@
 clear all
+addpath('../matlab');
+addpath('../sc');
+addpath('../leipzig_birgit/Numerical Recipes')
+
 % windows' size
 wsx=250; wsy=650; 
 % displacement for next window
@@ -15,7 +19,7 @@ read_ascii_synthetic
 read_sonde_synthetic
 molecular;
 % figure 6 7
-rayleigh_fit_Manaus
+rayleigh_fit_Manaus3
 % figure 8
 Klett_Manaus
 % figure 9

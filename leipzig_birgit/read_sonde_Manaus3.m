@@ -54,10 +54,29 @@ i=0;
 while ~feof(fid);
   sondedata = fgetl(fid);
   if ~isempty(sondedata)
+    if (sondedata(1:7)=='Station')
+      break
+    end
     i=i+1;
     pres_snd(i,1)=str2num(sondedata(1:7));  % P in hPa!
     alt_snd(i,1)=str2num(sondedata(8:14)); % in m 
     temp_snd(i,1)=T0 + str2num(sondedata(15:21)); % T in K
+    
+    dwpt_snd(i,1)=T0 + str2num(sondedata(23:28)); % Td in K
+    relh_snd(i,1)=str2num(sondedata(30:35)); % RH in %
+    
+    if (any(sondedata(44:49)~=' '))
+      drct_snd(i,1)=str2num(sondedata(44:49)); % direction in deg
+    else
+      drct_snd(i,1)=NaN;
+    end
+    if (any(sondedata(51:56)~=' '))
+      sknt_snd(i,1)=str2num(sondedata(51:56))/0.514; % speed in m/s
+    else
+      sknt_snd(i,1)=NaN;
+    end
+    
+%1002.0     84   29.8   23.8     70  18.94    100      3  302.8  359.2  306.2
 % P = rho*R*T, R=287.05 J/kg/K
 % 100 corrects hPa to Pa, hence rho in kg/m3
     rho_snd(i,1)=100*pres_snd(i,1)./temp_snd(i,1)/Rair;

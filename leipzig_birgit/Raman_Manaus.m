@@ -23,7 +23,6 @@ clear fval angfit linfit relerr smed
 clear aero_ext_raman
 clear aero_ext_raman_sm
 clear signal
-clear ray_ext
 clear lambda_aang
 %
 %%------------------------------------------------------------------------
@@ -34,9 +33,8 @@ clear lambda_aang
 bin1st = 1; 
 
 % Angstrom coefficient 
-% aang = 1.05;    % European Urban
+aang = 1.05;    % European Urban
 % aang = 0.2;   % Saharan Desert Dust   
-aang = 1.0;
 
 % Scalling between Elastic and Raman, i.e., 
 % aer_ext(elastic) = aer_ext(raman) * (elastic/raman) ^ angstron
@@ -54,7 +52,7 @@ end
 % avoid division by zero
 log_raman(~isfinite(log_raman))=NaN;
 % lower raman RefBin if necessary
-RefBin(2) = min(RefBin(2),min(find(isnan(log_raman))));
+%RefBin(2) = min(RefBin(2),min(find(isnan(log_raman(:,2)))));
 
 % Compute the derivative as a simple linear fit centered in each
 % point. The number of points used is 2*SPAN+1 but it varies linearly 
@@ -66,6 +64,7 @@ RefBin(2) = min(RefBin(2),min(find(isnan(log_raman))));
 [fval,angfit,linfit,relerr,smed]=runfit2(...
     log_raman(2,bin1st:maxbin)', alt(bin1st:maxbin).*1e-3, 2, 200);
 
+aero_ext_raman = NaN(maxbin,1);
 for i=bin1st:RefBin(2)
   aero_ext_raman(i) = (angfit(i)-alpha_mol(i,1)-alpha_mol(i,2))./(1+lambda_aang);
 end

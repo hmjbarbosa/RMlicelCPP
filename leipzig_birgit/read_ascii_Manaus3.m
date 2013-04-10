@@ -111,7 +111,7 @@ plot(P(:,1),alt*1.e-3,'b')
 xlabel('smooth bg-corr signal','fontsize',[10])  
 ylabel('altitude (km)','fontsize',[10])
 grid on
-hold on
+hold on;
 plot(P(:,2),alt*1.e-3,'c')
 hold off
 %
@@ -122,7 +122,7 @@ plot(Pr2(:,1),alt*1.e-3,'b')
 xlabel('range corrected smooth bg-corr signal','fontsize',[10])  
 ylabel('altitude (km)','fontsize',[10])
 grid on
-hold on 
+hold on ;
 plot(Pr2(:,2),alt*1.e-3,'c')
 hold off
 % 

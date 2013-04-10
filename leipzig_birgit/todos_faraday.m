@@ -2,6 +2,8 @@ clear all
 addpath('../matlab');
 addpath('../sc');
 
+load overlap.mat
+
 % windows' size
 wsx=250; wsy=650; 
 % displacement for next window
@@ -15,7 +17,7 @@ constants
 radio{1}='./Manaus/82332_110901_00.dat'; tag{1}='dry';
 radio{2}='./Manaus/82332_120119_00.dat'; tag{2}='wet';
 
-for z=2:2
+for z=1:1
   radiofile=radio{z};
   read_sonde_Manaus3
   molecular
@@ -99,9 +101,14 @@ for z=2:2
     jdf=wjdf(w);
     
     read_ascii_Manaus3
+    n1=size(glue355,1);
+    n2=size(over,1);
+    if (n1>n2)
+      over(n2:n1)=1;
+    end
     
     for q=1:nfile
-      P(:,1)=glue355(:,q);
+      P(:,1)=glue355(:,q)./over(:);
       Pr2(:,1) = P(:,1).*altsq(:);
       
       rayleigh_fit_Manaus3
@@ -115,7 +122,7 @@ for z=2:2
     totfile=totfile+nfile;
   end
   if (totfile>0)
-    out=['beta_klett_' tag{z} '.mat'];
+    out=['beta_klett_' tag{z} '_overlap.mat'];
     save(out,'klett_beta_aero','klett_alpha_aero','totheads')
   end
 end

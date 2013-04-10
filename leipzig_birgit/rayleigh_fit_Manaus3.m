@@ -16,15 +16,16 @@ clear fval a b sa sb chi2red ndf distance nmask
 clear out nn RefBin
 % ---------------------------------------------------
 
-debug=0;
+debug=2;
 
 %%------------------------------------------------------------------------
 %%  INTERPOLATION TO LIDAR SAMPLING ALTITUDES
 %%------------------------------------------------------------------------
 
-toextrapolate=1;
+toextrapolate=0;
 
-lidar_altitude=100;
+%lidar_altitude=100;
+lidar_altitude=0;
 
 if toextrapolate==0
   % Set maximum lidar bin to highest altitude of sounding 
@@ -60,7 +61,7 @@ alpha_mol(:,2) = beta_mol(:,2).*LR_mol(2);
 
 % Compute molecular optical depth between lidar height and each
 % atmospheric level
-for j = 1:1
+for j = 1:2
   for i=1:maxbin
     if i==1
       tau(i,j) = alpha_mol(i,j)*r_bin; 
@@ -76,7 +77,7 @@ end
 % raman cross section! Beta_mol() however, is proportional to the
 % nitrogen number density, and hence, proportional to the N2-raman
 % back-scatter.
-for j = 1:1
+for j = 1:2
   for i=1:maxbin
     % calculate Pr2_mol in km-1 
     Pr2_mol(i,j)=beta_mol(i,j)*exp(-tau(i,j)-tau(i,1));
@@ -90,7 +91,7 @@ end
 %%------------------------------------------------------------------------
 
 % for elastic and raman channels
-for ch=1:1
+for ch=1:2
 
   %%------------------------------------------------------------------------
   %%  LOOP ON RAYLEIGH FIT FOR DETERMINATION OF MOLECULAR RANGE
@@ -114,8 +115,8 @@ for ch=1:1
 
   % crop regions that we know will never be molecular
   % for now: 5km
-  tmpY(1:floor(2.0/r_bin))=NaN;
-  tmpY(floor(8.0/r_bin):end)=NaN;
+  tmpY(1:floor(8.0/r_bin))=NaN;
+  tmpY(floor(15.0/r_bin):end)=NaN;
   
   % Initialize counter for the number of NaN data points
   nmask=sum(isnan(tmpY)); nmask_old=-1;
@@ -229,9 +230,9 @@ for ch=1:1
   end % bg convergence loop
   disp(['ch= ' num2str(ch) '  last BG= ' num2str(bg) ]);
 
-%  if (bg<0)
-%    bg=0;
-%  end
+  if (bg<0)
+    bg=0;
+  end
   
   %% APPLY THE CALCULATED BG
   P  (:,ch) = P(:,ch)-bg;
@@ -258,10 +259,10 @@ set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
 % at lidar levels
 plot(beta_mol(:,1),alt(1:maxbin)*1e-3,'b'); 
 hold on
-%plot(beta_mol(:,2),alt(1:maxbin)*1e-3,'c');
+plot(beta_mol(:,2),alt(1:maxbin)*1e-3,'c');
 % at sounding levels
 plot(beta_mol_snd(:,1),alt_snd(:)*1e-3,'bo'); 
-%plot(beta_mol_snd(:,2),alt_snd(:)*1e-3,'co');
+plot(beta_mol_snd(:,2),alt_snd(:)*1e-3,'co');
 xlabel('Lidar Beta / m-1')
 ylabel('Height / km')
 title('beta scatter for sounding','fontsize',[14]) 
@@ -286,16 +287,15 @@ plot(Pr2(RefBin(1),1), alt(RefBin(1))*1e-3,'r*');
 hold off
 legend('Lidar', 'Rayleigh Fit', 'Reference Bin'); 
 %   
-%subplot(1,2,2)
-%plot(Pr2(1:maxbin,2), alt(1:maxbin)*1e-3); 
-%xlabel('range smooth bg-corr signal','fontsize',[10])  
-%title('Rayleigh Fit 387','fontsize',14)
-%grid on
-%hold on
-%plot(Pr2_mol(1:maxbin,2), alt(1:maxbin)*1e-3,'g','LineWidth',2); 
-%plot(Pr2(RefBin(2),2), alt(RefBin(2))*1e-3,'r*');
-%legend('Lidar', 'Rayleigh Fit', 'Reference Bin'); 
-%
+subplot(1,2,2)
+plot(Pr2(1:maxbin,2), alt(1:maxbin)*1e-3); 
+xlabel('range smooth bg-corr signal','fontsize',[10])  
+title('Rayleigh Fit 387','fontsize',14)
+grid on
+hold on
+plot(Pr2_mol(1:maxbin,2), alt(1:maxbin)*1e-3,'g','LineWidth',2); 
+plot(Pr2(RefBin(2),2), alt(RefBin(2))*1e-3,'r*');
+legend('Lidar', 'Rayleigh Fit', 'Reference Bin'); 
 %
 % -------------
 figure(7); clf
@@ -312,15 +312,15 @@ plot(log(Pr2_mol(1:maxbin,1)),alt(1:maxbin)*1e-3,'g','LineWidth',2);
 plot(log(Pr2(RefBin(1),1)), alt(RefBin(1))*1e-3,'r*');
 hold off
 %
-%subplot(1,2,2)
-%plot(log(Pr2(1:maxbin,2)),alt(1:maxbin)*1e-3,'b');  
-%xlabel('ln range smooth bg-corr signal','fontsize',[10])  
-%title('Rayleigh fit Ln 387' ,'fontsize',14) 
-%grid on
-%hold on
-%plot(log(Pr2_mol(1:maxbin,2)),alt(1:maxbin)*1e-3,'g','LineWidth',2);   
-%plot(log(Pr2(RefBin(2),2)), alt(RefBin(2))*1e-3,'r*');
-%hold off
+subplot(1,2,2)
+plot(log(Pr2(1:maxbin,2)),alt(1:maxbin)*1e-3,'b');  
+xlabel('ln range smooth bg-corr signal','fontsize',[10])  
+title('Rayleigh fit Ln 387' ,'fontsize',14) 
+grid on
+hold on
+plot(log(Pr2_mol(1:maxbin,2)),alt(1:maxbin)*1e-3,'g','LineWidth',2);   
+plot(log(Pr2(RefBin(2),2)), alt(RefBin(2))*1e-3,'r*');
+hold off
 %
 disp('End of program: rayleigh_fit_Manaus.m, Vers. 1.0 06/12')
 

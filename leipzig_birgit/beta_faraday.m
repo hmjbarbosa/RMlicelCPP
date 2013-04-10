@@ -3,10 +3,10 @@ clear all
 addpath('../matlab');
 addpath('../sc');
 
-%load beta_klett_dry.mat
-%jdi=datenum(2011, 7, 29, 0, 0, 0);
-load beta_klett_wet.mat
-jdi=datenum(2012,  1, 20, 0, 0, 0);
+load beta_klett_dry_overlap.mat
+jdi=datenum(2011, 7, 29, 0, 0, 0);
+%load beta_klett_wet.mat
+%jdi=datenum(2012,  1, 20, 0, 0, 0);
 jdf=jdi+7;
 
 maxbin=floor(6/7.5e-3);
@@ -53,7 +53,7 @@ set(gca,'fontsize',12)
 datetick('x','mm/dd')
 ylabel('Altitude agl (km)','fontsize',14)
 tmp=datevec(jdi);
-out=sprintf('faraday_beta_%4d_%02d_%02d.png', tmp(1),tmp(2),tmp(3));
+out=sprintf('faraday_beta_%4d_%02d_%02d_overlap.png', tmp(1),tmp(2),tmp(3));
 print(out,'-dpng')
 eval(['!mogrify -trim ' out])
 
