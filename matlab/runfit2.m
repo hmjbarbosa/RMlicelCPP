@@ -38,6 +38,9 @@ function [fval, a, b, relerr, Smed] = runfit2(S, z, nside, nside2)
 if ~exist('z','var') z(:,1)=(1:nz)'; end
 if ~exist('nside','var') nside=5; end
 
+S(isnan(z))=nan;
+z(isnan(S))=nan;
+
 % smooth(S,SPAN) is a running average using SPAN points. Therefore,
 % for odd SPAN, the number of points on each side of central point is
 % the same, i.e., (SPAN-1)/2
