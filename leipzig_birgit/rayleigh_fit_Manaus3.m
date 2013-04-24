@@ -114,9 +114,19 @@ for ch=1:2
   end
 
   % crop regions that we know will never be molecular
-  % for now: 5km
-  tmpY(1:floor(8.0/r_bin))=NaN;
-  tmpY(floor(15.0/r_bin):end)=NaN;
+  tmpY(1:floor(1.0/r_bin))=NaN;
+  % fit mol x lidar by parts
+  [fval2,a2,b2,err2,smed2]=nanrunfit2(tmpY,tmpX,34,34);
+% kind of a signal do noise ratio. in a local sense.
+  good=smed2./err2;
+% try to use the S/N to exclude potential bad regions
+%  tmpY(good<10)=NaN;
+%  return
+  tmpY(1:floor(2.0/r_bin))=NaN;
+  tmpY(floor(16.0/r_bin):end)=NaN;
+  minZ=min(tmpZ(~isnan(tmpY))); maxZ=max(tmpZ(~isnan(tmpY)));
+  disp(['lowest used at height=' num2str(minZ) ]);
+  disp(['highest used at height=' num2str(maxZ) ]);
   
   % Initialize counter for the number of NaN data points
   nmask=sum(isnan(tmpY)); nmask_old=-1;
@@ -129,6 +139,11 @@ for ch=1:2
     
     % Do a linear fit using all remaining points
     [a, b, fval, sa, sb, chi2red, ndf] = fastfit(tmpX,tmpY);
+    if (debug>1)
+      [fval2,a2,b2,err2,smed2]=nanrunfit2(tmpY,tmpX,67,67);
+      figure(25); clf; hold on;
+      plot(tmpZ,fval2./err2,'o-');grid on;
+    end
     % For each point, exclude those which are too far away 
     %
     % NOTE1: this exclusion does not depend on having the BG corrected
@@ -138,16 +153,17 @@ for ch=1:2
     % (hyperbola) as the error is larger near the ends. Here
     % sqrt(chi2red) is used as a measure of the uncertainty.
     distance=abs(tmpY-fval)./sqrt(chi2red); 
+%    distance=abs(tmpY-fval)./sqrt(tmpY); 
     tmpY(distance>2)=nan;
     
-    if (debug>1)
-      figure(30); plot(tmpY)
-    end
-    for i=2:maxbin-1
-      if isnan(tmpY(i-1)) & isnan(tmpY(i+1))
-	tmpY(i)=nan;
-      end
-    end
+%    if (debug>1)
+%      figure(30); plot(tmpY)
+%    end
+%    for i=2:maxbin-1
+%      if isnan(tmpY(i-1)) & isnan(tmpY(i+1))
+%        tmpY(i)=nan;
+%      end
+%    end
 
     % Recompute the mask counter
     nmask=sum(isnan(tmpY));
@@ -168,10 +184,14 @@ for ch=1:2
     if (debug>1)
       figure(24); clf; hold on;
       scatter(tmpZ(~isnan(tmpY)),tmpX(~isnan(tmpY))*a+b,'o');
-      scatter(tmpZ(~isnan(tmpY)),tmpY(~isnan(tmpY)),'.');
+      scatter(tmpZ(~isnan(tmpY)),tmpY(~isnan(tmpY)),'o');
       hold on; grid on;
-      plot(tmpZ(~isnan(tmpY)),tmpX(~isnan(tmpY))*a+b,'r');
+      [i1]=floor(min(tmpZ(~isnan(tmpY)))/r_bin);
+      [i2]=floor(max(tmpZ(~isnan(tmpY)))/r_bin);
+      plot(tmpZ(i1:i2),tmpX(i1:i2)*a+b,'r');
       xlabel('Z'); ylabel('P, Pmol and Fit');
+      legend('molecular','lidar','mol*A+B');
+      [x,y,but]=ginput(1);
     end
 
     iter=iter+1; 
@@ -187,11 +207,9 @@ for ch=1:2
     colorbar;
   end
 
-%  figure(23); plot(log10(P_mol(1:maxbin,ch)),...
-%		   log10(P_mol(1:maxbin,ch)*a+b),'r');
   if (debug>0)
-    figure(23); plot(tmpZ(200:maxbin), ...
-		     (P_mol(200:maxbin,ch)*a+b), 'r');
+    figure(23); 
+    plot(tmpZ(200:maxbin), (P_mol(200:maxbin,ch)*a+b), 'r');
   end
   
   %% SET THE REFERENCE BIN
@@ -233,6 +251,9 @@ for ch=1:2
   if (bg<0)
     bg=0;
   end
+%  if (ch==2)
+    bg=0;
+%  end
   
   %% APPLY THE CALCULATED BG
   P  (:,ch) = P(:,ch)-bg;
@@ -243,6 +264,11 @@ for ch=1:2
   Pr2_mol(1:maxbin,ch) = P_mol(1:maxbin,ch).*altsq(1:maxbin);
 
 end % channel loop
+
+%RefBin(1)=1047;
+%RefBin(2)=1082;
+%RefBin(1)=1328;
+%RefBin(2)=1331;
 
 if (debug==0)
   return

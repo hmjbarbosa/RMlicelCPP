@@ -48,6 +48,11 @@ beta_par(1,Ref_1)= 1e-12;  % in km
 %beta_par(1,Ref_1)= 5e-5;  % in km
 %beta_par(1,Ref_1)= 8e-3; % in case of cirrus
 %
+%figure(123)
+%clf
+%hold on
+%for up=RefBin(2):-1:RefBin(2)-100
+  
 p_ave_raman_1(up)=0;
 m_ave_raman_1(up)=0;
 p_ave_elast_1(up)=0;
@@ -67,17 +72,31 @@ for i=up : -1 : bin1st
   exp_n_1(i) = exp(+(p_ave_elast_1(i) + m_ave_elast_1(i))*r_bin);
 end
 
+%plot(exp_z_1(200:up)./exp_n_1(200:up),alt(200:up))
+%pause
+%end
+%return
+
 % -------------------------
 % calculate beta Raman
 % -------------------------
-for i=up : -1 : bin1st   
-  signals_1(i) =(mean(P(Ref_1-100:Ref_1+100,2))*P(i,1)'*beta_mol(i,1))/...
-                (mean(P(Ref_1-100:Ref_1+100,1))*P(i,2)'*beta_mol(Ref_1,1));  
+for i=up : -1 : bin1st
+% use the fitted molecular signal instead of real signal to avoid
+% random fluctuations 
+  signals_1(i) =(P_mol(Ref_1,2)*P(i,1)'*beta_mol(i,1))/...
+                (P_mol(Ref_1,1)*P(i,2)'*beta_mol(Ref_1,1));  
+%  signals_1(i) =(mean(P(Ref_1-100:Ref_1+100,2))*P(i,1)'*beta_mol(i,1))/...
+%                (mean(P(Ref_1-100:Ref_1+100,1))*P(i,2)'*beta_mol(Ref_1,1));  
 %  signals_1(i) =(P(Ref_1,2)'*P(i,1)'*beta_mol(1,i))/...
 %                (P(Ref_1,1)'*P(i,2)'*beta_mol(1,Ref_1));  
   beta_raman(i)= -beta_mol(i,1)+(beta_par(1,Ref_1)+ ...
                                  beta_mol(Ref_1,1))*signals_1(i)*exp_z_1(i)/exp_n_1(i);
 end
+
+%plot(beta_raman(50:up),alt(50:up))
+%pause
+%end
+%return
 
 %  
 % --------------------------------------
