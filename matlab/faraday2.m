@@ -70,8 +70,8 @@ datain='/home/lidar_data/data';
 
 
 %% FIRST DATE
-jdi0=datenum(2012,  1, 20, 0, 0, 0);
-%jdi0=datenum(2011,  7, 29, 0, 0, 0);
+%jdi0=datenum(2012,  1, 20, 0, 0, 0);
+jdi0=datenum(2011,  7, 29, 0, 0, 0);
 
 nsel=0; nday=0; step=0.25;
 while (nday<=7)

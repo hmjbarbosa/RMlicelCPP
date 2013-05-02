@@ -72,10 +72,14 @@ altsq = alt.*alt;
 % bin height in km
 r_bin=(alt(2)-alt(1))*1e-3; 
 
+noise=0*randn(size(channel));
+%load ruido_ruim.mat
+noisechannel=channel+noise;
+
 % matrix to hold lidar received power P(z, lambda)
 % anything user needs: time average, bg correction, glueing, etc..
-P=smooth_region(squeeze(nanmean(channel,3)), 3, 400, 7, 800, 10);
-%P=squeeze(nanmean(channel,3));
+%P=smooth_region(squeeze(nanmean(noisechannel,3)), 3, 400, 7, 800, 10);
+P=squeeze(nanmean(channel,3));
 %clear channel;
 
 % range bg-corrected signal Pr2(z, lambda)

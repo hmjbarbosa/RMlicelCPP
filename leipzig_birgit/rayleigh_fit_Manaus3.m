@@ -114,16 +114,16 @@ for ch=1:2
   end
 
   % crop regions that we know will never be molecular
-  tmpY(1:floor(1.0/r_bin))=NaN;
-  % fit mol x lidar by parts
-  [fval2,a2,b2,err2,smed2]=nanrunfit2(tmpY,tmpX,34,34);
-% kind of a signal do noise ratio. in a local sense.
-  good=smed2./err2;
-% try to use the S/N to exclude potential bad regions
+%  tmpY(1:floor(1.0/r_bin))=NaN;
+%  % fit mol x lidar by parts
+%  [fval2,a2,b2,err2,smed2]=nanrunfit2(tmpY,tmpX,34,34);
+%% kind of a signal do noise ratio. in a local sense.
+%  good=smed2./err2;
+%% try to use the S/N to exclude potential bad regions
 %  tmpY(good<10)=NaN;
 %  return
-  tmpY(1:floor(2.0/r_bin))=NaN;
-  tmpY(floor(16.0/r_bin):end)=NaN;
+  tmpY(1:floor(9.0/r_bin))=NaN;
+  tmpY(floor(25.0/r_bin):end)=NaN;
   minZ=min(tmpZ(~isnan(tmpY))); maxZ=max(tmpZ(~isnan(tmpY)));
   disp(['lowest used at height=' num2str(minZ) ]);
   disp(['highest used at height=' num2str(maxZ) ]);
@@ -153,12 +153,10 @@ for ch=1:2
     % (hyperbola) as the error is larger near the ends. Here
     % sqrt(chi2red) is used as a measure of the uncertainty.
     distance=abs(tmpY-fval)./sqrt(chi2red); 
+%return
 %    distance=abs(tmpY-fval)./sqrt(tmpY); 
-    tmpY(distance>2)=nan;
+%    tmpY(distance>3)=nan;
     
-%    if (debug>1)
-%      figure(30); plot(tmpY)
-%    end
 %    for i=2:maxbin-1
 %      if isnan(tmpY(i-1)) & isnan(tmpY(i+1))
 %        tmpY(i)=nan;
@@ -175,12 +173,6 @@ for ch=1:2
 	  ' chi2red=' num2str(chi2red) ' ndf=' num2str(ndf) ]); 
     
     % update the plot window
-%    figure(24); clf; hold off;
-%    scatter(tmpX(~isnan(tmpY)),tmpY(~isnan(tmpY)),10,tmpZ(~isnan(tmpY)));
-%    hold on; grid on;
-%    plot(tmpX(~isnan(tmpY)),tmpX(~isnan(tmpY))*a+b,'r');
-%    xlabel('Pmol'); ylabel('P and Fit');
-
     if (debug>1)
       figure(24); clf; hold on;
       scatter(tmpZ(~isnan(tmpY)),tmpX(~isnan(tmpY))*a+b,'o');
@@ -191,7 +183,7 @@ for ch=1:2
       plot(tmpZ(i1:i2),tmpX(i1:i2)*a+b,'r');
       xlabel('Z'); ylabel('P, Pmol and Fit');
       legend('molecular','lidar','mol*A+B');
-      [x,y,but]=ginput(1);
+%      [x,y,but]=ginput(1);
     end
 
     iter=iter+1; 
@@ -218,7 +210,8 @@ for ch=1:2
   disp(['lowest used bin #' num2str(minI) ' at height=' num2str(minZ) ]);
   disp(['highest used bin #' num2str(maxI) ' at height=' num2str(maxZ) ]);
 %  RefBin(ch) = floor((minZ+maxZ)*0.5/r_bin); 
-  RefBin(ch) = floor(maxZ/r_bin); 
+%  RefBin(ch) = floor(maxZ/r_bin); 
+ RefBin(ch) = floor(minZ/r_bin); 
   
   %% SAVE MOLECULAR MASK
   mask_mol(1:maxbin,ch)=~isnan(tmpY);
@@ -248,11 +241,14 @@ for ch=1:2
   end % bg convergence loop
   disp(['ch= ' num2str(ch) '  last BG= ' num2str(bg) ]);
 
-  if (bg<0)
-    bg=0;
-  end
+%  if (bg<0)
+%    bg=0;
+%  end
+%  if (ch==1)
+%    bg=10.0108;
+%  end
 %  if (ch==2)
-    bg=0;
+%    bg=9.9946;
 %  end
   
   %% APPLY THE CALCULATED BG
@@ -263,10 +259,27 @@ for ch=1:2
   P_mol(1:maxbin,ch) = P_mol(1:maxbin,ch)*a;
   Pr2_mol(1:maxbin,ch) = P_mol(1:maxbin,ch).*altsq(1:maxbin);
 
+  P(RefBin(ch),ch)=P_mol(RefBin(ch),ch);
+  Pr2(RefBin(ch),ch)=Pr2_mol(RefBin(ch),ch);
+
+  % ref bin outra vez... procurando pelo mais proximo.
+%  delta=abs(P(RefBin(ch),ch)-P_mol(RefBin(ch),ch));
+%  for i=1:maxbin
+%    if (~isnan(tmpY(i)))
+%      if (abs(P(i,ch)-P_mol(i,ch)) < delta);
+%	RefBin(ch)=i;
+%	delta=abs(P(i,ch)-P_mol(i,ch));
+%	[i/1000 alt(i)/1000 delta]
+%      end
+%    end
+%  end
+  
 end % channel loop
 
-%RefBin(1)=1047;
-%RefBin(2)=1082;
+RefBin
+alt(RefBin)
+%RefBin(1)=1200;
+%RefBin(2)=1000;
 %RefBin(1)=1328;
 %RefBin(2)=1331;
 

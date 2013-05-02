@@ -77,16 +77,16 @@ end
 % calculate beta Raman
 % -------------------------
 for i=up : -1 : bin1st   
-  signals_1(i) =(mean(P(Ref_1-100:Ref_1+100,2))*P(i,1)'*beta_mol(i,1))/...
+  signals_1(i,1) =(mean(P(Ref_1-100:Ref_1+100,2))*P(i,1)'*beta_mol(i,1))/...
                 (mean(P(Ref_1-100:Ref_1+100,1))*P(i,2)'*beta_mol(Ref_1,1));  
 %  signals_1(i) =(P(Ref_1,2)'*P(i,1)'*beta_mol(1,i))/...
 %                (P(Ref_1,1)'*P(i,2)'*beta_mol(1,Ref_1));  
-  beta_raman(i)= -beta_mol(i,1)+(beta_par(1,Ref_1)+ ...
+  beta_raman(i,1)= -beta_mol(i,1)+(beta_par(1,Ref_1)+ ...
                                  beta_mol(Ref_1,1))*signals_1(i)*exp_z_1(i)/exp_n_1(i);
 end
 
-xbetatot(k,:)=beta_raman(bin1st:up);
-xbeta(k,:)=beta_raman(bin1st:up).*(msk(bin1st:up)');
+xbetatot(k,:)=beta_raman(bin1st:up,1);
+xbeta(k,:)=beta_raman(bin1st:up,1).*msk(bin1st:up);
 xdiff(k)=nansum(xbeta(k,:));
 xrms(k)=nansum(xbeta(k,:).^2);
 [a,b,fval,sa,sb,chi2red,ndf] = fastfit((bin1st:up)', xbeta(k,:)');
@@ -98,12 +98,12 @@ xchi2red(k) = chi2red;
 xndf(k)     = ndf    ; 
 
 figure(90); clf;
-plot(beta_raman(bin1st:up)); hold on; grid
-plot(beta_raman(bin1st:up).*(msk(bin1st:up)'),'r');
+plot(beta_raman(bin1st:up,1)); hold on; grid
+plot(beta_raman(bin1st:up,1).*msk(bin1st:up),'r');
 plot((bin1st:up),(bin1st:up)*a+b,'k-');
 title(['N=' num2str(k) ' rms= ' num2str(xrms(k))]);
 end
-figure(80)
+figure(80); clf
 plot(xref,xrms)   
 
 %  

@@ -41,6 +41,8 @@ clear xbetatot xbeta xdiff xref xrms a b fval sa sb chi2red ndf xa xb
 % define upper boundary from Raman Ext coeff
 up = RefBin(2);
 
+debug=2;
+
 %------------------------------------
 % reference value for beta particle
 %------------------------------------
@@ -53,11 +55,11 @@ eps=1;
 for k=1:15
 %  xref(k)=-1e-3 + 2e-3*k/100;
 if (k==1)
-  x1=-1e-3;
+  x1=-0.9*beta_mol(Ref_1,1);
   xref(k)=x1;
 end
 if (k==2)
-  x2=5e-3;
+  x2=0.9*beta_mol(Ref_1,1);
   xref(k)=x2;
 end
 if (k>=3)
@@ -102,7 +104,7 @@ end
 xbeta(k,:)=(beta_mol(bin1st:up,1)'+beta_raman(bin1st:up))./...
     beta_mol(bin1st:up);
 xdiff(k)=nansum(xbeta(k,:).*(msk(bin1st:up)'));
-xrms(k)=nansum(xbeta(k,:).*(msk(bin1st:up)').^2);
+xrms(k)=nansum((xbeta(k,:).*(msk(bin1st:up)')).^2);
 [a,b,fval,sa,sb,chi2red,ndf] = fastfit((bin1st:up)', xbeta(k,:)'.*msk(bin1st:up));
 xa(k)	    = a	;    
 xb(k)	    = b	;    
@@ -127,19 +129,24 @@ if (k>=3)
   end    
 end
 
-figure(9); clf;
-plot(xbeta(k,:)); hold on; grid
-plot(xbeta(k,:).*(msk(bin1st:up)'),'r');
-plot((bin1st:up),(bin1st:up)*a+b,'g-');
-plot((bin1st:up),(bin1st:up)*0,'k-');
-title(['N=' num2str(k) ' rms= ' num2str(xrms(k))]);
-
+if (debug>1)
+  figure(80); clf;
+  plot(xbeta(k,:)); hold on; grid
+  plot(xbeta(k,:).*(msk(bin1st:up)'),'r');
+  plot((bin1st:up),(bin1st:up)*a+b,'g-');
+  plot((bin1st:up),(bin1st:up)*0,'k-');
+  title(['N=' num2str(k) ' rms= ' num2str(xrms(k))]);
 end
 
-figure(8)
-plot(xref,xa,'o'); grid; xlim([-2e-3 10e-3]);
-title(['largura=' num2str(x2-x1) '  centro= ' num2str((x1+x2)/2) ...
-      ]);
+%pause
+ginput(1);
+end
+
+if (debug>0)
+  figure(81)
+  plot(xref,xa,'o'); grid; xlim([-2e-3 10e-3]);
+  title(['largura=' num2str(x2-x1) '  centro= ' num2str((x1+x2)/2) ]);
+end
 
 disp(['aprox beta ref= ' num2str((x1+x2)/2)])
 disp(['beta tot / beta mol ref= ' num2str(b)])

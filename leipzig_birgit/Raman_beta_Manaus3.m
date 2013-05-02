@@ -55,11 +55,13 @@ eps=1;
 for k=1:15
 %  xref(k)=-1e-3 + 2e-3*k/100;
 if (k==1)
-  x1=-1e-2;
+  x1=-0.5*beta_mol(Ref_1,1);
+%  x1=-1e-2;
   xref(k)=x1;
 end
 if (k==2)
-  x2=1e-2;
+  x2=0.9*beta_mol(Ref_1,1);
+%  x2=1e-2;
   xref(k)=x2;
 end
 if (k>=3)
@@ -91,52 +93,61 @@ end
 % -------------------------
 % calculate beta Raman
 % -------------------------
-for i=up : -1 : bin1st   
-  signals_1(i) =(mean(P(Ref_1-100:Ref_1+100,2))*P(i,1)'*beta_mol(i,1))/...
-                (mean(P(Ref_1-100:Ref_1+100,1))*P(i,2)'*beta_mol(Ref_1,1));  
-%  signals_1(i) =(P(Ref_1,2)'*P(i,1)'*beta_mol(1,i))/...
-%                (P(Ref_1,1)'*P(i,2)'*beta_mol(1,Ref_1));  
-  beta_raman(i)= -beta_mol(i,1)+(beta_par(1,Ref_1)+ ...
+for i=up : -1 : bin1st    
+  signals_1(i) =(P_mol(Ref_1,2)*P(i,1)'*beta_mol(i,1))/...
+                (P_mol(Ref_1,1)*P(i,2)'*beta_mol(Ref_1,1));  
+%  signals_1(i) =(mean(P(Ref_1-100:Ref_1+100,2))*P(i,1)'*beta_mol(i,1))/...
+%                (mean(P(Ref_1-100:Ref_1+100,1))*P(i,2)'*beta_mol(Ref_1,1));  
+%  signals_1(i) =(P(Ref_1,2)'*P(i,1)'*beta_mol(i,1))/...
+%                (P(Ref_1,1)'*P(i,2)'*beta_mol(Ref_1,1));  
+  beta_raman(i,1)= -beta_mol(i,1)+(beta_par(1,Ref_1)+ ...
                                  beta_mol(Ref_1,1))*signals_1(i)*exp_z_1(i)/exp_n_1(i);
 end
 
-xbetatot(k,:)=beta_raman(bin1st:up);
-xbeta(k,:)=beta_raman(bin1st:up).*(msk(bin1st:up)');
-xdiff(k)=nansum(xbeta(k,:));
-xrms(k)=nansum(xbeta(k,:).^2);
-[a,b,fval,sa,sb,chi2red,ndf] = fastfit((bin1st:up)', xbeta(k,:)');
+%xbetatot(k,:)=beta_raman(bin1st:up);
+xbeta(k,:)=beta_raman(bin1st:up,1);
+xdiff(k)=nansum(xbeta(k,:).*(msk(bin1st:up)'));
+xrms(k)=nansum((xbeta(k,:).*(msk(bin1st:up)')).^2);
+[a,b,fval,sa,sb,chi2red,ndf] = fastfit((bin1st:up)', xbeta(k,:)'.*msk(bin1st:up));
 xa(k)	    = a	;    
 xb(k)	    = b	;    
 xsa(k)	    = sa	;    
 xsb(k)	    = sb	;    
 xchi2red(k) = chi2red;
 xndf(k)     = ndf    ; 
+xmean(k)    = nanmean(xbeta(k,:)'.*msk(bin1st:up));
 
 if (k==1)
   f1=a;
+%  f1=xmean(k);
 end
 if (k==2)
   f2=a;
+%  f2=xmean(k);
 end
 if (k>=3)
   if (f1*a<0)
+%  if (f1*xmean(k)<0)
     x2=xref(k);
-    f2=a;
+    f2=xmean(k);
   else
     x1=xref(k);
     f1=a;
+%    f1=xmean(k);
   end    
 end
 
 if (debug>1)
   figure(80); clf;
-  plot(beta_raman(bin1st:up)); hold on; grid
-  plot(beta_raman(bin1st:up).*(msk(bin1st:up)'),'r');
+  plot(xbeta(k,:)); hold on; grid
+  plot(xbeta(k,:).*(msk(bin1st:up)'),'r');
   plot((bin1st:up),(bin1st:up)*a+b,'g-');
   plot((bin1st:up),(bin1st:up)*0,'k-');
+  ylim([-2e-3 5e-3]);
   title(['N=' num2str(k) ' rms= ' num2str(xrms(k))]);
 end
 
+%ginput(1);
 end
 
 if (debug>0)
@@ -148,19 +159,11 @@ end
 disp(['aprox beta ref= ' num2str((x1+x2)/2)])
 disp(['average beta ref(fit)= ' num2str(b)])
 
-%  
-% --------------------------------------
-%  smoothing 7.5 m * smothing length sl
-% --------------------------------------
-sl = 11; 
-beta_raman_sm = smooth(beta_raman,sl,'sgolay',3);
-aero_ext_raman_sm = smooth(aero_ext_raman,sl,'sgolay',3);
 % 
 % -------------
 %  Lidar Ratio 
 % -------------
 Lidar_Ratio(bin1st:up) = aero_ext_raman(bin1st:up)./beta_raman(bin1st:up);  
-Lidar_Ratio_sm(bin1st:up) = aero_ext_raman_sm(bin1st:up)./beta_raman_sm(bin1st:up);  
 %    
 % +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 %   Plots
@@ -168,25 +171,25 @@ Lidar_Ratio_sm(bin1st:up) = aero_ext_raman_sm(bin1st:up)./beta_raman_sm(bin1st:u
 % Backscatter coeffcient
 % ------------------------
 %rbbb = size(beta_aerosol);
-rbbr = size(beta_raman_sm(:));
+rbbr = size(beta_raman(:));
 %maxbin=RefBin(1);
 tope=1000;
 %
 figure(10); 
 xx=xx0+3*wdx; yy=yy0+3*wdy;
 % Klett
-plot(beta_aerosol_sm(1,bin1st:tope-1), alt(bin1st:tope-1).*1e-3,'b--');
+plot(beta_aerosol(1,bin1st:tope-1), alt(bin1st:tope-1).*1e-3,'b--');
 set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
-axis([-0.5e-3 1e-3 0 alt(tope-1)*1e-3*1.1]);
+axis([-3e-3 4e-3 0 alt(tope-1)*1e-3*1.1]);
 xlabel('BSC km-1 sr-1','fontsize',[12])  
 ylabel('Height agl / km','fontsize',[12])
 title(['Raman'],'fontsize',[14]) 
 grid on
 hold on;
 % Raman
-plot(beta_raman_sm(bin1st:rbbr(1)), alt(bin1st:rbbr(1)).*1e-3,'b','LineWidth',2)
-%plot(beta_aerosol_sm(RefBin(1)), alt(RefBin(1))*1e-3,'r*');
-%plot(beta_aerosol_sm(RefBin(2)), alt(RefBin(2))*1e-3,'g*');
+plot(beta_raman(bin1st:rbbr(1)), alt(bin1st:rbbr(1)).*1e-3,'b','LineWidth',2)
+plot(beta_aerosol(RefBin(1)), alt(RefBin(1))*1e-3,'r*');
+plot(beta_aerosol(RefBin(2)), alt(RefBin(2))*1e-3,'g*');
 legend('Klett', 'Raman', 'RefBin 355', 'RefBin 387')
 hold off
 %  
@@ -197,7 +200,7 @@ rLR_1 = size(Lidar_Ratio(1,:));
 %  
 figure(11);
 xx=xx0+2*wdx; yy=yy0+2*wdy;
-plot(Lidar_Ratio_sm(bin1st:rLR_1(2)),alt(bin1st:rLR_1(2)).*1e-3,'b')
+plot(Lidar_Ratio(bin1st:rLR_1(2)),alt(bin1st:rLR_1(2)).*1e-3,'b')
 set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
 axis([0 100 0 alt(tope-1)*1e-3*1.1]); 
 xlabel('Lidar Ratio / sr','fontsize',[12])  
