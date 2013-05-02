@@ -23,7 +23,7 @@ clear fval angfit linfit relerr smed
 clear aero_ext_raman
 %clear aero_ext_raman_sm
 clear signal
-clear lambda_aang
+clear lambda_aang tmp
 %
 %%------------------------------------------------------------------------
 %% USER SETTING
@@ -45,20 +45,16 @@ lambda_aang = (355/387)^aang;
 %% Solve Ansman Equation
 %%------------------------------------------------------------------------
 
-%P(RefBin(1):1998,1)=P_mol(RefBin(1):1998,1);
-%P(RefBin(2):1998,2)=P_mol(RefBin(2):1998,2);
-%Pr2(RefBin(1):1998,1)=Pr2_mol(RefBin(1):1998,1);
-%Pr2(RefBin(2):1998,2)=Pr2_mol(RefBin(2):1998,2);
-
 % Calculate term to be derived
-for i = bin1st:maxbin
-  tmp(i) = (alpha_mol(i,2)./Pr2(i,2)'); % 387 nm
+tmp=NaN(maxbin,1);
+for i = 1:maxbin
+  if (Pr2(i,2)==0)
+    tmp(i,1)=NaN;
+  else
+    tmp(i,1) = (alpha_mol(i,2)./Pr2(i,2));
+  end
 %  log_raman(2,i) = log(alpha_mol(i,2)./Pr2(i,2)'); % 387 nm
 end 
-% avoid division by zero
-%log_raman(~isfinite(log_raman))=NaN;
-% lower raman RefBin if necessary
-%RefBin(2) = min(RefBin(2),min(find(isnan(log_raman(:,2)))));
 
 % Compute the derivative as a simple linear fit centered in each
 % point. The number of points used is 2*SPAN+1 but it varies linearly 
@@ -70,34 +66,65 @@ end
 %[fval,angfit,linfit,relerr,smed]=runfit2(...
 %    log_raman(2,bin1st:maxbin)', alt(bin1st:maxbin).*1e-3, 2, 200);
 %tmp=mysmooth(tmp2,10,10);
-[fval,angfit,linfit,relerr,smed]=runfit2(...
-    tmp(bin1st:maxbin)', alt(bin1st:maxbin).*1e-3, 10, 10);
+%[fval,angfit,linfit,relerr,smed]=nanrunfit2(...
+%    tmp(bin1st:maxbin), alt(bin1st:maxbin).*1e-3, 5, 5);
 
-%now the derivative and tmp have different averaging
-%tmp=mysmooth(tmp,20,60);
+% DERIVATIVE
+%tmp=nanmysmooth(tmp,0,25);
+%% 1st order backward
+%for i=bin1st+1:maxbin
+%  angfit(i)=(tmp(i)-tmp(i-1))/(alt(i)-alt(i-1))*1e3;
+%end
+% 1st order forward
+%for i=bin1st:maxbin-1
+for i=bin1st:bin1st
+  angfit(i)=(tmp(i+1)-tmp(i))/(alt(i+1)-alt(i))*1e3;
+end
+% 2nd order central
+for i=bin1st+1:maxbin-1
+  angfit(i)=(tmp(i+1)-tmp(i-1))/(alt(i+1)-alt(i-1))*1e3;
+end
+% 2nd order backward
+%for i=bin1st+2:maxbin
+for i=maxbin:maxbin
+  angfit(i)=(tmp(i-2)-4*tmp(i-1)+3*tmp(i))/(alt(i)-alt(i-2))*1e3;
+end
+% 2nd order forward
+%for i=bin1st:maxbin-2
+%for i=bin1st:bin1st
+%  angfit(i)=(-3*tmp(i)+4*tmp(i+1)-tmp(i+2))/(alt(i+2)-alt(i))*1e3;
+%end
+%% 3rd order backward
+%for i=bin1st+2:maxbin-1
+%  angfit(i)=(tmp(i-2)-6*tmp(i-1)+3*tmp(i)+2*tmp(i+1))/(alt(i+1)-alt(i-2))*1e3/2;
+%end
+%% 3rd order forward
+%for i=bin1st+2:maxbin-1
+%  angfit(i)=(-2*tmp(i-1)-3*tmp(i)+6*tmp(i+1)-tmp(i+2))/(alt(i+2)-alt(i-1))*1e3/2;
+%end
+% 4th order central
+%for i=bin1st+2:maxbin-2
+%  angfit(i)=(tmp(i-2)-8*tmp(i-1)+8*tmp(i+1)-tmp(i+2))/(alt(i+2)-alt(i-2))*1e3/3;
+%end
+
+%angfit=nanmysmooth(angfit,0,25);
 
 aero_ext_raman = NaN(maxbin,1);
-for i=bin1st:RefBin(2)
-  aero_ext_raman(i) = (angfit(i)./tmp(i)-alpha_mol(i,1)-alpha_mol(i,2))./(1+lambda_aang);
+%for i=bin1st:RefBin(2)
+for i=bin1st:maxbin
+  aero_ext_raman(i) = (angfit(i-bin1st+1)./tmp(i)-alpha_mol(i,1)-alpha_mol(i,2))./(1+lambda_aang);
 %  aero_ext_raman(i) = (angfit(i)-alpha_mol(i,1)-alpha_mol(i,2))./(1+lambda_aang);
 end
 
-aero_ext_raman=mysmooth(aero_ext_raman,2,100);
+tmp=real(exp(nanmysmooth(log(aero_ext_raman),0,25)));
 
-%aero_ext_raman(RefBin(2)-5:RefBin(2)+5)=0;
-
-%%------------------------------------------------------------------------
-%% Smoothing and Cleaning
-%%------------------------------------------------------------------------
-%SPAN=11;
-%NPOLY=3;
-%aero_ext_raman_sm = smooth(aero_ext_raman, SPAN, 'sgolay', NPOLY);
-%aero_ext_raman_sm = mysmooth(aero_ext_raman, 5, 50);
+aero_ext_raman=nanmysmooth(aero_ext_raman,0,25);
+%aero_ext_raman=nanmysmooth(aero_ext_raman,0,25);
 
 % -------------
 %   plot data
 % -------------
-tope=1000;
+tope=floor(15/r_bin);
 
 figure(9);
 xx=xx0+4*wdx; yy=yy0+4*wdy;
@@ -111,7 +138,7 @@ title(['Raman'],'fontsize',[14])
 grid on
 hold on 
 % Raman 
-plot(aero_ext_raman(bin1st:RefBin(2)),alt(bin1st:RefBin(2))*1e-3,'r');
+plot(aero_ext_raman(bin1st:maxbin),alt(bin1st:maxbin)*1e-3,'r');
 %plot(aero_ext_raman_sm(bin1st:RefBin(2)),alt(bin1st:RefBin(2))*1e-3,'r');
 plot(alpha_aerosol(RefBin(1)), alt(RefBin(1))*1e-3,'r*');
 plot(alpha_aerosol(RefBin(2)), alt(RefBin(2))*1e-3,'g*');

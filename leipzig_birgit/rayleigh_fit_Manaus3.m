@@ -259,8 +259,6 @@ for ch=1:2
 %    bg=9.9946;
 %  end
  
-
-
   %% APPLY THE CALCULATED BG
   P  (:,ch) = P(:,ch)-bg;
   Pr2(:,ch) = P(:,ch).*altsq(:);

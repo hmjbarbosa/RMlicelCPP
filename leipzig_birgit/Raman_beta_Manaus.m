@@ -28,7 +28,7 @@
 %           Raman_Manaus.m
 % ---------------------------------------------------------
 %
-bin1st = 2; %no overlap dependence because of signal ratios -> start at the bottom
+%bin1st = 2; %no overlap dependence because of signal ratios -> start at the bottom
 %
 clear p_ave_raman_1 p_ave_elast_1 p_ave_raman_2 p_ave_elast_2
 clear m_ave_elast_1 m_ave_raman_1 m_ave_elast_2 m_ave_raman_2
@@ -67,7 +67,18 @@ for i=up - 1 : -1 : bin1st
   % Elastic molecular extinction at 355
   m_ave_elast_1(i) = m_ave_elast_1(i+1) + 0.5*(alpha_mol(i,1)+alpha_mol(i+1,1));
 end
-for i=up : -1 : bin1st
+for i=up + 1 : 1 : maxbin
+  % Raman Particle extinction at 387
+  p_ave_raman_1(i) = p_ave_raman_1(i-1) - 0.5*(aero_ext_raman(i) + aero_ext_raman(i-1))*lambda_aang; 
+  % Raman molecular extinction at 387
+  m_ave_raman_1(i) = m_ave_raman_1(i-1) - 0.5*(alpha_mol(i,2)+alpha_mol(i-1,2));    
+  % Elastic particle  extinction at 355
+  p_ave_elast_1(i) = p_ave_elast_1(i-1) - 0.5*(aero_ext_raman(i) + aero_ext_raman(i-1)); 
+  % Elastic molecular extinction at 355
+  m_ave_elast_1(i) = m_ave_elast_1(i-1) - 0.5*(alpha_mol(i,1)+alpha_mol(i-1,1));
+end
+%for i=up : -1 : bin1st
+for i=maxbin : -1 : bin1st
   exp_z_1(i) = exp(+(p_ave_raman_1(i) + m_ave_raman_1(i))*r_bin); 
   exp_n_1(i) = exp(+(p_ave_elast_1(i) + m_ave_elast_1(i))*r_bin);
 end
@@ -80,7 +91,8 @@ end
 % -------------------------
 % calculate beta Raman
 % -------------------------
-for i=up : -1 : bin1st
+%for i=up : -1 : bin1st
+for i=maxbin : -1 : bin1st
 % use the fitted molecular signal instead of real signal to avoid
 % random fluctuations 
   signals_1(i) =(P_mol(Ref_1,2)*P(i,1)'*beta_mol(i,1))/...
@@ -93,7 +105,7 @@ for i=up : -1 : bin1st
   %hmjb testando como definir beta_par em Ref_1
   
   
-  beta_raman(i)= -beta_mol(i,1)+(beta_par(1,Ref_1)+ ...
+  beta_raman(i,1)= -beta_mol(i,1)+(beta_par(1,Ref_1)+ ...
                                  beta_mol(Ref_1,1))*signals_1(i)*exp_z_1(i)/exp_n_1(i);
 end
 
@@ -113,7 +125,8 @@ end
 % -------------
 %  Lidar Ratio 
 % -------------
-Lidar_Ratio(bin1st:up) = aero_ext_raman(bin1st:up)./beta_raman(bin1st:up)';  
+Lidar_Ratio(bin1st:maxbin) = aero_ext_raman(bin1st:maxbin)./beta_raman(bin1st:maxbin);  
+%Lidar_Ratio(bin1st:up) = aero_ext_raman(bin1st:up)./beta_raman(bin1st:up)';  
 %Lidar_Ratio_sm(bin1st:up) = aero_ext_raman_sm(bin1st:up)./beta_raman_sm(bin1st:up);  
 %    
 % +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -139,7 +152,7 @@ grid on
 hold on
 % Raman
 %plot(beta_raman_sm(bin1st:rbbr(1)), alt(bin1st:rbbr(1)).*1e-3,'b','LineWidth',2)
-plot(beta_raman(bin1st:rbbr(1)), alt(bin1st:rbbr(1)).*1e-3,'b','LineWidth',2)
+plot(beta_raman(bin1st:rbbr(1)), alt(bin1st:rbbr(1)).*1e-3,'r')
 %plot(beta_aerosol_sm(RefBin(1)), alt(RefBin(1))*1e-3,'r*');
 %plot(beta_aerosol_sm(RefBin(2)), alt(RefBin(2))*1e-3,'g*');
 %legend('Klett', 'Raman', 'RefBin 355', 'RefBin 387')
