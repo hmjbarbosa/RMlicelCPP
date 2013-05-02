@@ -78,8 +78,8 @@ noisechannel=channel+noise;
 
 % matrix to hold lidar received power P(z, lambda)
 % anything user needs: time average, bg correction, glueing, etc..
-%P=smooth_region(squeeze(nanmean(noisechannel,3)), 3, 400, 7, 800, 10);
-P=squeeze(nanmean(channel,3));
+P=smooth_region(squeeze(nanmean(noisechannel,3)), 3, 400, 7, 800, 10);
+%P=squeeze(nanmean(channel,3));
 %clear channel;
 
 % range bg-corrected signal Pr2(z, lambda)

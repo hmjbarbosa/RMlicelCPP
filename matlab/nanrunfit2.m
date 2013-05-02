@@ -79,7 +79,8 @@ b=(Smed.*z2med-zmed.*zSmed)./(z2med-zmed2);
 clear z2med zmed2 zmed zSmed;
 
 % With the coefficients, calculate the value interpolated at each zi
-% note: since dz is uniform, fval == Smed
+% note: IF dz is varying uniformly (e.g heights), fval == Smed
+% but IF z is the molecular signal, then fval != Smed
 fval = a.*z + b;
 
 % calculate <abs(S-fval)>/<y> for all nt rows

@@ -71,7 +71,7 @@ end
 %    log_raman(2,bin1st:maxbin)', alt(bin1st:maxbin).*1e-3, 2, 200);
 %tmp=mysmooth(tmp2,10,10);
 [fval,angfit,linfit,relerr,smed]=runfit2(...
-    tmp(bin1st:maxbin)', alt(bin1st:maxbin).*1e-3, 5, 60);
+    tmp(bin1st:maxbin)', alt(bin1st:maxbin).*1e-3, 10, 10);
 
 %now the derivative and tmp have different averaging
 %tmp=mysmooth(tmp,20,60);
@@ -82,7 +82,7 @@ for i=bin1st:RefBin(2)
 %  aero_ext_raman(i) = (angfit(i)-alpha_mol(i,1)-alpha_mol(i,2))./(1+lambda_aang);
 end
 
-%aero_ext_raman=mysmooth(aero_ext_raman,2,50);
+aero_ext_raman=mysmooth(aero_ext_raman,2,100);
 
 %aero_ext_raman(RefBin(2)-5:RefBin(2)+5)=0;
 

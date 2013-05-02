@@ -114,23 +114,30 @@ for ch=1:2
   end
 
   % crop regions that we know will never be molecular
-%  tmpY(1:floor(1.0/r_bin))=NaN;
-%  % fit mol x lidar by parts
-%  [fval2,a2,b2,err2,smed2]=nanrunfit2(tmpY,tmpX,34,34);
-%% kind of a signal do noise ratio. in a local sense.
-%  good=smed2./err2;
-%% try to use the S/N to exclude potential bad regions
-%  tmpY(good<10)=NaN;
+  tmpY(1:floor(2.0/r_bin))=NaN;
+  % fit mol x lidar by parts
+  [fval2,a2,b2,err2,smed2]=nanrunfit2(tmpY,tmpX,37,37);
+  % kind of a signal do noise ratio. in a local sense.
+  good=fval2./err2;
+  % try to use the S/N to exclude potential bad regions
+  tmpY(good<2)=NaN;
 %  return
+    if (debug>1)
+      [fval2,a2,b2,err2,smed2]=nanrunfit2(tmpY,tmpX,37,37);
+%      [fval3,a3,b3,err3,smed3]=nanrunfit2(log(tmpY),tmpZ,37,37);
+      figure(25); clf; hold on;
+      plot(tmpZ,fval2./err2,'o-');grid on;
+    end
+%    return
   tmpY(1:floor(9.0/r_bin))=NaN;
-  tmpY(floor(25.0/r_bin):end)=NaN;
+%  tmpY(floor(25.0/r_bin):end)=NaN;
   minZ=min(tmpZ(~isnan(tmpY))); maxZ=max(tmpZ(~isnan(tmpY)));
   disp(['lowest used at height=' num2str(minZ) ]);
   disp(['highest used at height=' num2str(maxZ) ]);
   
   % Initialize counter for the number of NaN data points
   nmask=sum(isnan(tmpY)); nmask_old=-1;
-    
+
   % Convergence will stop when no more points are removed based on the
   % criteria stablished below
   iter=0;
@@ -139,11 +146,6 @@ for ch=1:2
     
     % Do a linear fit using all remaining points
     [a, b, fval, sa, sb, chi2red, ndf] = fastfit(tmpX,tmpY);
-    if (debug>1)
-      [fval2,a2,b2,err2,smed2]=nanrunfit2(tmpY,tmpX,67,67);
-      figure(25); clf; hold on;
-      plot(tmpZ,fval2./err2,'o-');grid on;
-    end
     % For each point, exclude those which are too far away 
     %
     % NOTE1: this exclusion does not depend on having the BG corrected
@@ -203,7 +205,7 @@ for ch=1:2
     figure(23); 
     plot(tmpZ(200:maxbin), (P_mol(200:maxbin,ch)*a+b), 'r');
   end
-  
+
   %% SET THE REFERENCE BIN
   tmpZ(isnan(tmpY))=NaN;
   [minZ,minI]=min(tmpZ); [maxZ,maxI]=max(tmpZ);
@@ -212,7 +214,7 @@ for ch=1:2
 %  RefBin(ch) = floor((minZ+maxZ)*0.5/r_bin); 
 %  RefBin(ch) = floor(maxZ/r_bin); 
  RefBin(ch) = floor(minZ/r_bin); 
-  
+
   %% SAVE MOLECULAR MASK
   mask_mol(1:maxbin,ch)=~isnan(tmpY);
 
@@ -223,22 +225,28 @@ for ch=1:2
   disp(['% BG correction for ch= ' num2str(ch) ]);
   disp(['%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%']);
 
-  nBG=1; 
-  bg=0;
-  while(abs(b/sb)>1 || abs(b/bg) > 1e-6)
-
-    bg=bg+b;
-    tmpY=tmpY-b;
-    
-    disp(['ch= ' num2str(ch) '  trying BG= ' num2str(bg) ]);
-
-    [a, b, fval, sa, sb, chi2red, ndf] = fastfit(tmpX,tmpY);
-
-    disp(['nBG= ' num2str(nBG) ' a=' num2str(a) ' sa=' num2str(sa) ... 
-	  ' b=' num2str(b) ' sb=' num2str(sb) ... 
-	  ' chi2red=' num2str(chi2red) ' ndf=' num2str(ndf) ]);     
-
-  end % bg convergence loop
+%  nBG=1; 
+%  bg=0;
+%while(abs(b/sb)>1 || abs(b/bg) > 1e-6)
+%
+%    bg=bg+b;
+%    tmpY=tmpY-b;
+%    
+%    disp(['ch= ' num2str(ch) '  trying BG= ' num2str(bg) ]);
+%
+%    [a, b, fval, sa, sb, chi2red, ndf] = fastfit(tmpX,tmpY);
+%
+%    disp(['nBG= ' num2str(nBG) ' a=' num2str(a) ' sa=' num2str(sa) ... 
+%	  ' b=' num2str(b) ' sb=' num2str(sb) ... 
+%	  ' chi2red=' num2str(chi2red) ' ndf=' num2str(ndf) ]);     
+%
+%  end % bg convergence loop
+% dont try to remove BG if linear coef. is compatible with bg=0
+  if (abs(b/sb)>3)
+    bg=b;
+  else
+    bg=0;
+  end
   disp(['ch= ' num2str(ch) '  last BG= ' num2str(bg) ]);
 
 %  if (bg<0)
@@ -250,7 +258,9 @@ for ch=1:2
 %  if (ch==2)
 %    bg=9.9946;
 %  end
-  
+ 
+
+
   %% APPLY THE CALCULATED BG
   P  (:,ch) = P(:,ch)-bg;
   Pr2(:,ch) = P(:,ch).*altsq(:);
@@ -259,6 +269,7 @@ for ch=1:2
   P_mol(1:maxbin,ch) = P_mol(1:maxbin,ch)*a;
   Pr2_mol(1:maxbin,ch) = P_mol(1:maxbin,ch).*altsq(1:maxbin);
 
+  %% FORCE THE REFERENCE BIN TO BE MOLECULAR
   P(RefBin(ch),ch)=P_mol(RefBin(ch),ch);
   Pr2(RefBin(ch),ch)=Pr2_mol(RefBin(ch),ch);
 
