@@ -20,8 +20,8 @@
 clear bin1st aang lambda_aang
 clear log_raman
 clear fval angfit linfit relerr smed
-clear aero_ext_raman
-%clear aero_ext_raman_sm
+clear alpha_raman
+%clear alpha_raman_sm
 clear signal
 clear lambda_aang tmp
 %
@@ -51,7 +51,7 @@ for i = 1:maxbin
   if (Pr2(i,2)==0)
     tmp(i,1)=NaN;
   else
-    tmp(i,1) = (alpha_mol(i,2)./Pr2(i,2));
+    tmp(i,1) = log(alpha_mol(i,2)./Pr2(i,2));
   end
 %  log_raman(2,i) = log(alpha_mol(i,2)./Pr2(i,2)'); % 387 nm
 end 
@@ -66,60 +66,74 @@ end
 %[fval,angfit,linfit,relerr,smed]=runfit2(...
 %    log_raman(2,bin1st:maxbin)', alt(bin1st:maxbin).*1e-3, 2, 200);
 %tmp=mysmooth(tmp2,10,10);
-%[fval,angfit,linfit,relerr,smed]=nanrunfit2(...
-%    tmp(bin1st:maxbin), alt(bin1st:maxbin).*1e-3, 5, 5);
+tmp=nanmysmooth(tmp,0,25);
+
+[fval,angfit2,linfit,relerr,smed]=nanrunfit2(...
+    tmp(bin1st:maxbin), alt(bin1st:maxbin).*1e-3, 5, 5);
 
 % DERIVATIVE
-%tmp=nanmysmooth(tmp,0,25);
+clear angfit
+angfit(:,9)=angfit2;
 %% 1st order backward
-%for i=bin1st+1:maxbin
-%  angfit(i)=(tmp(i)-tmp(i-1))/(alt(i)-alt(i-1))*1e3;
-%end
-% 1st order forward
-%for i=bin1st:maxbin-1
-for i=bin1st:bin1st
-  angfit(i)=(tmp(i+1)-tmp(i))/(alt(i+1)-alt(i))*1e3;
+for i=bin1st+1:maxbin
+%for i=maxbin:maxbin
+  angfit(i,1)=(tmp(i)-tmp(i-1))/(alt(i)-alt(i-1))*1e3;
 end
-% 2nd order central
+% 1st order forward
+for i=bin1st:maxbin-1
+%for i=bin1st:bin1st
+  angfit(i,2)=(tmp(i+1)-tmp(i))/(alt(i+1)-alt(i))*1e3;
+end
+%% 2nd order central
 for i=bin1st+1:maxbin-1
-  angfit(i)=(tmp(i+1)-tmp(i-1))/(alt(i+1)-alt(i-1))*1e3;
+  angfit(i,3)=(tmp(i+1)-tmp(i-1))/(alt(i+1)-alt(i-1))*1e3;
 end
 % 2nd order backward
-%for i=bin1st+2:maxbin
-for i=maxbin:maxbin
-  angfit(i)=(tmp(i-2)-4*tmp(i-1)+3*tmp(i))/(alt(i)-alt(i-2))*1e3;
+for i=bin1st+2:maxbin
+%for i=maxbin:maxbin
+  angfit(i,4)=(tmp(i-2)-4*tmp(i-1)+3*tmp(i))/(alt(i)-alt(i-2))*1e3;
 end
 % 2nd order forward
-%for i=bin1st:maxbin-2
+for i=bin1st:maxbin-2
 %for i=bin1st:bin1st
-%  angfit(i)=(-3*tmp(i)+4*tmp(i+1)-tmp(i+2))/(alt(i+2)-alt(i))*1e3;
-%end
-%% 3rd order backward
-%for i=bin1st+2:maxbin-1
-%  angfit(i)=(tmp(i-2)-6*tmp(i-1)+3*tmp(i)+2*tmp(i+1))/(alt(i+1)-alt(i-2))*1e3/2;
-%end
-%% 3rd order forward
-%for i=bin1st+2:maxbin-1
-%  angfit(i)=(-2*tmp(i-1)-3*tmp(i)+6*tmp(i+1)-tmp(i+2))/(alt(i+2)-alt(i-1))*1e3/2;
-%end
+  angfit(i,5)=(-3*tmp(i)+4*tmp(i+1)-tmp(i+2))/(alt(i+2)-alt(i))*1e3;
+end
+% 3rd order backward
+for i=bin1st+2:maxbin-1
+  angfit(i,6)=(tmp(i-2)-6*tmp(i-1)+3*tmp(i)+2*tmp(i+1))/(alt(i+1)-alt(i-2))*1e3/2;
+end
+% 3rd order forward
+for i=bin1st+1:maxbin-2
+  angfit(i,7)=(-2*tmp(i-1)-3*tmp(i)+6*tmp(i+1)-tmp(i+2))/(alt(i+2)-alt(i-1))*1e3/2;
+end
 % 4th order central
-%for i=bin1st+2:maxbin-2
-%  angfit(i)=(tmp(i-2)-8*tmp(i-1)+8*tmp(i+1)-tmp(i+2))/(alt(i+2)-alt(i-2))*1e3/3;
-%end
-
+for i=bin1st+2:maxbin-2
+  angfit(i,8)=(tmp(i-2)-8*tmp(i-1)+8*tmp(i+1)-tmp(i+2))/(alt(i+2)-alt(i-2))*1e3/3;
+end
+%return
 %angfit=nanmysmooth(angfit,0,25);
 
-aero_ext_raman = NaN(maxbin,1);
+alpha_raman = NaN(maxbin,1);
+alpha_raman2= NaN(maxbin,1);
+for j=1:9
 %for i=bin1st:RefBin(2)
 for i=bin1st:maxbin
-  aero_ext_raman(i) = (angfit(i-bin1st+1)./tmp(i)-alpha_mol(i,1)-alpha_mol(i,2))./(1+lambda_aang);
-%  aero_ext_raman(i) = (angfit(i)-alpha_mol(i,1)-alpha_mol(i,2))./(1+lambda_aang);
+%  alpha_raman(i,j) = (angfit(i-bin1st+1,j)./tmp(i)-alpha_mol(i,1)-alpha_mol(i,2))./(1+lambda_aang);
+  alpha_raman2(i,j) = (angfit(i,j)-alpha_mol(i,1)-alpha_mol(i,2))./(1+lambda_aang);
 end
+end
+figure(88); clf;
+n=50;
+plot(alpha_raman2(1:n,:),'o-')
+legend('1b','1f','2c','2b','2f','3b','3f','4c','tmp');
+hold on;
+plot(alpha_klett(1:n,1),'ko--')
+%ylim([-1.35 1.50])
 
-tmp=real(exp(nanmysmooth(log(aero_ext_raman),0,25)));
+%alpha_raman=alpha_raman2(:,3);
 
-aero_ext_raman=nanmysmooth(aero_ext_raman,0,25);
-%aero_ext_raman=nanmysmooth(aero_ext_raman,0,25);
+alpha_raman=nanmysmooth(alpha_raman2(:,3),0,200);
+%alpha_raman=nanmysmooth(alpha_raman,0,25);
 
 % -------------
 %   plot data
@@ -129,19 +143,19 @@ tope=floor(15/r_bin);
 figure(9);
 xx=xx0+4*wdx; yy=yy0+4*wdy;
 % Klett
-plot(alpha_aerosol(1,bin1st:tope-1),alt(bin1st:tope-1)*1e-3,'b--')
+plot(alpha_klett(bin1st:maxbin,1),alt(bin1st:maxbin)*1e-3,'b--')
 set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
-axis([-0.05 0.2 0 alt(tope-1)*1e-3*1.1]); 
+axis([-0.15 0.4 0 alt(tope-1)*1e-3*1.1]); 
 xlabel('Extinction / km^-1','fontsize',[12])  
 ylabel('Height / km','fontsize',[12])
 title(['Raman'],'fontsize',[14]) 
 grid on
 hold on 
 % Raman 
-plot(aero_ext_raman(bin1st:maxbin),alt(bin1st:maxbin)*1e-3,'r');
-%plot(aero_ext_raman_sm(bin1st:RefBin(2)),alt(bin1st:RefBin(2))*1e-3,'r');
-plot(alpha_aerosol(RefBin(1)), alt(RefBin(1))*1e-3,'r*');
-plot(alpha_aerosol(RefBin(2)), alt(RefBin(2))*1e-3,'g*');
+plot(alpha_raman(bin1st:maxbin),alt(bin1st:maxbin)*1e-3,'r');
+%plot(alpha_raman_sm(bin1st:RefBin(2)),alt(bin1st:RefBin(2))*1e-3,'r');
+plot(alpha_klett(RefBin(1),1), alt(RefBin(1))*1e-3,'r*');
+plot(alpha_klett(RefBin(2),1), alt(RefBin(2))*1e-3,'g*');
 legend('Klett', 'Raman', 'RefBin 355', 'RefBin 387')
 hold off
 %

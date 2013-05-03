@@ -86,20 +86,20 @@ P=squeeze(nanmean(noisechannel,3));
 %clear channel;
 
 % binning
-binsize=5;
-span=(binsize-1)/2;
-j=1;
-for i=span+1:binsize:rangebins-span-1
-  newP(j,:)=mean(P(i-span:i+span,:),1);
-  newalt(j,1)=mean(alt(i-span:i+span));
-  j=j+1;
-end
-clear P alt
-alt=newalt;
-altsq=alt.*alt;
-P=newP;
-r_bin=(alt(2)-alt(1))*1e-3; 
-rangebins=size(P,1);
+%binsize=5;
+%span=(binsize-1)/2;
+%j=1;
+%for i=span+1:binsize:rangebins-span-1
+%  newP(j,:)=mean(P(i-span:i+span,:),1);
+%  newalt(j,1)=mean(alt(i-span:i+span));
+%  j=j+1;
+%end
+%clear P alt
+%alt=newalt;
+%altsq=alt.*alt;
+%P=newP;
+%r_bin=(alt(2)-alt(1))*1e-3; 
+%rangebins=size(P,1);
 
 % range bg-corrected signal Pr2(z, lambda)
 for j = 1:2

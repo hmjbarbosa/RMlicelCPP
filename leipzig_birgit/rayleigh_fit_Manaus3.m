@@ -211,9 +211,8 @@ for ch=1:2
   [minZ,minI]=min(tmpZ); [maxZ,maxI]=max(tmpZ);
   disp(['lowest used bin #' num2str(minI) ' at height=' num2str(minZ) ]);
   disp(['highest used bin #' num2str(maxI) ' at height=' num2str(maxZ) ]);
-%  RefBin(ch) = floor((minZ+maxZ)*0.5/r_bin); 
-%  RefBin(ch) = floor(maxZ/r_bin); 
- RefBin(ch) = floor(minZ/r_bin); 
+  RefBinTop(ch) = floor(maxZ/r_bin); 
+  RefBin(ch) = floor(minZ/r_bin); 
 
   %% SAVE MOLECULAR MASK
   mask_mol(1:maxbin,ch)=~isnan(tmpY);

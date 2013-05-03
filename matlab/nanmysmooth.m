@@ -21,7 +21,8 @@ for i=1:nx
     p2=nx;
   end
 
-  out(i,:) = nanmean(in(p1:p2,:));
+  out(i,:) = nanmean(in(p1:p2,:),1);
+%  [i p1 p2 in(p1:p2,1)' out(i,1)]
 end
 
 if M(1)==1
