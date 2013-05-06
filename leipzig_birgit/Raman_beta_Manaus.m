@@ -95,8 +95,8 @@ end
 for i=maxbin : -1 : bin1st
 % use the fitted molecular signal instead of real signal to avoid
 % random fluctuations 
-  signals_1(i,1) =(P_mol(Ref_1,2)*P(i,1)'*beta_mol(i,1))/...
-                (P_mol(Ref_1,1)*P(i,2)'*beta_mol(Ref_1,1));  
+  signals_1(i,1) =(P_mol(Ref_1,2)*P(i,1)*beta_mol(i,1))/...
+                (P_mol(Ref_1,1)*P(i,2)*beta_mol(Ref_1,1));  
 %  signals_1(i,1) =(mean(P(Ref_1-100:Ref_1+100,2))*P(i,1)'*beta_mol(i,1))/...
 %                (mean(P(Ref_1-100:Ref_1+100,1))*P(i,2)'*beta_mol(Ref_1,1));  
 %  signals_1(i,1) =(P(Ref_1,2)'*P(i,1)'*beta_mol(i,1))/...
@@ -105,15 +105,16 @@ for i=maxbin : -1 : bin1st
   beta_raman(i,1)= -beta_mol(i,1)+(beta_par(1,Ref_1)+ ...
                                  beta_mol(Ref_1,1))*signals_1(i,1)*exp_z_1(i,1)/exp_n_1(i,1);
 end
-%beta_raman(beta_raman==Inf)=NaN;
-
-%beta_raman=nanmysmooth(beta_raman,0,200);
+beta_raman(beta_raman==Inf)=NaN;
+%beta_raman=nanmysmooth(beta_raman,0,25);
 
 % 
 % -------------
 %  Lidar Ratio 
 % -------------
-Lidar_Ratio(bin1st:maxbin) = alpha_raman(bin1st:maxbin)./beta_raman(bin1st:maxbin);  
+Lidar_Ratio(bin1st:maxbin) = alpha_raman(bin1st:maxbin)./...
+    nanmysmooth(beta_raman,0,5);
+Lidar_Ratio=nanmysmooth(Lidar_Ratio,0,5);
 %Lidar_Ratio(bin1st:up) = alpha_raman(bin1st:up)./beta_raman(bin1st:up)';  
 %Lidar_Ratio_sm(bin1st:up) = alpha_raman_sm(bin1st:up)./beta_raman_sm(bin1st:up);  
 %    

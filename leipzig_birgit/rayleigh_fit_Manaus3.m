@@ -16,7 +16,7 @@ clear fval a b sa sb chi2red ndf distance nmask
 clear out nn RefBin
 % ---------------------------------------------------
 
-debug=2;
+debug=0;
 
 %%------------------------------------------------------------------------
 %%  INTERPOLATION TO LIDAR SAMPLING ALTITUDES

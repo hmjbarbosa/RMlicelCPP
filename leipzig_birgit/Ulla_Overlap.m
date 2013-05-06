@@ -2,37 +2,64 @@
 % The basic idea behind the iterative approach is that the aerosol signal,
 % after correction of the range and overlap dependencies, is proportional 
 % to the backscatter coefficient Po(z)O(z)-1z2 =~ beta_raman(z) + beta_o_mol(z)  
-%
+%          
+clear delta_O PS overlap
 it=1;
 itnum = 0;
 PS = P(:,1); 
+
+if (initover)
+  delta_O = (beta_raman(1:RefBin(1)) - beta_klett(1:RefBin(1)))./...
+            (beta_raman(1:RefBin(1)) + beta_mol(1:RefBin(1),1));
+  dts=diff((1-delta_O));
+  i=2;
+  while( ~ (dts(i)>dts(i-1) & dts(i)>dts(i+1)) )
+    i=i+1;
+  end
+  n=2*i;
+
+  figure(300); clf;
+  plot((1-delta_O(1:n)),'o-r'); hold on;
+  plot(diff((1-delta_O(1:n))),'o-b'); hold on;
+
+  initover=false;
+end
+
+overlap=ones(n,1);
 while it < 15
   %Eq. 7 Ulla 2002:  delta_O = (beta_raman - beta_klett)./(beta_raman + beta_o_mol);
-  delta_O = (beta_raman - beta_klett)./(beta_raman + beta_mol(:,1));
+  %warn: limit to RefBin, klett does not work upward
+  delta_O = (beta_raman(1:n) - beta_klett(1:n))./...
+            (beta_raman(1:n) + beta_mol(1:n,1));
+
+  % accumulate contribuitions to the overlap
+  overlap=overlap.*(1-delta_O);
+  
   itnum = itnum + 1;
-  %it = input('otra?:','s')
   it = it + 1;
   %Eq. 8 Ulla 2002:  Po i+1(z) = Po i(z)[1 + delta_O i(z)];
-  %    P(1:maxbin,1) = P(1:maxbin,1).*(1 + delta_O);
-  P(1:maxbin,1) = P(1:maxbin,1)./(1 - delta_O);
-  Pr2(:,1) = P(:,1).*altsq(:);
+  %P(1:n,1) = P(1:n,1).*(1 + delta_O); 
+  %P(1:n,1) = P(1:n,1)./(1 - delta_O);
+  P(1:n,1) = PS(1:n,1)./overlap;
+  Pr2(1:n,1) = P(1:n,1).*altsq(1:n);
+
   Klett_Manaus;
+
   PS(:,itnum+1) = P(:,1);
   
-  
   figure(90); clf
-  plot(beta_raman(1:100),'r')
+  plot(beta_raman,'r')
   hold on;
-  plot(beta_klett(1:100),'b')
+  plot(beta_klett,'b')
   
   figure(91); clf
-  plot(PS(:,1)./PS(:,end),alt)
-  grid; hold on; ylim([0 10e3]);
-  plot(smooth_region(PS(:,1)./PS(:,end),3,500,9,1000,27),alt,'r')
+  plot(overlap,alt(1:n)*1e-3)
+  grid; 
+%  ginput(1);
 end
-overlap=PS(:,1)./PS(:,end);
-P(:,2)=P(:,2)./overlap(:);
-Pr2(:,2) = P(:,2).*altsq(:);
+%overlap=PS(:,1)./PS(:,end);
+P(1:n,2)=P(1:n,2)./overlap(1:n);
+Pr2(1:n,2) = P(1:n,2).*altsq(1:n);
 
 figure(90); grid
 %figure(91); grid; 

@@ -26,6 +26,10 @@ clear alpha_aero LR_par j i
 zet_0 = 1;
 LR_par(1:maxbin,1) = 55;
 
+%load('true_LR.mat')
+%LR_par(:,1) = res_lrt(1:maxbin);
+
+
 %% ------------------------------------------------------------------------
 %%   BACKWARD INTEGRATION
 %% ------------------------------------------------------------------------
@@ -51,68 +55,35 @@ end
 % Integral in denominator (2. summand); 2 cancels with 1/2 mean value 
 nfkt(RefBin(1),1)=0;
 for i=RefBin(1)-1: -1 : zet_0
-  nfkt(i,1)=nfkt(i+1,1)+(zfkt(i,1)*LR_par(i,1)+zfkt(i+1)*LR_par(i+1,1))*r_bin; 
+  nfkt(i,1)=nfkt(i+1,1)+(zfkt(i,1)*LR_par(i,1)+zfkt(i+1,1)*LR_par(i+1,1))*r_bin; 
 end
 
 % Klett 1985, Equ. (22)
-for i=RefBin(1)-1 : -1 : zet_0
+for i=RefBin(1) : -1 : zet_0
   beta_klett_total(i,1) = zfkt(i,1)/(1./beta_mol(RefBin(1),1) + nfkt(i,1)); 
 end
 
 %% ------------------------------------------------------------------------
-%%  2ND  BACKWARD INTEGRATION, FROM TOP OF MOLECULAR REGION
+%%   FORWARD INTEGRATION
 %% ------------------------------------------------------------------------
-
-%  Klett (Equ. 20; 1985):
-%  fkt1: 2/B_R int(beta_R) = 2 int (alpha_R) = sum (alpha_1,R+alpha_2,R)*r_bin
-%  fkt2: 2 int(beta_R/B_P) = 2 int(alpha_R*B_R/B_P) =  2 int (alpha_R*S_P/S_R)
-%  Fernald, AO, 1984
-fkt1(RefBinTop(1),1) = 0; 
-fkt2(RefBinTop(1),1) = 0;
-for i=RefBinTop(1)-1 : -1 : RefBin(1)+1
-  ext_ave = (alpha_mol(i,1) + alpha_mol(i+1,1)) * r_bin; 
-  fkt1(i,1) = fkt1(i+1,1) + ext_ave; 
-  fkt2(i,1) = fkt2(i+1,1) + ext_ave/LR_mol(1) * LR_par(i,1); 
-end
-
-%  zfkt: exp(S'-Sm') after Klett (Equ. 22; 1985) = S-Sm+fkt1-fkt2 
-for i=RefBin(1)+1:RefBinTop(1)
-  zfkt(i,1)=Pr2(i,1)/Pr2_mol(RefBinTop(1),1)/exp(fkt1(i,1))*exp(fkt2(i,1));
-  %zfkt(i,1)=Pr2(i,1)/Pr2    (RefBinTop(1),1)/exp(fkt1(i,1))*exp(fkt2(i,1));
-end
-
-% Integral in denominator (2. summand); 2 cancels with 1/2 mean value 
-nfkt(RefBinTop(1),1)=0;
-for i=RefBinTop(1)-1: -1 : RefBin(1)+1
-  nfkt(i,1)=nfkt(i+1,1)+(zfkt(i,1)*LR_par(i,1)+zfkt(i+1)*LR_par(i+1,1))*r_bin; 
-end
-
-% Klett 1985, Equ. (22)
-for i=RefBinTop(1)-1 : -1 : RefBin(1)+1
-  beta_klett_total(i,1) = zfkt(i,1)/(1./beta_mol(RefBinTop(1),1) + nfkt(i,1)); 
-end
-
-%% ------------------------------------------------------------------------
-%%   FORWARD INTEGRATION, JUST ABOVE TOP OF MOLECULAR REGION
-%% ------------------------------------------------------------------------
-for i=RefBinTop(1)+1 : maxbin
+for i=RefBin(1)+1 : maxbin
   ext_ave = (alpha_mol(i,1) + alpha_mol(i-1,1)) * r_bin; 
   fkt1(i) = fkt1(i-1) + ext_ave; 
   fkt2(i) = fkt2(i-1) + ext_ave/LR_mol(1) * LR_par(i,1); 
 end
 % 
-for i=RefBinTop(1) : maxbin
-  zfkt(i,1)=Pr2(i,1)/Pr2_mol(RefBinTop(1),1)/exp(fkt1(i,1))*exp(fkt2(i,1));
-  %zfkt(i,1)=Pr2(i,1)/Pr2    (RefBinTop(1),1)/exp(fkt1(i,1))*exp(fkt2(i,1));
+for i=RefBin(1) : maxbin
+  zfkt(i,1)=Pr2(i,1)/Pr2_mol(RefBin(1),1)/exp(fkt1(i,1))*exp(fkt2(i,1));
+  %zfkt(i,1)=Pr2(i,1)/Pr2    (RefBin(1),1)/exp(fkt1(i,1))*exp(fkt2(i,1));
 end
 %
-nfkt(RefBinTop(1),1)=0;
-for i=RefBinTop(1)+1 : maxbin
+nfkt(RefBin(1),1)=0;
+for i=RefBin(1)+1 : maxbin
   nfkt(i,1)=nfkt(i-1,1)+(zfkt(i,1)*LR_par(i,1)+zfkt(i-1,1)*LR_par(i-1,1))*r_bin; 
 end
 % 
-for i=RefBinTop(1) : maxbin
-  beta_klett_total(i,1) = zfkt(i,1)/(1./beta_mol(RefBinTop(1),1) + nfkt(i,1)); 
+for i=RefBin(1) : maxbin
+  beta_klett_total(i,1) = zfkt(i,1)/(1./beta_mol(RefBin(1),1) + nfkt(i,1)); 
 end
 
 %% ------------------------------------------------------------------------

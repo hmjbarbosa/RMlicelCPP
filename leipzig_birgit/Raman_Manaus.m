@@ -33,7 +33,7 @@ clear lambda_aang tmp
 bin1st = 1; 
 
 % Angstrom coefficient 
-aang = 1.05;    % European Urban
+aang = 1;    % European Urban
 % aang = 0.2;   % Saharan Desert Dust   
 
 % Scalling between Elastic and Raman, i.e., 
@@ -47,11 +47,14 @@ lambda_aang = (355/387)^aang;
 
 % Calculate term to be derived
 tmp=NaN(maxbin,1);
+%inp=nanmysmooth(Pr2(:,2),0,20);
 for i = 1:maxbin
   if (Pr2(i,2)==0)
+%  if (inp(i)==0)
     tmp(i,1)=NaN;
   else
     tmp(i,1) = log(alpha_mol(i,2)./Pr2(i,2));
+%    tmp(i,1) = log(alpha_mol(i,2)./inp(i));
   end
 %  log_raman(2,i) = log(alpha_mol(i,2)./Pr2(i,2)'); % 387 nm
 end 
@@ -66,74 +69,74 @@ end
 %[fval,angfit,linfit,relerr,smed]=runfit2(...
 %    log_raman(2,bin1st:maxbin)', alt(bin1st:maxbin).*1e-3, 2, 200);
 %tmp=mysmooth(tmp2,10,10);
-tmp=nanmysmooth(tmp,0,25);
+%tmp=nanmysmooth(tmp,0,25);
 
-[fval,angfit2,linfit,relerr,smed]=nanrunfit2(...
-    tmp(bin1st:maxbin), alt(bin1st:maxbin).*1e-3, 5, 5);
+%[fval,angfit2,linfit,relerr,smed]=nanrunfit2(...
+%    tmp(bin1st:maxbin), alt(bin1st:maxbin).*1e-3, 5, 5);
 
 % DERIVATIVE
 clear angfit
-angfit(:,9)=angfit2;
+%angfit(:,9)=angfit2;
 %% 1st order backward
-for i=bin1st+1:maxbin
-%for i=maxbin:maxbin
-  angfit(i,1)=(tmp(i)-tmp(i-1))/(alt(i)-alt(i-1))*1e3;
-end
-% 1st order forward
-for i=bin1st:maxbin-1
-%for i=bin1st:bin1st
-  angfit(i,2)=(tmp(i+1)-tmp(i))/(alt(i+1)-alt(i))*1e3;
-end
+%for i=bin1st+1:maxbin
+%%for i=maxbin:maxbin
+%  angfit(i,1)=(tmp(i)-tmp(i-1))/(alt(i)-alt(i-1))*1e3;
+%end
+%% 1st order forward
+%for i=bin1st:maxbin-1
+%%for i=bin1st:bin1st
+%  angfit(i,2)=(tmp(i+1)-tmp(i))/(alt(i+1)-alt(i))*1e3;
+%end
 %% 2nd order central
 for i=bin1st+1:maxbin-1
   angfit(i,3)=(tmp(i+1)-tmp(i-1))/(alt(i+1)-alt(i-1))*1e3;
 end
 % 2nd order backward
-for i=bin1st+2:maxbin
-%for i=maxbin:maxbin
-  angfit(i,4)=(tmp(i-2)-4*tmp(i-1)+3*tmp(i))/(alt(i)-alt(i-2))*1e3;
+%for i=bin1st+2:maxbin
+for i=maxbin:maxbin
+  angfit(i,3)=(tmp(i-2)-4*tmp(i-1)+3*tmp(i))/(alt(i)-alt(i-2))*1e3;
 end
 % 2nd order forward
-for i=bin1st:maxbin-2
-%for i=bin1st:bin1st
-  angfit(i,5)=(-3*tmp(i)+4*tmp(i+1)-tmp(i+2))/(alt(i+2)-alt(i))*1e3;
+%for i=bin1st:maxbin-2
+for i=bin1st:bin1st
+  angfit(i,3)=(-3*tmp(i)+4*tmp(i+1)-tmp(i+2))/(alt(i+2)-alt(i))*1e3;
 end
-% 3rd order backward
-for i=bin1st+2:maxbin-1
-  angfit(i,6)=(tmp(i-2)-6*tmp(i-1)+3*tmp(i)+2*tmp(i+1))/(alt(i+1)-alt(i-2))*1e3/2;
-end
-% 3rd order forward
-for i=bin1st+1:maxbin-2
-  angfit(i,7)=(-2*tmp(i-1)-3*tmp(i)+6*tmp(i+1)-tmp(i+2))/(alt(i+2)-alt(i-1))*1e3/2;
-end
-% 4th order central
-for i=bin1st+2:maxbin-2
-  angfit(i,8)=(tmp(i-2)-8*tmp(i-1)+8*tmp(i+1)-tmp(i+2))/(alt(i+2)-alt(i-2))*1e3/3;
-end
+%% 3rd order backward
+%for i=bin1st+2:maxbin-1
+%  angfit(i,6)=(tmp(i-2)-6*tmp(i-1)+3*tmp(i)+2*tmp(i+1))/(alt(i+1)-alt(i-2))*1e3/2;
+%end
+%% 3rd order forward
+%for i=bin1st+1:maxbin-2
+%  angfit(i,7)=(-2*tmp(i-1)-3*tmp(i)+6*tmp(i+1)-tmp(i+2))/(alt(i+2)-alt(i-1))*1e3/2;
+%end
+%% 4th order central
+%for i=bin1st+2:maxbin-2
+%  angfit(i,8)=(tmp(i-2)-8*tmp(i-1)+8*tmp(i+1)-tmp(i+2))/(alt(i+2)-alt(i-2))*1e3/3;
+%end
 %return
 %angfit=nanmysmooth(angfit,0,25);
 
 alpha_raman = NaN(maxbin,1);
 alpha_raman2= NaN(maxbin,1);
-for j=1:9
+for j=3:3
 %for i=bin1st:RefBin(2)
 for i=bin1st:maxbin
 %  alpha_raman(i,j) = (angfit(i-bin1st+1,j)./tmp(i)-alpha_mol(i,1)-alpha_mol(i,2))./(1+lambda_aang);
   alpha_raman2(i,j) = (angfit(i,j)-alpha_mol(i,1)-alpha_mol(i,2))./(1+lambda_aang);
 end
 end
-figure(88); clf;
-n=50;
-plot(alpha_raman2(1:n,:),'o-')
-legend('1b','1f','2c','2b','2f','3b','3f','4c','tmp');
-hold on;
-plot(alpha_klett(1:n,1),'ko--')
+%figure(88); clf;
+%n=50;
+%plot(alpha_raman2(1:n,:),'o-')
+%legend('1b','1f','2c','2b','2f','3b','3f','4c','tmp');
+%hold on;
+%plot(alpha_klett(1:n,1),'ko--')
 %ylim([-1.35 1.50])
 
-%alpha_raman=alpha_raman2(:,3);
+alpha_raman=alpha_raman2(:,3);
 
-alpha_raman=nanmysmooth(alpha_raman2(:,3),0,200);
-%alpha_raman=nanmysmooth(alpha_raman,0,25);
+%alpha_raman=nanmysmooth(alpha_raman2(:,3),0,5);
+%alpha_raman=nanmysmooth(alpha_raman2(:,3),0,300);
 
 % -------------
 %   plot data
