@@ -8,6 +8,7 @@ it=1;
 itnum = 0;
 PS = P(:,1); 
 
+initover=false;
 if (initover)
   delta_O = (beta_raman(1:RefBin(1)) - beta_klett(1:RefBin(1)))./...
             (beta_raman(1:RefBin(1)) + beta_mol(1:RefBin(1),1));
@@ -19,10 +20,12 @@ if (initover)
   n=2*i;
 
   figure(300); clf;
+  n=450;
   plot((1-delta_O(1:n)),'o-r'); hold on;
-  plot(diff((1-delta_O(1:n))),'o-b'); hold on;
+  plot(diff((1-delta_O(1:n))),'o-b'); grid;
 
   initover=false;
+  return
 end
 
 overlap=ones(n,1);

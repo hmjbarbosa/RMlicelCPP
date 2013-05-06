@@ -41,6 +41,9 @@ clear temp_snd pres_snd rho_snd alt_snd nlev_snd
 % missing data. usually happens at higher altitudes. the reading
 % mechanism, in this case, must rely on the constant width of the
 % fields. 
+% => Now these are defined from outside
+% radiofile=['./Manaus/82332_110901_00.dat']
+% radiofile=['./Manaus/82332_120119_00.dat']
 
 disp(['*** read radiosounding data ' radiofile]);
 

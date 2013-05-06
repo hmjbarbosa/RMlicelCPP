@@ -33,8 +33,9 @@ clear lambda_aang tmp
 bin1st = 1; 
 
 % Angstrom coefficient 
-aang = 1;    % European Urban
+%aang = 1;    % European Urban
 % aang = 0.2;   % Saharan Desert Dust   
+aang = 1.2;    % Manaus = clean Amazon = 1.2+-0.4 dry season 
 
 % Scalling between Elastic and Raman, i.e., 
 % aer_ext(elastic) = aer_ext(raman) * (elastic/raman) ^ angstron
@@ -141,7 +142,7 @@ alpha_raman=alpha_raman2(:,3);
 % -------------
 %   plot data
 % -------------
-tope=floor(15/r_bin);
+tope=floor(6/r_bin);
 
 figure(9);
 xx=xx0+4*wdx; yy=yy0+4*wdy;

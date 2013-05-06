@@ -1,8 +1,10 @@
-allsyn
+todos
 beta_klett_orig=beta_klett;
 beta_raman_orig=beta_raman;
 alpha_klett_orig=alpha_klett;
 alpha_raman_orig=alpha_raman;
+
+n=400;
 
 Ulla_Overlap
 ncorr(:,1)=overlap;

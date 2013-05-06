@@ -80,7 +80,7 @@ r_bin=(alt(2)-alt(1))*1e-3;
 
 %% GLUE ANALOG+PC
 glue355=glue(chphy(1).data, heads(1).ch(1), chphy(2).data, heads(1).ch(2));
-%glue387=glue(chphy(3).data, heads(1).ch(3), chphy(4).data, heads(1).ch(4));
+glue387=glue(chphy(3).data, heads(1).ch(3), chphy(4).data, heads(1).ch(4));
 
 figure(100)
 tmp=remove_bg(glue355, 500, -10);

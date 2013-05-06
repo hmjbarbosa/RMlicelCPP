@@ -16,7 +16,7 @@ clear fval a b sa sb chi2red ndf distance nmask
 clear out nn RefBin
 % ---------------------------------------------------
 
-debug=0;
+debug=2;
 
 %%------------------------------------------------------------------------
 %%  INTERPOLATION TO LIDAR SAMPLING ALTITUDES
@@ -120,16 +120,12 @@ for ch=1:2
   % kind of a signal do noise ratio. in a local sense.
   good=fval2./err2;
   % try to use the S/N to exclude potential bad regions
-  tmpY(good<2)=NaN;
-%  return
-    if (debug>1)
-      [fval2,a2,b2,err2,smed2]=nanrunfit2(tmpY,tmpX,37,37);
-%      [fval3,a3,b3,err3,smed3]=nanrunfit2(log(tmpY),tmpZ,37,37);
-      figure(25); clf; hold on;
-      plot(tmpZ,fval2./err2,'o-');grid on;
-    end
-%    return
-  tmpY(1:floor(9.0/r_bin))=NaN;
+  tmpY(good<10)=NaN;
+  if (debug>1)
+    figure(25); clf; hold on;
+    plot(tmpZ,fval2./err2,'o-');grid on;
+  end
+  tmpY(1:floor(4.0/r_bin))=NaN;
 %  tmpY(floor(25.0/r_bin):end)=NaN;
   minZ=min(tmpZ(~isnan(tmpY))); maxZ=max(tmpZ(~isnan(tmpY)));
   disp(['lowest used at height=' num2str(minZ) ]);

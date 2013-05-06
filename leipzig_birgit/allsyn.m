@@ -1,7 +1,7 @@
 clear all
 addpath('../matlab');
 addpath('../sc');
-addpath('../leipzig_birgit/Numerical Recipes')
+%addpath('../leipzig_birgit/Numerical Recipes')
 
 % windows' size
 wsx=250; wsy=650; 
@@ -12,12 +12,11 @@ wdy=0;   yy0=50;
 
 % read physics constants
 constants;
+read_sonde_synthetic
+molecular;
 
 % figure 1 2 3
 read_ascii_synthetic
-% figure 4 5
-read_sonde_synthetic
-molecular;
 % figure 6 7
 rayleigh_fit_Manaus3
 % figure 8
