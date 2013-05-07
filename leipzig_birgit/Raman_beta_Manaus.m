@@ -128,18 +128,18 @@ figure(10); clf;
 xx=xx0+3*wdx; yy=yy0+3*wdy;
 % Klett
 %plot(beta_aerosol_sm(1,bin1st:tope-1), alt(bin1st:tope-1).*1e-3,'b--');
-plot(beta_klett(bin1st:maxbin,1), alt(bin1st:maxbin).*1e-3,'b--');
+plot(beta_klett(bin1st:maxbin,1)*1e3, alt(bin1st:maxbin).*1e-3,'b--');
 set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
-axis([-2e-3 9e-3 0 alt(tope-1)*1e-3*1.1]);
-xlabel('BSC km-1 sr-1','fontsize',[12])  
+axis([-2 9 0 alt(tope-1)*1e-3*1.1]);
+xlabel('BSC Mm-1 sr-1','fontsize',[12])  
 ylabel('Height agl / km','fontsize',[12])
 title(['Raman'],'fontsize',[14]) 
 grid on
 hold on
 % Raman
-plot(beta_raman(bin1st:maxbin), alt(bin1st:maxbin).*1e-3,'r')
-plot(beta_klett(RefBin(1),1), alt(RefBin(1))*1e-3,'r*');
-plot(beta_klett(RefBin(2),1), alt(RefBin(2))*1e-3,'g*');
+plot(beta_raman(bin1st:maxbin)*1e3, alt(bin1st:maxbin).*1e-3,'r')
+plot(beta_klett(RefBin(1),1)*1e3, alt(RefBin(1))*1e-3,'r*');
+plot(beta_klett(RefBin(2),1)*1e3, alt(RefBin(2))*1e-3,'g*');
 legend('Klett', 'Raman', 'RefBin 355', 'RefBin 387')
 %legend('Klett', 'Raman')
 hold off

@@ -7,7 +7,7 @@ clear all;
 datain='/home/lidar_data/data';
 
 %% FIRST DATE
-jdi=datenum(2011, 7, 29, 0, 0, 0);
+jdi=datenum(2011, 8, 5, 0, 0, 0);
 %jdi=datenum(2012,  1, 20, 0, 0, 0);
 jdf=jdi+7;
 

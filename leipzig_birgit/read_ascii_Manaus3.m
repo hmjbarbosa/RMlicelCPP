@@ -87,7 +87,7 @@ tmp=remove_bg(glue355, 500, -10);
 for j=1:nfile
   tmp(:,j)=tmp(:,j).*altsq(:);
 end
-gplot2(tmp(1:1000,:));
+gplot2(tmp(1:2000,:));
 title([datestr(jdi) ' - ' datestr(jdf)]);
 
 %P(:,1)=squeeze(nanmean(glue355,2));

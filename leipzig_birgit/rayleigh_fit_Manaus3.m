@@ -125,8 +125,8 @@ for ch=1:2
     figure(25); clf; hold on;
     plot(tmpZ,fval2./err2,'o-');grid on;
   end
-  tmpY(1:floor(4.0/r_bin))=NaN;
-%  tmpY(floor(25.0/r_bin):end)=NaN;
+  tmpY(1:floor(5.0/r_bin))=NaN;
+  tmpY(floor(9.0/r_bin):end)=NaN;
   minZ=min(tmpZ(~isnan(tmpY))); maxZ=max(tmpZ(~isnan(tmpY)));
   disp(['lowest used at height=' num2str(minZ) ]);
   disp(['highest used at height=' num2str(maxZ) ]);
@@ -151,9 +151,7 @@ for ch=1:2
     % (hyperbola) as the error is larger near the ends. Here
     % sqrt(chi2red) is used as a measure of the uncertainty.
     distance=abs(tmpY-fval)./sqrt(chi2red); 
-%return
-%    distance=abs(tmpY-fval)./sqrt(tmpY); 
-%    tmpY(distance>3)=nan;
+    tmpY(distance>3)=nan;
     
 %    for i=2:maxbin-1
 %      if isnan(tmpY(i-1)) & isnan(tmpY(i+1))

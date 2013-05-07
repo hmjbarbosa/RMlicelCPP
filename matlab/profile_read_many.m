@@ -114,6 +114,14 @@ for nf=1:nfile
   % read file 
   [head(nf), tmpphy, tmpraw]=profile_read(list{nf}, dbin, dtime, ach, maxz);
 
+  % initialize vectors
+  if (nf==1)
+    for ch=1:head(1).nch
+      chphy(ch).data(1:head(1).ch(1).ndata,1:nfile) = NaN;
+      chraw(ch).data(1:head(1).ch(1).ndata,1:nfile) = NaN;
+    end
+  end
+  
   % time-stamp of current file
   if (nf>1)
     if (head(nf).jdf < head(nf-1).jdf)

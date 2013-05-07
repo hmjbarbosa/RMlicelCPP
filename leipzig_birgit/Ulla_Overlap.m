@@ -51,9 +51,9 @@ while it < 15
   PS(:,itnum+1) = P(:,1);
   
   figure(90); clf
-  plot(beta_raman,'r')
+  plot(beta_raman(1:n),'r')
   hold on;
-  plot(beta_klett,'b')
+  plot(beta_klett(1:n),'b')
   
   figure(91); clf
   plot(overlap,alt(1:n)*1e-3)

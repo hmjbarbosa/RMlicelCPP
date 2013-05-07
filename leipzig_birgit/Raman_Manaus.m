@@ -142,24 +142,23 @@ alpha_raman=alpha_raman2(:,3);
 % -------------
 %   plot data
 % -------------
-tope=floor(6/r_bin);
 
 figure(9);
 xx=xx0+4*wdx; yy=yy0+4*wdy;
 % Klett
-plot(alpha_klett(bin1st:maxbin,1),alt(bin1st:maxbin)*1e-3,'b--')
+plot(alpha_klett(bin1st:maxbin,1)*1e3,alt(bin1st:maxbin)*1e-3,'b--')
 set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
-axis([-0.15 0.4 0 alt(tope-1)*1e-3*1.1]); 
-xlabel('Extinction / km^-1','fontsize',[12])  
+axis([-15 400 0 alt(tope-1)*1e-3*1.1]); 
+xlabel('Extinction / Mm^-1','fontsize',[12])  
 ylabel('Height / km','fontsize',[12])
 title(['Raman'],'fontsize',[14]) 
 grid on
 hold on 
 % Raman 
-plot(alpha_raman(bin1st:maxbin),alt(bin1st:maxbin)*1e-3,'r');
-%plot(alpha_raman_sm(bin1st:RefBin(2)),alt(bin1st:RefBin(2))*1e-3,'r');
-plot(alpha_klett(RefBin(1),1), alt(RefBin(1))*1e-3,'r*');
-plot(alpha_klett(RefBin(2),1), alt(RefBin(2))*1e-3,'g*');
+plot(alpha_raman(bin1st:maxbin)*1e3,alt(bin1st:maxbin)*1e-3,'r');
+%plot(alpha_raman_sm(bin1st:RefBin(2))*1e3,alt(bin1st:RefBin(2))*1e-3,'r');
+plot(alpha_klett(RefBin(1),1)*1e3, alt(RefBin(1))*1e-3,'r*');
+plot(alpha_klett(RefBin(2),1)*1e3, alt(RefBin(2))*1e-3,'g*');
 legend('Klett', 'Raman', 'RefBin 355', 'RefBin 387')
 hold off
 %
