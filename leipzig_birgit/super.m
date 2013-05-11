@@ -39,7 +39,7 @@ figure(10); set(gcf,'PaperUnits','inches','PaperSize',[3,9],'PaperPosition',[0 0
 print(sprintf('ramanb%d.png',2),'-dpng');
 figure(91); set(gcf,'PaperUnits','inches','PaperSize',[3,9],'PaperPosition',[0 0 3 7.8])
 print(sprintf('overlap%d.png',2),'-dpng');
-save(sprintf('step%d.mat',1),'alt','beta_klett','beta_raman', ...
+save(sprintf('step%d.mat',2),'alt','beta_klett','beta_raman', ...
      'alpha_klett','alpha_raman','overlap');
 
 Ulla_Overlap
@@ -55,7 +55,7 @@ figure(10); set(gcf,'PaperUnits','inches','PaperSize',[3,9],'PaperPosition',[0 0
 print(sprintf('ramanb%d.png',3),'-dpng');
 figure(91); set(gcf,'PaperUnits','inches','PaperSize',[3,9],'PaperPosition',[0 0 3 7.8])
 print(sprintf('overlap%d.png',3),'-dpng');
-save(sprintf('step%d.mat',1),'alt','beta_klett','beta_raman', ...
+save(sprintf('step%d.mat',3),'alt','beta_klett','beta_raman', ...
      'alpha_klett','alpha_raman','overlap');
 
 clf;
