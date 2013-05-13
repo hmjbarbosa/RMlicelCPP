@@ -19,8 +19,9 @@ if isempty(maxz) maxz=0; end
 jd=jdi; ff={};
 %while (jd<jdf)
 while (floor(jd)<ceil(jdf))
-  time=datevec(jd)
+  time=datevec(jd);
   dir=sprintf('%s/%02d/%d/%02d',basedir,time(1)-2000,time(2),time(3));
+  disp(['profile_read_dates::OPENING dir=' dir]);
   tmpf=dirpath(dir,'RM*');
   ff=[ff,tmpf];
   jd=jd+1;
