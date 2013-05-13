@@ -12,8 +12,8 @@ if ( nz==1 || nt==1 )
   return
 end
 
-if ~exist('X','var') X=[1:nt]; end;
-if ~exist('Y','var') Y=[1:nz]; end;
+if (~exist('X','var') || numel(X)==0) X=[1:nt]; end;
+if (~exist('Y','var') || numel(Y)==0) Y=[1:nz]; end;
 if (size(mat2d,2)~=numel(X))
   disp('Error: X and mat2d must have the same number of columns');
   return
