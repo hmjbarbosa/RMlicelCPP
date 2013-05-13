@@ -34,8 +34,9 @@
 %    Then execute this script.
 %
 %------------------------------------------------------------------------
-clear sondedata
-clear temp_snd pres_snd rho_snd alt_snd nlev_snd
+clear fid sondedata
+clear pres_snd alt_snd temp_snd dwpt_snd relh_snd 
+clear drct_snd sknt_snd rho_snd nlev_snd
 
 % cannot read as a table because wyoming files have empty space for
 % missing data. usually happens at higher altitudes. the reading
@@ -61,22 +62,34 @@ while ~feof(fid);
       break
     end
     i=i+1;
+    if all(sondedata(1:7)==' ') | all(sondedata(8:14)==' ') | ...
+          all(sondedata(15:21)==' ') 
+      break; 
+    end
     pres_snd(i,1)=str2num(sondedata(1:7));  % P in hPa!
     alt_snd(i,1)=str2num(sondedata(8:14)); % in m 
     temp_snd(i,1)=T0 + str2num(sondedata(15:21)); % T in K
-    
-    dwpt_snd(i,1)=T0 + str2num(sondedata(23:28)); % Td in K
-    relh_snd(i,1)=str2num(sondedata(30:35)); % RH in %
-    
-    if (any(sondedata(44:49)~=' '))
-      drct_snd(i,1)=str2num(sondedata(44:49)); % direction in deg
+
+    if all(sondedata(23:28)==' ') 
+      dwpt_snd(i,1)=NaN;
     else
-      drct_snd(i,1)=NaN;
+      dwpt_snd(i,1)=T0 + str2num(sondedata(23:28)); % Td in K
     end
-    if (any(sondedata(51:56)~=' '))
-      sknt_snd(i,1)=str2num(sondedata(51:56))/0.514; % speed in m/s
+    if all(sondedata(30:35)==' ') 
+      relh_snd(i,1)=NaN;
     else
+      relh_snd(i,1)=str2num(sondedata(30:35)); % RH in %
+    end
+    
+    if (all(sondedata(44:49)==' '))
+      drct_snd(i,1)=NaN;
+    else
+      drct_snd(i,1)=str2num(sondedata(44:49)); % direction in deg
+    end
+    if (all(sondedata(51:56)==' '))
       sknt_snd(i,1)=NaN;
+    else
+      sknt_snd(i,1)=str2num(sondedata(51:56))/0.514; % speed in m/s
     end
     
 %1002.0     84   29.8   23.8     70  18.94    100      3  302.8  359.2  306.2
@@ -91,7 +104,7 @@ fclose(fid);
 
 % number of levels in sounding
 nlev_snd=max(size(pres_snd));
-
+return
 %------------------------------------------------------------------------
 %  Plots
 %------------------------------------------------------------------------
