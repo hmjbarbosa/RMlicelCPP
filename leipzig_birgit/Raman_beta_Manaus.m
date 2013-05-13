@@ -147,6 +147,7 @@ hold off
 % -------------- 
 %  Lidar Ratio
 % --------------
+return
 rLR_1 = size(Lidar_Ratio(1,:));
 %  
 figure(11); clf;

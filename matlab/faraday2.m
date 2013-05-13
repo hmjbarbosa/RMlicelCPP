@@ -4,8 +4,8 @@ addpath('../sc')
 ['analysis started @ ' datestr(clock)]; tic
 
 %datain='../../Raymetrics_data';
-%datain='/media/work/data/EMBRAPA/lidar/data';
-datain='/home/lidar_data/data';
+datain='/media/work/DATA/EMBRAPA/lidar/data';
+%datain='/home/lidar_data/data';
 
 %WET - CEU LIMPO
 %jdi=datenum('20-Jan-2012 17:15:21'); jdf=datenum('20-Jan-2012 22:32:17')
@@ -71,9 +71,9 @@ datain='/home/lidar_data/data';
 
 %% FIRST DATE
 %jdi0=datenum(2012,  1, 20, 0, 0, 0);
-jdi0=datenum(2012,10, 7, 20, 0, 0);
+jdi0=datenum(2011, 7, 9, 18, 0, 0);
 
-nsel=0; nday=0; step=0.4;
+nsel=0; nday=0; step=0.5;
 while (nday<=7)
   jdi=jdi0+nday;
   jdf=jdi0+nday+abs(step);

@@ -52,7 +52,8 @@ clear glue355 glue387 P Pr2
 %%  READ DATA
 %%------------------------------------------------------------------------
 
-datain='/home/lidar_data/data';
+%datain='/home/lidar_data/data';
+datain='/media/work/DATA/EMBRAPA/lidar/data';
 
 [nfile, heads, chphy]=profile_read_dates(datain, ...
 					 jdi, jdf, 10, 0.004, 0, 4000);
@@ -87,16 +88,17 @@ tmp=remove_bg(glue355, 500, -10);
 for j=1:nfile
   tmp(:,j)=tmp(:,j).*altsq(:);
 end
-gplot2(tmp(1:2000,:));
+gplot2(tmp(1:2000,:),[],[],alt(1:2000)*1e-3);
 title([datestr(jdi) ' - ' datestr(jdf)]);
 
-%P(:,1)=squeeze(nanmean(glue355,2));
-%%P(:,2)=squeeze(nanmean(chphy(4).data,2));
-%
-%% range corrected signal Pz2(z, lambda)
-%for j = 1:1
-%  Pr2(:,j) = P(:,j).*altsq(:);
-%end
+% number of photons should be summed and not averaged
+P(:,1)=squeeze(nansum(glue355,2));
+P(:,2)=squeeze(nansum(glue387,2));
+
+% range corrected signal Pz2(z, lambda)
+for j = 1:1
+  Pr2(:,j) = P(:,j).*altsq(:);
+end
 
 return
 %------------------------------------------------------------------------

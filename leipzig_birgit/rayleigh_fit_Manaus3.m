@@ -10,13 +10,14 @@
 %       read_sonde_Manaus.m
 % ---------------------------------------------------
 clear maxbin beta_mol alpha_mol tau P_mol Pr2_mol
-clear pmin pmax pave bg1 bg2 nBG 
-clear tmpX tmpY tmpZ tmpXX tmpYY
-clear fval a b sa sb chi2red ndf distance nmask
-clear out nn RefBin
+clear tmpX tmpY tmpZ good minZ maxZ 
+clear fval2 a2 b2 err2 smed2 nmask
+clear fval a b sa sb chi2red ndf distance 
+clear out nn RefBin toerase cloudsize n1 n2
+clear RefBin RefBinTop mask_mol
 % ---------------------------------------------------
 
-debug=2;
+debug=1;
 
 %%------------------------------------------------------------------------
 %%  INTERPOLATION TO LIDAR SAMPLING ALTITUDES
@@ -103,7 +104,7 @@ for ch=1:2
   % Select data
   tmpX=P_mol(1:maxbin,ch);
   tmpY=P    (1:maxbin,ch);
-  tmpZ =alt (1:maxbin)*1e-3;
+  tmpZ=alt (1:maxbin)*1e-3;
   
   % plot to know what is going on
   if (debug>0)
@@ -114,29 +115,42 @@ for ch=1:2
   end
 
   % crop regions that we know will never be molecular
-  tmpY(1:floor(2.0/r_bin))=NaN;
-  % fit mol x lidar by parts
-  [fval2,a2,b2,err2,smed2]=nanrunfit2(tmpY,tmpX,37,37);
-  % kind of a signal do noise ratio. in a local sense.
-  good=fval2./err2;
-  % try to use the S/N to exclude potential bad regions
-  tmpY(good<10)=NaN;
-  if (debug>1)
-    figure(25); clf; hold on;
-    plot(tmpZ,fval2./err2,'o-');grid on;
+  if ~exist('bottomlayer','var')
+    bottomlayer=7;
   end
-  tmpY(1:floor(5.0/r_bin))=NaN;
-  tmpY(floor(9.0/r_bin):end)=NaN;
+  tmpY(1:floor(bottomlayer/r_bin))=NaN;
+  %tmpY(1:floor(7.0/r_bin))=NaN;
+  %tmpY(floor(16.0/r_bin):end)=NaN;
+  if (ch>1)
+    tmpY(~mask_mol(:,ch-1))=NaN;
+  end
+  
+  % Fit mol x lidar by parts. This is kind of a signal do noise
+  % ratio. in a local sense. Then try to use the S/N to exclude
+  % potential bad regions
+  [fval2,a2,b2,err2,smed2]=nanrunfit2(tmpY,tmpX,37,37);
+  good=fval2./err2;
+%  tmpY(good<15)=NaN;
+  % exclude all points above 
+  n1=find(good<10,1); % first bad point
+  tmpY(n1:end)=NaN;
+  
   minZ=min(tmpZ(~isnan(tmpY))); maxZ=max(tmpZ(~isnan(tmpY)));
   disp(['lowest used at height=' num2str(minZ) ]);
   disp(['highest used at height=' num2str(maxZ) ]);
+
+  if (debug>1)
+    figure(25); clf; hold on;
+    plot(tmpZ,good,'o-');grid on; title('good');
+    xlabel(['n1= ' num2str(n1) ' alt=' num2str(alt(n1))]);
+  end
   
   % Initialize counter for the number of NaN data points
   nmask=sum(isnan(tmpY)); nmask_old=-1;
 
   % Convergence will stop when no more points are removed based on the
   % criteria stablished below
-  iter=0;
+  iter=0; hascloud=0;
   while(nmask_old ~= nmask)
     nmask_old=nmask;
     
@@ -150,15 +164,51 @@ for ch=1:2
     % NOTE2: it would be better to draw the confidence curves
     % (hyperbola) as the error is larger near the ends. Here
     % sqrt(chi2red) is used as a measure of the uncertainty.
-    distance=abs(tmpY-fval)./sqrt(chi2red); 
-    tmpY(distance>3)=nan;
+    %distance=abs(tmpY-fval)./sqrt(chi2red);
+    distance=(tmpY-fval)./sqrt(fval);
+    toerase=distance>3;
     
-%    for i=2:maxbin-1
-%      if isnan(tmpY(i-1)) & isnan(tmpY(i+1))
-%        tmpY(i)=nan;
-%      end
-%    end
+    cloudsize=floor(0.1/r_bin);
+    n1=find(~isnan(distance),1); % first good point
+    n2=max(find(~isnan(distance))); % last good point
 
+    for i=n1:maxbin-cloudsize
+      if (all(distance(i:i+cloudsize)>3))
+        toerase(i-4*cloudsize:maxbin)=1;
+        hascloud=1;
+        break;
+      end
+    end
+
+    for i=n1:maxbin-cloudsize
+      if all(isnan(distance(i:i+cloudsize)))
+        toerase(i:maxbin)=1;
+        break;
+      end
+    end
+
+    if (debug>1)
+      figure(26); clf; hold on; grid;
+      plot(alt(n1:n2)*1e-3,distance(n1:n2),'.'); 
+      plot(alt(toerase)*1e-3,distance(toerase),'og'); 
+    end
+
+    % update the plot window
+    if (debug>1)
+      figure(24); clf; hold on;
+      plot(tmpZ(~isnan(tmpY)),tmpY(~isnan(tmpY)),'.');
+      plot(tmpZ(~isnan(tmpY)),tmpX(~isnan(tmpY))*a+b,'r-');
+      plot(tmpZ(toerase),tmpY(toerase),'og');
+      hold on; grid on;
+      xlabel('Z'); ylabel('P, Pmol Fit');
+      legend('lidar','mol*A+B');
+      title('MOLECULAR POINTS');
+      colorbar;
+      ginput(1);
+    end
+
+    tmpY(toerase)=nan;
+    
     % Recompute the mask counter
     nmask=sum(isnan(tmpY));
     
@@ -168,31 +218,7 @@ for ch=1:2
 	  ' b=' num2str(b) ' sb=' num2str(sb) ... 
 	  ' chi2red=' num2str(chi2red) ' ndf=' num2str(ndf) ]); 
     
-    % update the plot window
-    if (debug>1)
-      figure(24); clf; hold on;
-      scatter(tmpZ(~isnan(tmpY)),tmpX(~isnan(tmpY))*a+b,'o');
-      scatter(tmpZ(~isnan(tmpY)),tmpY(~isnan(tmpY)),'o');
-      hold on; grid on;
-      [i1]=floor(min(tmpZ(~isnan(tmpY)))/r_bin);
-      [i2]=floor(max(tmpZ(~isnan(tmpY)))/r_bin);
-      plot(tmpZ(i1:i2),tmpX(i1:i2)*a+b,'r');
-      xlabel('Z'); ylabel('P, Pmol and Fit');
-      legend('molecular','lidar','mol*A+B');
-%      [x,y,but]=ginput(1);
-    end
-
     iter=iter+1; 
-  end
-
-%  figure(24); clf; hold off;
-%  scatter(tmpX(~isnan(tmpY)),tmpY(~isnan(tmpY)),10,tmpZ(~isnan(tmpY)));
-%  hold on; grid on;
-%  plot(tmpX(~isnan(tmpY)),tmpX(~isnan(tmpY))*a+b,'r');
-%  xlabel('Pmol'); ylabel('P and Fit');
-  if (debug>1)
-    title('MOLECULAR POINTS');
-    colorbar;
   end
 
   if (debug>0)
@@ -212,48 +238,23 @@ for ch=1:2
   mask_mol(1:maxbin,ch)=~isnan(tmpY);
 
   %%------------------------------------------------------------------------
-  %%  LOOP ON BACKGROUND CORRECTION
+  %%  BACKGROUND CORRECTION
   %%------------------------------------------------------------------------
-  disp(['%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%']);
   disp(['% BG correction for ch= ' num2str(ch) ]);
-  disp(['%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%']);
 
-%  nBG=1; 
-%  bg=0;
-%while(abs(b/sb)>1 || abs(b/bg) > 1e-6)
-%
-%    bg=bg+b;
-%    tmpY=tmpY-b;
-%    
-%    disp(['ch= ' num2str(ch) '  trying BG= ' num2str(bg) ]);
-%
-%    [a, b, fval, sa, sb, chi2red, ndf] = fastfit(tmpX,tmpY);
-%
-%    disp(['nBG= ' num2str(nBG) ' a=' num2str(a) ' sa=' num2str(sa) ... 
-%	  ' b=' num2str(b) ' sb=' num2str(sb) ... 
-%	  ' chi2red=' num2str(chi2red) ' ndf=' num2str(ndf) ]);     
-%
-%  end % bg convergence loop
-% dont try to remove BG if linear coef. is compatible with bg=0
+  % Don't try to remove BG if linear coef. is compatible with bg=0
   if (abs(b/sb)>3)
-    bg=b;
+    bg(ch)=b;
   else
-    bg=0;
+    bg(ch)=0;
   end
-  disp(['ch= ' num2str(ch) '  last BG= ' num2str(bg) ]);
-
-%  if (bg<0)
-%    bg=0;
-%  end
-%  if (ch==1)
-%    bg=10.0108;
-%  end
-%  if (ch==2)
-%    bg=9.9946;
-%  end
+  errbg(ch)=sb;
+  disp(['ch= ' num2str(ch) '  last BG= ' num2str(bg(ch)) ]);
  
   %% APPLY THE CALCULATED BG
-  P  (:,ch) = P(:,ch)-bg;
+  P  (:,ch) = P(:,ch)-bg(ch);
+  n1=find(P(:,ch)<=0, 1);
+  P(n1:end,ch)=NaN;
   Pr2(:,ch) = P(:,ch).*altsq(:);
   
   %% APPLY THE SCALLING
@@ -269,9 +270,9 @@ for ch=1:2
 %  for i=1:maxbin
 %    if (~isnan(tmpY(i)))
 %      if (abs(P(i,ch)-P_mol(i,ch)) < delta);
-%	RefBin(ch)=i;
-%	delta=abs(P(i,ch)-P_mol(i,ch));
-%	[i/1000 alt(i)/1000 delta]
+%        RefBin(ch)=i;
+%        delta=abs(P(i,ch)-P_mol(i,ch));
+%        [i/1000 alt(i)/1000 delta]
 %      end
 %    end
 %  end
@@ -279,19 +280,14 @@ for ch=1:2
 end % channel loop
 
 RefBin
-alt(RefBin)
-%RefBin(1)=1200;
-%RefBin(2)=1000;
-%RefBin(1)=1328;
-%RefBin(2)=1331;
+alt(RefBin)*1e-3
 
-if (debug==0)
-  return
-end
 %------------------------------------------------------------------------
 %  Plots
 %------------------------------------------------------------------------
-%
+if (debug==0)
+  return
+end
 %
 % -------------
 figure(5)
@@ -325,6 +321,7 @@ grid on
 hold on
 plot(Pr2_mol(1:maxbin,1), alt(1:maxbin)*1e-3,'g','LineWidth',2); 
 plot(Pr2(RefBin(1),1), alt(RefBin(1))*1e-3,'r*');
+plot(Pr2(RefBinTop(1),1), alt(RefBinTop(1))*1e-3,'r*');
 hold off
 legend('Lidar', 'Rayleigh Fit', 'Reference Bin'); 
 %   
@@ -336,6 +333,7 @@ grid on
 hold on
 plot(Pr2_mol(1:maxbin,2), alt(1:maxbin)*1e-3,'g','LineWidth',2); 
 plot(Pr2(RefBin(2),2), alt(RefBin(2))*1e-3,'r*');
+plot(Pr2(RefBinTop(2),2), alt(RefBinTop(2))*1e-3,'r*');
 legend('Lidar', 'Rayleigh Fit', 'Reference Bin'); 
 %
 % -------------
@@ -351,6 +349,7 @@ grid on
 hold on
 plot(log(Pr2_mol(1:maxbin,1)),alt(1:maxbin)*1e-3,'g','LineWidth',2);   
 plot(log(Pr2(RefBin(1),1)), alt(RefBin(1))*1e-3,'r*');
+plot(log(Pr2(RefBinTop(1),1)), alt(RefBinTop(1))*1e-3,'r*');
 hold off
 %
 subplot(1,2,2)
@@ -361,6 +360,7 @@ grid on
 hold on
 plot(log(Pr2_mol(1:maxbin,2)),alt(1:maxbin)*1e-3,'g','LineWidth',2);   
 plot(log(Pr2(RefBin(2),2)), alt(RefBin(2))*1e-3,'r*');
+plot(log(Pr2(RefBinTop(2),2)), alt(RefBinTop(2))*1e-3,'r*');
 hold off
 %
 disp('End of program: rayleigh_fit_Manaus.m, Vers. 1.0 06/12')

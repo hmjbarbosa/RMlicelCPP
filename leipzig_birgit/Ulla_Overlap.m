@@ -50,10 +50,10 @@ while it < 15
 
   PS(:,itnum+1) = P(:,1);
   
-  figure(90); clf
-  plot(beta_raman(1:n),'r')
-  hold on;
-  plot(beta_klett(1:n),'b')
+%  figure(90); clf
+%  plot(beta_raman(1:n),'r')
+%  hold on;
+%  plot(beta_klett(1:n),'b')
   
   figure(91); clf
   plot(overlap,alt(1:n)*1e-3)
@@ -64,7 +64,7 @@ end
 P(1:n,2)=P(1:n,2)./overlap(1:n);
 Pr2(1:n,2) = P(1:n,2).*altsq(1:n);
 
-figure(90); grid
+%figure(90); grid
 %figure(91); grid; 
 %hold on; ylim([0 10e3]);
 %plot(smooth_region(PS(:,1)./PS(:,end),3,500,9,1000,27),alt,'r')
