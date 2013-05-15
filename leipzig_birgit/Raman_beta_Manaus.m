@@ -120,6 +120,11 @@ Lidar_Ratio=nanmysmooth(Lidar_Ratio,0,5);
 %    
 % +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 %   Plots
+
+if (debug==0)
+  return
+end
+
 % ------------------------
 % Backscatter coeffcient
 % ------------------------

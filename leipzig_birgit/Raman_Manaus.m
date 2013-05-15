@@ -142,6 +142,9 @@ alpha_raman=alpha_raman2(:,3);
 % -------------
 %   plot data
 % -------------
+if (debug==0)
+  return
+end
 
 figure(9);
 xx=xx0+4*wdx; yy=yy0+4*wdy;

@@ -110,7 +110,10 @@ for i=1:maxbin
     bb(i)=nan;
   end
 end
-%return
+
+if (debug==0)
+  return
+end
 
 %
 %----------
