@@ -69,7 +69,11 @@ while ~feof(fid);
     pres_snd(i,1)=str2num(sondedata(1:7));  % P in hPa!
     alt_snd(i,1)=str2num(sondedata(8:14)); % in m 
     temp_snd(i,1)=T0 + str2num(sondedata(15:21)); % T in K
-
+    if (i>1 & alt_snd(i,1)==alt_snd(i-1,1))
+      i=i-1;
+      continue;
+    end
+    
     if all(sondedata(23:28)==' ') 
       dwpt_snd(i,1)=NaN;
     else
@@ -104,11 +108,14 @@ fclose(fid);
 
 % number of levels in sounding
 nlev_snd=max(size(pres_snd));
-return
+
 %------------------------------------------------------------------------
 %  Plots
 %------------------------------------------------------------------------
 %
+if (debug<2)
+  return
+end
 %
 % -------------
 figure(4)
