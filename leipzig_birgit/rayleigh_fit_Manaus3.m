@@ -13,20 +13,18 @@ clear maxbin beta_mol alpha_mol tau P_mol Pr2_mol
 clear tmpX tmpY tmpZ good minZ maxZ 
 clear fval2 a2 b2 err2 smed2 nmask
 clear fval a b sa sb chi2red ndf distance 
-clear out nn RefBin toerase cloudsize n1 n2
-clear RefBin RefBinTop mask_mol
+clear RefBin toerase cloudsize n1 n2
+clear RefBinTop mask_mol
 % ---------------------------------------------------
-
-debug=1;
 
 %%------------------------------------------------------------------------
 %%  INTERPOLATION TO LIDAR SAMPLING ALTITUDES
 %%------------------------------------------------------------------------
 
-toextrapolate=0;
+toextrapolate=1;
 
-%lidar_altitude=100;
-lidar_altitude=0;
+lidar_altitude=100;
+%lidar_altitude=0;
 
 if toextrapolate==0
   % Set maximum lidar bin to highest altitude of sounding 
@@ -118,9 +116,11 @@ for ch=1:2
   if ~exist('bottomlayer','var')
     bottomlayer=7;
   end
+  if ~exist('toplayer','var')
+    toplayer=25;
+  end
   tmpY(1:floor(bottomlayer/r_bin))=NaN;
-  %tmpY(1:floor(7.0/r_bin))=NaN;
-  %tmpY(floor(16.0/r_bin):end)=NaN;
+  tmpY(floor(toplayer/r_bin):end)=NaN;
   if (ch>1)
     tmpY(~mask_mol(:,ch-1))=NaN;
   end
@@ -130,10 +130,9 @@ for ch=1:2
   % potential bad regions
   [fval2,a2,b2,err2,smed2]=nanrunfit2(tmpY,tmpX,37,37);
   good=fval2./err2;
-%  tmpY(good<15)=NaN;
   % exclude all points above 
   n1=find(good<10,1); % first bad point
-  tmpY(n1:end)=NaN;
+%  tmpY(n1:end)=NaN;
   
   minZ=min(tmpZ(~isnan(tmpY))); maxZ=max(tmpZ(~isnan(tmpY)));
   disp(['lowest used at height=' num2str(minZ) ]);
@@ -150,7 +149,7 @@ for ch=1:2
 
   % Convergence will stop when no more points are removed based on the
   % criteria stablished below
-  iter=0; hascloud=0;
+  iter=0; 
   while(nmask_old ~= nmask)
     nmask_old=nmask;
     
@@ -164,18 +163,19 @@ for ch=1:2
     % NOTE2: it would be better to draw the confidence curves
     % (hyperbola) as the error is larger near the ends. Here
     % sqrt(chi2red) is used as a measure of the uncertainty.
-    %distance=abs(tmpY-fval)./sqrt(chi2red);
-    distance=(tmpY-fval)./sqrt(fval);
-    toerase=distance>3;
+%    distance=(tmpY-fval)./sqrt(chi2red);
+%    toerase=distance>3;
+% this is assuming noise = sqrt(# fotons)
+distance=(tmpY-fval)./sqrt(fval);
+toerase=distance>1e12;
     
     cloudsize=floor(0.1/r_bin);
     n1=find(~isnan(distance),1); % first good point
     n2=max(find(~isnan(distance))); % last good point
 
     for i=n1:maxbin-cloudsize
-      if (all(distance(i:i+cloudsize)>3))
+      if (all(distance(i:i+cloudsize)>1))
         toerase(i-4*cloudsize:maxbin)=1;
-        hascloud=1;
         break;
       end
     end
@@ -204,7 +204,9 @@ for ch=1:2
       legend('lidar','mol*A+B');
       title('MOLECULAR POINTS');
       colorbar;
-      ginput(1);
+      if (debug>2)
+	ginput(1);
+      end
     end
 
     tmpY(toerase)=nan;
