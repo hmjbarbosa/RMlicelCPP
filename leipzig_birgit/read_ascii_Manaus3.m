@@ -52,8 +52,8 @@ clear glue355 glue387 P Pr2
 %%  READ DATA
 %%------------------------------------------------------------------------
 
-%datain='/home/lidar_data/data';
-datain='/media/work/DATA/EMBRAPA/lidar/data';
+datain='/home/lidar_data/data';
+%datain='/media/work/DATA/EMBRAPA/lidar/data';
 
 [nfile, heads, chphy]=profile_read_dates(datain, ...
 					 jdi, jdf, 10, 0.004, 0, 4000);
@@ -83,24 +83,28 @@ r_bin=(alt(2)-alt(1))*1e-3;
 glue355=glue(chphy(1).data, heads(1).ch(1), chphy(2).data, heads(1).ch(2));
 glue387=glue(chphy(3).data, heads(1).ch(3), chphy(4).data, heads(1).ch(4));
 
-figure(100)
-tmp=remove_bg(glue355, 500, -10);
-for j=1:nfile
-  tmp(:,j)=tmp(:,j).*altsq(:);
+if (debug>0)
+  figure(100)
+  tmp=remove_bg(glue355, 500, -10);
+  for j=1:nfile
+    tmp(:,j)=tmp(:,j).*altsq(:);
+  end
+  gplot2(tmp(1:2000,:),[0:2e7:2e9],[],alt(1:2000)*1e-3);
+  title([datestr(jdi) ' - ' datestr(jdf)]);
 end
-gplot2(tmp(1:2000,:),[],[],alt(1:2000)*1e-3);
-title([datestr(jdi) ' - ' datestr(jdf)]);
 
 % number of photons should be summed and not averaged
 P(:,1)=squeeze(nansum(glue355,2));
 P(:,2)=squeeze(nansum(glue387,2));
 
 % range corrected signal Pz2(z, lambda)
-for j = 1:1
+for j = 1:2
   Pr2(:,j) = P(:,j).*altsq(:);
 end
 
-return
+if (debug<2)
+  return
+end
 %------------------------------------------------------------------------
 %  Plots
 %------------------------------------------------------------------------
