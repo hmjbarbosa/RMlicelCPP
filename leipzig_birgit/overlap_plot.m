@@ -1,16 +1,31 @@
+clear all
 
-mfinal1=mean(finalover(:,1:28),2);
-sfinal1 =std(finalover(:,1:28),0,2);
+%load list_overlap_sel15km_top14km.mat
+%load list_overlap_sel14km_top13km.mat
+%load list_overlap_sel13km_top12km.mat
+%load list_overlap_sel12km_top11km.mat
+load list_overlap_sel11km_top10km.mat
+%load list_overlap_sel10km_top09km.mat
 
-alt=[1:600]*7.5;
-%mfinal2=mean(finalover(:,30:38),2);
-%sfinal2 =std(finalover(:,30:38),0,2);
+figure(1); clf;
+mask=final.jdi<datenum('1-Aug-12') & ~final.problem & ~final.hascloud & ...
+     final.maxglue>1.5e3 & final.beta_raman(134,:) > 1e-3;
 
-figure(300); clf; grid on; hold on;
-plot(alt(1:600)*1e-3, finalover(1:600,:));
-plot(alt(1:600)*1e-3, mfinal1(1:600),'r-','linewidth',3);
-%plot(alt(1:600)*1e-3, mfinal2(1:600),'r-','linewidth',2);
-%plot(alt(1:600)*1e-3, mfinal(1:600)+sfinal(1:600),'k--','linewidth',2);
-%plot(alt(1:600)*1e-3, mfinal(1:600)-sfinal(1:600),'k--','linewidth',2);
+n=750;
+alt=[1:n];%*7.5*1e-3;
+tmp=final.over(1:n,mask);
+%plot(alt,tmp,'color',[0.71 0.71 0.71]); hold on; grid on;
+plot(alt,tmp); hold on; grid on;
+plot(alt,mean(tmp,2),               'b'  ,'linewidth',3);
+plot(alt,mean(tmp,2)+2*std(tmp,0,2),'b--','linewidth',3);
+plot(alt,mean(tmp,2)-2*std(tmp,0,2),'b--','linewidth',3);
+
+%plot(alt,quantile(tmp,0.50,2),'b'  ,'linewidth',3);
+%plot(alt,quantile(tmp,0.05,2),'b--','linewidth',3);
+%plot(alt,quantile(tmp,0.95,2),'b--','linewidth',3);
+
+xlabel('Altitude (km)');
+title(['Overlap N=' num2str(sum(mask))]);
+ylim([0 1.05]);
 
 %

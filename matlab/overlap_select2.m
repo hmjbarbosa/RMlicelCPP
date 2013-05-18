@@ -16,7 +16,7 @@ nday=0;
 clear nsel;
 bar='*****************************************************';
 
-topheight=[10000, 12000, 14000, 16000];
+topheight=[10000, 11000, 12000, 13000, 14000, 15000];
 ntop=numel(topheight);
 nsel(1:ntop)=0;
 
@@ -71,36 +71,38 @@ while (nday<=800)
     nshoots=max(heads(1).nshoots,heads(1).nshoots2);
     numshoots=numsec*nhz; % number of shoots
     numprof=floor(numshoots/nshoots+0.5); % number of profiles in [jdi, jdf]
-    data(1:2000,1:numprof)=NaN;
+    maxbin=2000;
+    data(1:maxbin,1:numprof)=NaN;
     yy=(1:numprof);
  
     % no need to position the profiles in the correct time bin    
-    data(:,1:nfile)=chphy(1).rcs(1:2000,1:nfile);
+    data(:,1:nfile)=chphy(1).rcs(1:maxbin,1:nfile);
 
     %% DECIDE IF THERE IS A CLOUD OR NOT
     
+    % low level clouds
+    hascloud=0;
+    tmp=diff(nanmean(data(100:400,:),2));
+    if (any(abs(tmp-nanmean(tmp)) > 5 * nanstd(tmp)))
+      disp(['THERE IS A CLOUD IN THE PROFILE!!!!!!!!!!!!!!!!!'])
+      hascloud=1;
+    end
+
     % compute the fraction of NaN
     frac=sum(sum(isnan(data)))/numel(data);
-    % on each profile, find the height of the maximum
-    [v,idx]=nanmax(data);
-    % on each profile, find the height of the maximum above critH
-    % there should be no aerosols, so the maximum should be very
-    % close to critH... otherwise it is a cloud
-    critH=5000; % meters
-    n1=floor(critH/(zh(2)-zh(1)));
-    [v2,idx2]=nanmax(data(n1:end,:));
-    idx2=idx2+n1-1;
 
     for n=1:ntop
     
-      % flag for a thick cloud between 3km and 15km
-      cld=sum(zh(idx,1)>3000 & zh(idx,1)<topheight(n));
-
-      % flag for a thin cloud between critH+1km and 15km
-      % if noise it too large, 1km might not be enought
-      cld2=sum(zh(idx2,1)>critH+1000 & zh(idx2,1)<topheight(n));
+      for h=1:4
+	critH(h)=2000*h;
+	n1(h)=floor(critH(h)/(zh(2)-zh(1)));
+	[v(:,h),idx(:,h)]=nanmax(data(n1(h):end,:));
+	idx(:,h)=idx(:,h)+n1(h)-1;
+	
+	cld(h)=sum(zh(idx(:,h),1) > critH(h)*1.3 & zh(idx(:,h),1) < topheight(n));
+      end
       
-      if (frac<0.25 & cld==0 & cld2==0)
+      if (frac<0.25 & all(cld==0) & ~hascloud)
 	nsel(n)=nsel(n)+1;
 	disp([bar 'selected OK H=' num2str(topheight(n)/1e3)]);
 	fprintf(fid(n),'wjdi(%02d)=datenum(''%s''); wjdf(%02d)=datenum(''%s'');\n', ...
@@ -110,24 +112,31 @@ while (nday<=800)
       end
     end
 
-    show=0;
+    show=0; but=1;
+    cc={ 'black', 'red', 'green', 'yellow', 'green' };
     if (show)
       figure(1); clf
       set(gcf,'position',[0,500,1400,600]); % units in pixels!
-      gplot2(data,[0:3e5:3e7],yy,zh(1:2000,1)/1e3); hold on; grid on;
-      plot(yy, zh(idx,1)/1e3,'ro-')
-      plot(yy, zh(idx2,1)/1e3,'ko-')
+      gplot2(data,[0:3e5:3e7],yy,zh(1:maxbin,1)/1e3); hold on; grid on;
+      for h=1:4
+	plot(yy, zh(idx(:,h),1)/1e3,'o-','color',cc{h})
+	plot(yy, yy*0 + critH(h)*1.3/1e3,'--','color',cc{h})
+      end
       ylabel('Altitude agl (km)')
-      tmp=datevec(jdi);
-      out=sprintf('%4d / %02d / %02d - %02d:%02d frac=%4.2f cld=%d cld2=%d ',...
-		  tmp(1),tmp(2),tmp(3),tmp(4),tmp(5),...
-		  frac, cld, cld2);
+      dd=datevec(jdi);
+      out=sprintf(['%4d / %02d / %02d - %02d:%02d frac=%4.2f'... 
+		   ' cld=%d %d %d %d   nday= %d '],...
+		  dd(1),dd(2),dd(3),dd(4),dd(5),...
+		  frac, cld, nday);
       title(out)
       [x,y,but]=ginput(1);
     end
 
-
-    step=step+dstep;
+    if (but==3)
+      step=step-dstep;
+    else
+      step=step+dstep;
+    end
   end
 
   nday=nday+1;

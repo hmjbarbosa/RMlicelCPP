@@ -16,22 +16,19 @@ constants
 %list_overlap_select
 %temp_xyzw_15km
 
-selection_2levels_016km
-%selection_2levels_015km
-%selection_2levels_014km
-%selection_2levels_013km
-%selection_2levels_012km
-%selection_2levels_011km
-%selection_2levels_010km
-%selection_2levels_009km
-%selection_2levels_008km
+%selection_2levels_15km
+%selection_2levels_14km
+%selection_2levels_13km
+%selection_2levels_12km
+%selection_2levels_11km
+selection_2levels_10km
 
 nw=numel(wjdi);
 maxz=2000;
-debug=0;
+debug=3;
 
 %for w=1:nw
-for w=130:170
+for w=399:399
   jdi=wjdi(w);
   jdf=wjdf(w);
   disp(['=================================================================='])
@@ -48,20 +45,22 @@ for w=130:170
     break
   end
  
-%  outfile='list_overlap_sel16km_top10km_bot6km_fix4km.mat';
+%  outfile='list_overlap_sel10km_top09km.mat';
   outfile='temp.mat';
   tryagain=1;
   bottomlayer=7;
-  toplayer=14;
+  toplayer=9;
   problem=0;
   first=true;
   while (tryagain)
-
+    tryagain=0;
+    
     P(:,1)=nansum(glue355(:,:),2);
     P(:,2)=nansum(glue387(:,:),2);
     for j = 1:2
       Pr2(:,j) = P(:,j).*altsq(:);
     end
+    clear tmp;
     for j=1:nfile
       tmp(:,j)=glue355(:,j).*altsq(:);
     end
@@ -70,38 +69,40 @@ for w=130:170
     clear tmp
 
     hascloud=0;
-    tmp=diff(Pr2(200:1400,1));
-    if (any(abs(tmp-mean(tmp)) > 5 * std(tmp)))
-      disp(['THERE IS A CLOUD IN THE PROFILE!!!!!!!!!!!!!!!!!'])
+    clear deriv; snr=5;
+    deriv=diff(Pr2(100:400,1));
+    if (any(abs(deriv-mean(deriv)) > snr*std(deriv)))
+      disp(['THERE IS A CLOUD IN Pr2!!!!!!!!!!!!!!!!!'])
       figure(123); clf; plot(Pr2(:,1));
       title(['w= ' num2str(w) '  time=' datestr(jdi)])
+      figure(124); clf; plot(deriv); hold on;
+      plot(deriv*0 + mean(deriv),'r-');
+      plot(deriv*0 + mean(deriv) + snr*std(deriv),'r--');
+      plot(deriv*0 + mean(deriv) - snr*std(deriv),'r--');
+      title(['w= ' num2str(w) '  time=' datestr(jdi)])
       hascloud=1;
-%      break
     end
 
     rayleigh_fit_Manaus3
-
-% check if molecular region is long enough
-%    if any(alt(RefBinTop-RefBin) < 4000)
-%      tryagain=1;
-%      disp(['WARN WARN WARN ---- WARN WARN WARN'])
-%      disp(['molecular region too short'])
-%      % allow a 500m lower rayleight-fit for fixing the negative
-%      % part in beta_raman
-%      bottomlayer=bottomlayer-0.5;
-%      if (bottomlayer<6)
-%        break
-%      else
-%        continue
-%      end
-%    else
-      tryagain=0;
-%    end
-
     Klett_Manaus
     Raman_Manaus
     Raman_beta_Manaus
-    
+
+    clear deriv; snr=5;
+    deriv=diff(beta_raman(100:500));
+%    deriv=diff(mysmooth(beta_raman(100:500),1,1));
+    if (any(abs(deriv-mean(deriv)) > snr*std(deriv)))
+      disp(['THERE IS A CLOUD IN Beta_raman!!!!!!!!!!!!!!!!!'])
+      figure(223); clf; plot(Pr2(:,1));
+      title(['w= ' num2str(w) '  time=' datestr(jdi)])
+      figure(224); clf; plot(deriv); hold on;
+      plot(deriv*0 + mean(deriv),'r-');
+      plot(deriv*0 + mean(deriv) + snr*std(deriv),'r--');
+      plot(deriv*0 + mean(deriv) - snr*std(deriv),'r--');
+      title(['w= ' num2str(w) '  time=' datestr(jdi)])
+      hascloud=1;
+    end
+
     if (first)
       final.beta_raman0(1:maxz,w)=beta_raman(1:maxz);
       final.beta_klett0(1:maxz,w)=beta_klett(1:maxz);
@@ -109,7 +110,31 @@ for w=130:170
     end
 
     % find top of aerosol layer (first negative beta + 1km)
-    aertop=find(beta_raman(1:maxz)<0,1) + floor(1/r_bin);
+    %aertop=find(beta_raman(1:maxz)<0,1) + floor(1/r_bin);
+    rms=std(beta_raman(RefBin(1)-67:RefBin(1)));
+    for i=RefBin(1):-1:21
+      if all(beta_raman(i-20:i) > rms) 
+	break
+      end
+    end
+    aertop=i+floor(1/r_bin);
+    
+% check if molecular region is long enough
+    if any(alt(RefBinTop-RefBin) < 4000)
+      disp(['WARN WARN WARN ---- WARN WARN WARN'])
+      disp(['molecular region too short'])
+      % allow a 500m lower rayleight-fit for fixing the negative
+      % part in beta_raman
+      if (bottomlayer-0.5 > alt(aertop)*1e-3)
+	bottomlayer=bottomlayer-0.5;
+	tryagain=1;
+	continue;
+      else
+	disp(['PROBLEM: bottom layer already at limit! ' ])
+	problem=1;
+	tryagain=0;
+      end
+    end
     
     % check if Raman solution is stable, i.e., if it does not
     % become negative before going positive
@@ -133,8 +158,6 @@ for w=130:170
 	  plot(beta_raman(i-20:i),alt(i-20:i),'b','linewidth',2)
 	end
         break
-      else
-	tryagain=0;
       end
     end
 
