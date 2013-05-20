@@ -4,17 +4,17 @@ addpath('../sc')
 ['analysis started @ ' datestr(clock)]; tic
 
 %datain='../../Raymetrics_data';
-%datain='/media/work/DATA/EMBRAPA/lidar/data';
-datain='/home/lidar_data/data';
+datain='/media/work/DATA/EMBRAPA/lidar/data';
+%datain='/home/lidar_data/data';
 
 topheight=[10000, 11000, 12000, 13000, 14000, 15000];
 ntop=numel(topheight);
 nsel(1:ntop)=0;
 
-selection_2levels_11km
+selection_2levels_13km
 
 nw=numel(wjdi);
-w=251;
+w=148;
 while (w<=nw)
 
   clear nfile heads chphy zh yy data 

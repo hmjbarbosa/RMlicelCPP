@@ -19,16 +19,16 @@ constants
 %selection_2levels_15km
 %selection_2levels_14km
 %selection_2levels_13km
-%selection_2levels_12km
+selection_2levels_12km
 %selection_2levels_11km
-selection_2levels_10km
+%selection_2levels_10km
 
 nw=numel(wjdi);
 maxz=2000;
 debug=3;
 
 %for w=1:nw
-for w=399:399
+for w=232:232
   jdi=wjdi(w);
   jdf=wjdf(w);
   disp(['=================================================================='])
@@ -49,7 +49,7 @@ for w=399:399
   outfile='temp.mat';
   tryagain=1;
   bottomlayer=7;
-  toplayer=9;
+  toplayer=11;
   problem=0;
   first=true;
   while (tryagain)
