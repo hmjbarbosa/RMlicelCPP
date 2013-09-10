@@ -64,9 +64,11 @@ wjdi(36)=datenum('19-Sep-2012 22:30:00'); wjdf(36)=datenum('19-Sep-2012 23:30:00
 wjdi(37)=datenum('27-Sep-2012 22:00:00'); wjdf(37)=datenum('27-Sep-2012 23:00:00');
 wjdi(38)=datenum('07-Oct-2012 00:00:00'); wjdf(38)=datenum('07-Oct-2012 01:00:00');
 
+debug=1;
+
 nw=38;
 %for w=1:nw
-for w=6:6
+for w=5:5
   jdi=wjdi(w);
   jdf=wjdf(w);
 

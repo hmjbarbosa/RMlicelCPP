@@ -10,6 +10,8 @@ wdx=260; xx0=-wsx;
 % start position
 wdy=0;   yy0=50;
 
+debug=1;
+
 % read physics constants
 constants;
 read_sonde_synthetic
