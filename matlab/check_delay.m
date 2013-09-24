@@ -1,12 +1,13 @@
-function [] = check_delay(sig_an, sig_pc, head)
+function [rsq,tim] = check_delay(sig_an, sig_pc, head)
 
 % length of data
-n=head.ndata(3);
+n=head.ch(1).ndata;
 n=n-50;
 
 % Resolution (mV) of analog channel)
-resol=head.discr(3)/2^head.bits(3);
+resol=head.ch(1).discr/2^head.ch(1).bits;
 
+figure(3)
 i=1;
 for delay = -10:30
   an=sig_an(50+delay:n+delay);
@@ -26,13 +27,18 @@ for delay = -10:30
   rsq(i) = gof.rsquare;
 
   % Plot each step to the user
-  plot(cfun,'m',an(maskout), pc(maskout),'o');
-  s=['Delay(bins)=' int2str(delay) '  R^2=' num2str(gof.rsquare)]; 
-  title(s);
-  pause(0.2);
+  if (delay==0)
+    plot(cfun,'m',an(maskout), pc(maskout),'o');
+    s=['Delay(bins)=' int2str(delay) '  R^2=' num2str(gof.rsquare)]; 
+    title(s);
+    xlabel('Analog [mV]');
+    ylabel('PC [Mhz]');
+    pause(0.2);
+  end
   i=i+1;
 end
 
+figure(4)
 plot(tim,rsq); grid on;
 title('Correlation between analog and PC');
 %xlabel('Delay(bins)+1');

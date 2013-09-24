@@ -137,7 +137,7 @@ end
 alpha_raman=alpha_raman2(:,3);
 
 %alpha_raman=nanmysmooth(alpha_raman2(:,3),0,5);
-%alpha_raman=nanmysmooth(alpha_raman2(:,3),0,300);
+alpha_raman=nanmysmooth(alpha_raman2(:,3),0,200);
 
 % -------------
 %   plot data
