@@ -2,7 +2,9 @@ clear all
 addpath('../matlab');
 addpath('../sc');
 
-load overlap.mat
+load overlap_narrow.mat
+
+debug=0;
 
 % windows' size
 wsx=250; wsy=650; 
@@ -17,7 +19,7 @@ constants
 radio{1}='./Manaus/82332_110901_00.dat'; tag{1}='dry';
 radio{2}='./Manaus/82332_120119_00.dat'; tag{2}='wet';
 
-for z=1:1
+for z=1:2
   radiofile=radio{z};
   read_sonde_Manaus3
   molecular
@@ -96,33 +98,35 @@ for z=1:1
 %  end
 %  return
   totfile=0;
-  for w=1:nw
+  for w=1:1
     jdi=wjdi(w);
     jdf=wjdf(w);
+    disp(['-------------------------------------------------------------------------']);
+    disp(['w= ' num2str(w) ' wjdi= ' datestr(jdi) ' wjdf= ' datestr(jdf)]);
     
     read_ascii_Manaus3
     n1=size(glue355,1);
-    n2=size(over,1);
+    n2=size(overmean,1);
     if (n1>n2)
-      over(n2:n1)=1;
+      overmean(n2:n1)=1;
     end
     
     for q=1:nfile
-      P(:,1)=glue355(:,q)./over(:);
+      P(:,1)=glue355(:,q)./overmean(:);
       Pr2(:,1) = P(:,1).*altsq(:);
       
       rayleigh_fit_Manaus3
       Klett_Manaus
-      disp([num2str(q+totfile)])
-      klett_beta_aero(:,q+totfile)=beta_aerosol(1,:);
-      klett_alpha_aero(:,q+totfile)=alpha_aerosol(1,:);
+      klett_beta_aero(:,q+totfile)=beta_klett(1,:);
+      klett_alpha_aero(:,q+totfile)=alpha_klett(1,:);
       totheads(q+totfile)=heads(q);
+      disp(['======> FINISHED PROFILE #' num2str(q+totfile)])
     end
     
     totfile=totfile+nfile;
   end
   if (totfile>0)
-    out=['beta_klett_' tag{z} '_overlap.mat'];
+    out=['beta_klett_' tag{z} '_overlapfinal.mat'];
     save(out,'klett_beta_aero','klett_alpha_aero','totheads')
   end
 end

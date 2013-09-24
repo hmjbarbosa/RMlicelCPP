@@ -13,6 +13,7 @@ wdy=0;   yy0=50;
 constants
 
 %% DRY NO CLOUDS
+debug=0;
 
 wjdi(01)=datenum('11-Jul-2011 21:00:00'); wjdf(01)=datenum('29-Jul-2011 22:00:00');
 wjdi(01)=datenum('11-Jul-2011 22:00:00'); wjdf(01)=datenum('29-Jul-2011 23:00:00');
