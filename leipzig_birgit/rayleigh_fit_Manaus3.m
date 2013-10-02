@@ -90,7 +90,7 @@ end
 %%------------------------------------------------------------------------
 
 % for elastic and raman channels
-for ch=1:2
+for ch=1:1
 
   %%------------------------------------------------------------------------
   %%  LOOP ON RAYLEIGH FIT FOR DETERMINATION OF MOLECULAR RANGE
