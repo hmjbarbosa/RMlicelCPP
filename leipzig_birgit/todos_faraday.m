@@ -4,7 +4,7 @@ addpath('../sc');
 
 load overlap_narrow.mat
 
-debug=0;
+debug=1;
 
 % windows' size
 wsx=250; wsy=650; 
@@ -98,7 +98,8 @@ for z=1:2
 %  end
 %  return
   totfile=0;
-  for w=1:nw
+  for w=5:5
+%  for w=1:nw
     jdi=wjdi(w);
     jdf=wjdf(w);
     disp(['-------------------------------------------------------------------------']);
@@ -117,10 +118,11 @@ for z=1:2
       
       rayleigh_fit_Manaus3
       Klett_Manaus
-      klett_beta_aero(:,q+totfile)=beta_klett(1,:);
-      klett_alpha_aero(:,q+totfile)=alpha_klett(1,:);
+      klett_beta_aero(:,q+totfile)=beta_klett(:,1);
+      klett_alpha_aero(:,q+totfile)=alpha_klett(:,1);
       totheads(q+totfile)=heads(q);
       disp(['======> FINISHED PROFILE #' num2str(q+totfile)])
+    return
     end
     
     totfile=totfile+nfile;

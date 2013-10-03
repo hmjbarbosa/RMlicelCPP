@@ -3,7 +3,7 @@ clear all
 addpath('../matlab');
 addpath('../sc');
 
-load beta_klett_dry_overlap.mat
+load beta_klett_dry_overlapfinal.mat
 jdi=datenum(2011, 7, 29, 0, 0, 0);
 %load beta_klett_wet.mat
 %jdi=datenum(2012,  1, 20, 0, 0, 0);

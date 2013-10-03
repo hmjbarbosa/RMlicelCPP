@@ -22,7 +22,6 @@ end
 % proportional: below 7MHZ and above 5*resolution
 mask=(anSignal>5*resol) & (anSignal>0.) & (anSignal~=NaN) & ...
      (pcSignal<7.)      & (pcSignal>0.) & (pcSignal~=NaN);
-%mask=(idx>1000) & (idx<1500.);
 
 % limits of fit region. result of min() or max() is an array with the
 % corresponding values for each column
@@ -49,7 +48,7 @@ end
 %    break;
 %  end
 %end
-% check if there is enough points
+% check if there are enough points
 if (idxmax-idxmin<10 || sum(mask)<10)
   glued(1:n)=NaN;
   if exist('toplot','var')
@@ -83,11 +82,11 @@ if exist('toplot','var')
   pause;
 
   % Plot glued and PC
-  semilogy(idx(1:3000),pcSignal(1:3000),'r');
+  semilogy(idx,pcSignal,'r');
   hold on;
-  semilogy(idx(1:3000),glued(1:3000),'b');
+  semilogy(idx,glued,'b');
   semilogy(idx(mask),pcSignal(mask),'.g');
-  semilogy(idx(1:3000),anSignal(1:3000),'.m');
+  semilogy(idx,anSignal,'.m');
   legend('Uncorrected PC','Scaled Analog','fit region','analog');
   xlabel('#bins');
   ylabel('PC (MHz)');
