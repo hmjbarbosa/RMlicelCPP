@@ -13,7 +13,8 @@ n=anChannel.ndata;
 idx=1:n;
 
 % Resolution (mV) of analog channel)
-resol=anChannel.discr/2^anChannel.bits;
+%resol=anChannel.discr/2^anChannel.bits;
+resol=anChannel.discr*1000/2^anChannel.bits;
 if exist('toplot','var')
   disp(['resol= ' num2str(resol)]);
 end
@@ -34,6 +35,8 @@ end
 % proportional: below 7MHZ and above 5*resolution
 mask=(anSignal>5*resol) & (anSignal>bg_an+3*std_an) & (anSignal~=NaN) & ...
      (pcSignal<20.)     & (pcSignal>bg_pc+3*std_pc) & (pcSignal~=NaN);
+%mask=(anSignal>5*resol) & (anSignal~=NaN) & ...
+%     (pcSignal<20.)      & (pcSignal~=NaN);
 
 % limits of fit region. result of min() or max() is an array with the
 % corresponding values for each column
