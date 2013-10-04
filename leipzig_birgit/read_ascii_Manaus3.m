@@ -80,7 +80,7 @@ r_bin=(alt(2)-alt(1))*1e-3;
 % anything user needs: time average, bg correction, glueing, etc..
 
 %% GLUE ANALOG+PC
-glue355=glue(chphy(1).data, heads(1).ch(1), chphy(2).data, heads(1).ch(2),1);
+glue355=glue(chphy(1).data, heads(1).ch(1), chphy(2).data, heads(1).ch(2));
 glue387=glue(chphy(3).data, heads(1).ch(3), chphy(4).data, heads(1).ch(4));
 
 if (debug>0)

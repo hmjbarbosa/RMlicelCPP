@@ -18,10 +18,22 @@ if exist('toplot','var')
   disp(['resol= ' num2str(resol)]);
 end
 
+% Exclude BG region, even if user did not removed it before
+bg_an=mean(anSignal(n-500:n));
+std_an=std(anSignal(n-500:n));
+if (isnan(bg_an)||isnan(std_an))
+  bg_an=0; std_an=0;
+end
+bg_pc=mean(pcSignal(n-500:n));
+std_pc=std(pcSignal(n-500:n));
+if (isnan(bg_pc)||isnan(std_pc))
+  bg_pc=0; std_pc=0;
+end
+
 % Create a mask for the region where analog and PC are thought to be
 % proportional: below 7MHZ and above 5*resolution
-mask=(anSignal>5*resol) & (anSignal>0.) & (anSignal~=NaN) & ...
-     (pcSignal<7.)      & (pcSignal>0.) & (pcSignal~=NaN);
+mask=(anSignal>5*resol) & (anSignal>bg_an+3*std_an) & (anSignal~=NaN) & ...
+     (pcSignal<20.)     & (pcSignal>bg_pc+3*std_pc) & (pcSignal~=NaN);
 
 % limits of fit region. result of min() or max() is an array with the
 % corresponding values for each column
@@ -41,13 +53,13 @@ if ~(numel(idxmin) & numel(idxmax))
   return;
 end
 % take only a continuous mask, with no 0s in between
-%for i=idxmin:idxmax
-%  if ~mask(i)
-%    mask(i:idxmax)=0;
-%    idxmax=i-1;
-%    break;
-%  end
-%end
+for i=floor((idxmin+idxmax)/2):idxmax
+  if mask(i)==0
+    mask(i:idxmax)=0;
+    idxmax=i-1;
+    break;
+  end
+end
 % check if there are enough points
 if (idxmax-idxmin<10 || sum(mask)<10)
   glued(1:n)=NaN;

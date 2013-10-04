@@ -114,6 +114,7 @@ for z=1:2
     
     for q=1:nfile
       P(:,1)=glue355(:,q)./overmean(:);
+return
       Pr2(:,1) = P(:,1).*altsq(:);
       
       rayleigh_fit_Manaus3
