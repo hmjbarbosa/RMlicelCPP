@@ -49,6 +49,16 @@ head.file=fscanf(fp,'%s',[1,1]);
 
 %% LINE #2
 head.site=fscanf(fp,'%s',[1,1]);
+%% some site might have spaces.
+%% keep reading until we find something like ??/??/????
+pos=ftell(fp);
+[tmp, n]=fscanf(fp,'%s',[1,1]);
+while (length(tmp)~=10 || tmp(3)~='/' || tmp(6)~='/')
+  head.site=[head.site ' ' tmp];
+  pos=ftell(fp);
+  [tmp,n]=fscanf(fp,'%s',[1,1]);
+end
+fseek(fp,pos,'bof');
 
 head.datei=fscanf(fp,'%2d/%2d/%4d',[1,3]); %% DD MM YY
 head.houri=fscanf(fp,'%2d:%2d:%2d',[1,3]); %% hh mn ss
@@ -59,11 +69,24 @@ head.jdf=datenum([head.datef(3:-1:1) head.hourf]);
 
 head.alt=fscanf(fp,'%d',[1,1]);
 lon=fscanf(fp,'%s',[1,1]);  lon(lon==',')='.'; head.lon=str2num(lon);    
-lat=fscanf(fp,'%s',[1,1]);  lat(lat==',')='.'; head.lat=str2num(lat);    
-zen=fscanf(fp,'%s',[1,1]);  zen(zen==',')='.'; head.zen=str2num(zen);    
-idum=fscanf(fp,'%s',[1,1]); idum(idum==',')='.'; head.idum=str2num(idum);
-T0=fscanf(fp,'%s',[1,1]);   T0(T0==',')='.'; head.T0=str2num(T0);        
-P0=fscanf(fp,'%s',[1,1]);   P0(P0==',')='.'; head.P0=str2num(P0);        
+lat=fscanf(fp,'%s',[1,1]); lat(lat==',')='.'; head.lat=str2num(lat);
+% Some old Licel does not include 00, T0 and P0 in this line. So we
+% need to read the rest of the line, and from that try to read what we
+% want. 
+tmp=fgets(fp);
+[A,n]=sscanf(tmp,'%s %s %s %s');
+if n>=1
+  zen=A(1); zen(zen==',')='.'; head.zen=str2num(zen);    
+end
+if n>=2
+  idum=A(2); idum(idum==',')='.'; head.idum=str2num(idum);
+end
+if n>=3
+  T0=A(3); T0(T0==',')='.'; head.T0=str2num(T0);
+end
+if n>=4
+  P0=A(4); P0(P0==',')='.'; head.P0=str2num(P0);        
+end
 
 %% LINE #3
 head.nshoots=fscanf(fp,'%d',[1,1]);

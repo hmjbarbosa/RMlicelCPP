@@ -189,7 +189,7 @@ void header_read(FILE *fp, RMDataFile *rm, bool debug)
   // Line 2
   n=fscanf(fp,"%s",rm->site);
   if (n!=1) header_read_error();
-  // some filenames might have an space.
+  // some sites might have spaces.
   // keep reading until we find something like ??/??/????
   pos=ftell(fp);
   n=fscanf(fp,"%s",tmp);
