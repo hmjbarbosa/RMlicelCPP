@@ -114,10 +114,10 @@ for ch=1:1
 
   % crop regions that we know will never be molecular
   if ~exist('bottomlayer','var')
-    bottomlayer=7;
+    bottomlayer=5;
   end
   if ~exist('toplayer','var')
-    toplayer=25;
+    toplayer=10;
   end
   tmpY(1:floor(bottomlayer/r_bin))=NaN;
   tmpY(floor(toplayer/r_bin):end)=NaN;
@@ -256,6 +256,7 @@ toerase=distance>1e12;
   %% APPLY THE CALCULATED BG
   P  (:,ch) = P(:,ch)-bg(ch);
   n1=find(P(:,ch)<=0, 1);
+% hmjb: is it necessary??
   P(n1:end,ch)=NaN;
   Pr2(:,ch) = P(:,ch).*altsq(:);
   

@@ -3,7 +3,7 @@ clear all
 addpath('../matlab');
 addpath('../sc');
 
-load beta_klett_dry_overlapfinal.mat
+load beta_klett_dry_overlapfinal_night.mat
 jdi=datenum(2011, 7, 29, 0, 0, 0);
 %load beta_klett_wet.mat
 %jdi=datenum(2012,  1, 20, 0, 0, 0);
@@ -22,10 +22,12 @@ zz(1:maxbin)=(1:maxbin)'*7.5/1e3; % vertical in km
 for i=1:nfile
   j=floor((totheads(i).jdi-jdi)*1440+0.5)+2;
   if (j<=nslot && j>=1)
-    data(1:maxbin,j)=klett_beta_aero(1:maxbin,i)*1e3; % Mm-1
-    alfa(1:maxbin,j)=klett_alpha_aero(1:maxbin,i)*1e3; % Mm-1
+    data(1:maxbin,j)=raman_beta_aero(1:maxbin,i)*1e3; % Mm-1
+    alfa(1:maxbin,j)=raman_alpha_aero(1:maxbin,i)*1e3; % Mm-1
   end
 end
+alfa=nanmysmooth(alfa,0,200); % suavizando a curva
+
 
 % mask shutter closed
 for i=1:nslot
@@ -56,7 +58,7 @@ set(gca,'fontsize',12)
 datetick('x','mm/dd')
 ylabel('Altitude agl (km)','fontsize',14)
 tmp=datevec(jdi);
-out=sprintf('faraday_betaklett_%4d_%02d_%02d_overlap.png', tmp(1),tmp(2),tmp(3));
+out=sprintf('faraday_betaraman_%4d_%02d_%02d_overlap.png', tmp(1),tmp(2),tmp(3));
 print(out,'-dpng')
 eval(['!mogrify -trim ' out])
 
@@ -80,7 +82,7 @@ set(gca,'fontsize',12)
 datetick('x','mm/dd')
 ylabel('Altitude agl (km)','fontsize',14)
 tmp=datevec(jdi);
-out=sprintf('faraday_alfaklett_%4d_%02d_%02d_overlap.png', tmp(1),tmp(2),tmp(3));
+out=sprintf('faraday_alfaraman_%4d_%02d_%02d_overlap.png', tmp(1),tmp(2),tmp(3));
 print(out,'-dpng')
 eval(['!mogrify -trim ' out])
 
