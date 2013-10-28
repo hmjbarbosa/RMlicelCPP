@@ -3,8 +3,8 @@ clear all
 addpath('../matlab');
 addpath('../sc');
 
-load beta_klett_dry_overlapfinal.mat
-jdi=datenum(2011, 7, 29, 0, 0, 0);
+load beta_klett_dry_overlapfinal_set2011.mat
+jdi=datenum(2011, 8, 30, 0, 0, 0);
 %load beta_klett_wet.mat
 %jdi=datenum(2012,  1, 20, 0, 0, 0);
 jdf=jdi+7;
@@ -41,7 +41,7 @@ figure(1); clf
 set(gcf,'position',[0,300,900,300]); % units in pixels!
 set(gcf,'PaperUnits','inches','PaperSize',[12,4],'PaperPosition',[0 0 12 4])
 
-clev=[0:0.03:3];
+clev=[0:0.05:5];
 [cmap, clim]=cmapclim(clev);
 imsc(tt,zz(minbin:maxbin),data(minbin:maxbin,:),clim,cmap,...
      [1. 1. 1.],isnan(data(minbin:maxbin,:)),...
@@ -65,7 +65,7 @@ figure(2); clf
 set(gcf,'position',[0,300,900,300]); % units in pixels!
 set(gcf,'PaperUnits','inches','PaperSize',[12,4],'PaperPosition',[0 0 12 4])
 
-clev=[0:3:300];
+clev=[0:2:200];
 [cmap, clim]=cmapclim(clev);
 imsc(tt,zz(minbin:maxbin),alfa(minbin:maxbin,:),clim,cmap,...
      [1. 1. 1.],isnan(alfa(minbin:maxbin,:)),...
