@@ -96,7 +96,7 @@ figure(3); clf
 set(gcf,'position',[0,700,900,300]); % units in pixels!
 set(gcf,'PaperUnits','inches','PaperSize',[12,4],'PaperPosition',[0 0 12 4])
 
-clev=[0:1.2:120];
+clev=[20:0.8:100];
 [cmap, clim]=cmapclim(clev);
 imsc(tt,zz(minbin:maxbin),ldr(minbin:maxbin,:),clim,cmap,...
      [1. 1. 1.],isnan(ldr(minbin:maxbin,:)),...
