@@ -57,7 +57,7 @@ set(gca,'YDir','normal');
 colormap(min(max(cmap,0),1));
 caxis(clim);
 bar = colorbar;
-set(get(bar,'ylabel'),'String','Backscatter (Mm^{-1} sr^{-1})');
+set(get(bar,'ylabel'),'String','Backscatter (Mm^{-1} sr^{-1})','fontsize',14);
 
 set(gca,'fontsize',12)
 datetick('x','mm/dd')
@@ -81,7 +81,7 @@ set(gca,'YDir','normal');
 colormap(min(max(cmap,0),1));
 caxis(clim);
 bar = colorbar;
-set(get(bar,'ylabel'),'String','Extinction (Mm^{-1})');
+set(get(bar,'ylabel'),'String','Extinction (Mm^{-1})','fontsize',14);
 
 set(gca,'fontsize',12)
 datetick('x','mm/dd')
@@ -105,7 +105,7 @@ set(gca,'YDir','normal');
 colormap(min(max(cmap,0),1));
 caxis(clim);
 bar = colorbar;
-set(get(bar,'ylabel'),'String','Lidar Ratio (sr)');
+set(get(bar,'ylabel'),'String','Lidar Ratio (sr)','fontsize',14);
 
 set(gca,'fontsize',12)
 datetick('x','mm/dd')

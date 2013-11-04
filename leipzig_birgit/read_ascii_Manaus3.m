@@ -52,8 +52,9 @@ clear glue355 glue387 P Pr2
 %%  READ DATA
 %%------------------------------------------------------------------------
 
-datain='/home/lidar_data/data';
+%datain='/home/lidar_data/data';
 %datain='/media/work/DATA/EMBRAPA/lidar/data';
+datain='/Volumes/work/DATA/EMBRAPA/lidar/data';
 
 [nfile, heads, chphy]=profile_read_dates(datain, ...
 					 jdi, jdf, 10, 0.004, 0, 4000);
