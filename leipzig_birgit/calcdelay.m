@@ -1,6 +1,10 @@
 clear all;
+addpath('../matlab');
+addpath('../sc');
 
-datain='/home/lidar_data/data';
+%datain='/home/lidar_data/data';
+datain='/Volumes/work/DATA/EMBRAPA/lidar/data';
+
 jdi=datenum(2011,7,30,9,0,0);
 jdf=datenum(2011,7,30,10,0,0);
 [nfile, heads, chphy]=profile_read_dates(datain, jdi, jdf, 0, 0.004);

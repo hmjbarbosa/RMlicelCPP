@@ -23,7 +23,7 @@ clear RefBinTop mask_mol
 
 toextrapolate=1;
 
-lidar_altitude=100;
+%lidar_altitude=100;
 %lidar_altitude=0;
 
 if toextrapolate==0
@@ -257,7 +257,7 @@ toerase=distance>1e12;
   P  (:,ch) = P(:,ch)-bg(ch);
   n1=find(P(:,ch)<=0, 1);
 % hmjb: is it necessary??
-  P(n1:end,ch)=NaN;
+%  P(n1:end,ch)=NaN;
   Pr2(:,ch) = P(:,ch).*altsq(:);
   
   %% APPLY THE SCALLING

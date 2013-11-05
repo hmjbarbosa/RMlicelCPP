@@ -24,7 +24,7 @@ clear alpha_klett
 clear alpha_aero LR_par j i
 % 
 zet_0 = 1;
-LR_par(1:maxbin,1) = 55;
+LR_par(1:maxbin,1) = 40;
 
 %load('true_LR.mat')
 %LR_par(:,1) = res_lrt(1:maxbin);

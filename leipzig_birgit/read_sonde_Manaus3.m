@@ -50,7 +50,7 @@ disp(['*** read radiosounding data ' radiofile]);
 
 fid=fopen(radiofile,'r'); 
 % read the headers
-for j=1:7
+for j=1:5
   eval(['headerline_sonde' num2str(j) '=fgetl(fid);']);
 end   
 % read sounding data

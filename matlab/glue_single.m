@@ -34,7 +34,7 @@ end
 % Create a mask for the region where analog and PC are thought to be
 % proportional: below 7MHZ and above 5*resolution
 mask=(anSignal>5*resol) & (anSignal>bg_an+3*std_an) & (anSignal~=NaN) & ...
-     (pcSignal<20.)     & (pcSignal>bg_pc+3*std_pc) & (pcSignal~=NaN);
+     (pcSignal<15.)     & (pcSignal>bg_pc+3*std_pc) & (pcSignal~=NaN);
 %mask=(anSignal>5*resol) & (anSignal~=NaN) & ...
 %     (pcSignal<20.)      & (pcSignal~=NaN);
 
