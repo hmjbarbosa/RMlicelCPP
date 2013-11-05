@@ -1,7 +1,7 @@
-function [rsq,tim] = check_delay(sig_an, sig_pc, anhead)
+function [rsq,tim] = check_delay_ascii(sig_an, sig_pc, discr, bits)
 
 % length of data
-n=anhead.ndata;
+n=length(sig_an);
 anbg=nanmean(sig_an(n-500:n));
 pcbg=nanmean(sig_pc(n-500:n));
 anstd=nanstd(sig_an(n-500:n));
@@ -12,13 +12,11 @@ disp(['check_delay:: pc_bg= ' num2str(pcbg) ' +- ' num2str(pcstd)]);
 n=n-50;
 
 % Resolution (mV) of analog channel)
-resol=anhead.discr*1e3/2^anhead.bits;
-
+resol=discr*1e3/2^bits;
 
 figure(1)
 i=1;
-for delay = -49:49
-%  delay
+for delay = -10:30
   an=sig_an(50+delay:n+delay);
   pc=sig_pc(50:n);
 
@@ -30,7 +28,7 @@ for delay = -49:49
   % now correct for the background
   an=an-anbg;
   pc=pc-pcbg;
-  
+
   % Do a linear fit between both channels
   % and stores the value of rsquare
   [cfun, gof, out]=fit(an(maskout),pc(maskout),'poly1');
@@ -50,7 +48,7 @@ for delay = -49:49
 end
 
 figure(2)
-plot(tim,rsq,'o-'); grid on;
+plot(tim,rsq); grid on;
 title('Correlation between analog and PC');
 %xlabel('Delay(bins)+1');
 xlabel('Delay(bins)');
