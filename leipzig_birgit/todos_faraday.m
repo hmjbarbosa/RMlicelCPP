@@ -20,9 +20,9 @@ radio{1}='./Manaus/82332_110901_00.dat'; tag{1}='dry';
 radio{2}='./Manaus/82332_120119_00.dat'; tag{2}='wet';
 
 for z=1:1
-% radiofile=radio{z};
-% read_sonde_Manaus3
-% molecular
+%  radiofile=radio{z};
+%  read_sonde_Manaus3
+%  molecular
 
   if (z==1)
     %% DRY NO CLOUDS
@@ -126,20 +126,22 @@ for z=1:1
     jdi=wjdi(w);
     jdf=wjdf(w);
     disp(['-------------------------------------------------------------------------']);
-    disp(['w= ' num2str(w) ' wjdi= ' datestr(jdi) ' wjdf= ' datestr(jdf)]);
-    
+    disp(['w= ' num2str(w) ' / ' num2str(nw) ' wjdi= ' datestr(jdi) ' wjdf= ' datestr(jdf)])
+
     radiodir=['../../sondagens/dat/'];
     search_sonde_Manaus
 %    radiofile=radio{z};
     read_sonde_Manaus3
     molecular
 
-    read_ascii_Manaus3
+    read_ascii_Manaus3  
     ns1=size(glue355,1);
     ns2=size(overmean,1);
     if (ns1>ns2)
       overmean(ns2:ns1)=1;
     end
+    iq=0;
+%    for q=692:nfile
     for q=1:nfile
       P(:,1)=glue355(:,q)./overmean(1:ns1);
       Pr2(:,1) = P(:,1).*altsq(:);
@@ -148,7 +150,9 @@ for z=1:1
       klett_beta_aero(:,q+totfile)=beta_klett(:,1);
       klett_alpha_aero(:,q+totfile)=alpha_klett(:,1);
       totheads(q+totfile)=heads(q);
-      disp(['======> FINISHED PROFILE #' num2str(q+totfile)])
+      iq=iq+1;
+      disp(['======> FINISHED PROFILE #' num2str(q+totfile) ' =  '...
+            num2str(iq) ' / ' num2str(nfile) '  w= ' num2str(w) ' / ' num2str(nw)])
     end
     
     totfile=totfile+nfile;

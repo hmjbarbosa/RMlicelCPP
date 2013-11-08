@@ -97,7 +97,7 @@ for z=1:1
   end
 
   totfile=0;
-%  for w=5:5
+%  for w=1:1
   for w=1:nw
     jdi=wjdi(w);
     jdf=wjdf(w);

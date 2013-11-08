@@ -8,8 +8,8 @@ jdi=datenum(2011, 8, 30, 0, 0, 0);
 %jdi=datenum(2012,  1, 20, 0, 0, 0);
 jdf=jdi+7;
 
-maxbin=floor(7.1/7.5e-3);
-minbin=floor(0.5/7.5e-3);
+maxbin=floor(5.01/7.5e-3);
+minbin=floor(0.75/7.5e-3);
 nslot=ceil((jdf-jdi)*1440+1);
 P(1:maxbin,1:nslot)=NaN;
 Pr2(1:maxbin,1:nslot)=NaN;
