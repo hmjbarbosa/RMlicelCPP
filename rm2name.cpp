@@ -29,10 +29,10 @@ int main (int argc, char *argv[])
 
   for (int i=1; i<argc; i++) {
 
-    if (access(argv[1], F_OK)) {
-      printf("File does not exist!\n");
-      return 1;
-    }
+    //if (access(argv[1], F_OK)) {
+    //  printf("File does not exist!\n");
+    //  return 1;
+    //}
 
     // Init, Read, Print some data 
     Init_RMDataFile(&XX);

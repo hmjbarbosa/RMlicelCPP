@@ -21,14 +21,18 @@ int main (int argc, char *argv[])
 {
   RMDataFile XX;
   char fnc[256];
-  int err;
+  int err, i0=1, tropt=0;
   
   if (argc<2) {
     printf("Enter a file name!\n");
     return 1;
   }
   
-  for (int i=1; i<argc; i++) {
+  if (~strcmp(argv[1],"-tr")==0) {
+    i0=2; tropt=1;
+  }
+
+  for (int i=i0; i<argc; i++) {
     // Init, Read, Print some data 
     Init_RMDataFile(&XX);
     err=profile_read(argv[i], &XX, false);
@@ -39,7 +43,7 @@ int main (int argc, char *argv[])
       //        XX.end.GetHour(), XX.end.GetMin());
       sprintf(fnc,"%s.nc",argv[i]);
 
-      profile_write_netcdf(fnc, XX);
+      profile_write_netcdf(fnc, XX, tropt);
     }
 
     // destroy RM data file

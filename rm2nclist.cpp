@@ -28,10 +28,10 @@ int main (int argc, char *argv[])
     return 1;
   }
 
-  if (!access(argv[1], F_OK)) {
-    printf("Output file should not exist!\n");
-    return 1;
-  }
+  //  if (!access(argv[1], F_OK)) {
+  //  printf("Output file should not exist!\n");
+  //  return 1;
+  //}
 
   // Files to add
   for (int i=2; i<argc; i++) {
@@ -42,7 +42,7 @@ int main (int argc, char *argv[])
       profile_read(argv[i], &XX1);
       // Init NC file and write first data
       sprintf(fdat,"%s.nc",argv[1]);
-      profile_write_netcdf(fdat, XX1);
+      profile_write_netcdf(fdat, XX1, 0);
 
     } else {
       // Read other files 
