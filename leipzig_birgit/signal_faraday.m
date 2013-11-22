@@ -1,27 +1,25 @@
 clear all
 addpath('../matlab');
 addpath('../sc');
-load signal_dry_overlapfinal_set2011.mat
 
 jdi=datenum(2011, 8, 30, 0, 0, 0);
-%load beta_klett_wet.mat
-%jdi=datenum(2012,  1, 20, 0, 0, 0);
 jdf=jdi+7;
 
 maxbin=floor(5.01/7.5e-3);
-minbin=floor(0.75/7.5e-3);
+minbin=floor(0.01/7.5e-3);
 nslot=ceil((jdf-jdi)*1440+1);
-P(1:maxbin,1:nslot)=NaN;
-Pr2(1:maxbin,1:nslot)=NaN;
 tt=((1:nslot)-1)/1440+jdi; % horizontal in minutes
 zz(1:maxbin)=(1:maxbin)'*7.5/1e3; % vertical in km
 zz2=(zz.*zz)';
 
+%% lidar data
+load signal_dry_overlapfinal_set2011.mat
 [nz, nfile]=size(signal_aero);
-
 Sigmean=mean(signal_aero(nz-500:nz,:));
 Sigstd=std(signal_aero(nz-500:nz,:));
 
+P(1:maxbin,1:nslot)=NaN;
+Pr2(1:maxbin,1:nslot)=NaN;
 for i=1:nfile
   j=floor((totheads(i).jdi-jdi)*1440+0.5)+2;
   if (j<=nslot && j>=1)
