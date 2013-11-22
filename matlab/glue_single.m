@@ -30,13 +30,15 @@ std_pc=std(pcSignal(n-500:n));
 if (isnan(bg_pc)||isnan(std_pc))
   bg_pc=0; std_pc=0;
 end
+if exist('toplot','var')
+  disp(['bg_an=' num2str(bg_an) '  bg_pc=' num2str(bg_pc)]);
+  disp(['std_an=' num2str(std_an) '  std_pc=' num2str(std_pc)]);
+end
 
 % Create a mask for the region where analog and PC are thought to be
 % proportional: below 7MHZ and above 5*resolution
 mask=(anSignal>5*resol) & (anSignal>bg_an+3*std_an) & (anSignal~=NaN) & ...
      (pcSignal<15.)     & (pcSignal>bg_pc+3*std_pc) & (pcSignal~=NaN);
-%mask=(anSignal>5*resol) & (anSignal~=NaN) & ...
-%     (pcSignal<20.)      & (pcSignal~=NaN);
 
 % limits of fit region. result of min() or max() is an array with the
 % corresponding values for each column
