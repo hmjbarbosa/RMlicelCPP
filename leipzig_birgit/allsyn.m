@@ -20,7 +20,7 @@ molecular;
 % figure 1 2 3
 read_ascii_synthetic
 % figure 6 7
-rayleigh_fit_Manaus3
+rayleigh_fit_synth
 % figure 8
 Klett_Manaus
 % figure 9

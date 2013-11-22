@@ -25,6 +25,7 @@ hold on
 plot(res_beta*1e3, res_alti*1e-3,'k','LineWidth',2);
 hold off
 
+return
 figure(11)
 hold on
 plot(res_lrt, res_alti*1e-3,'k','LineWidth',2);
