@@ -1,3 +1,5 @@
+%% this routine makes the plots of the signal for the week of the
+% lidar paper #1.
 clear all
 addpath('../matlab');
 addpath('../sc');
@@ -48,7 +50,7 @@ for i=1:nslot
 end
 
 %----------------------
-figure(2); clf
+figure(1); clf
 set(gcf,'position',[0,400,900,300]); % units in pixels!
 set(gcf,'PaperUnits','inches','PaperSize',[12,4],'PaperPosition',[0 0 12 4])
 

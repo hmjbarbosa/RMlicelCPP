@@ -1,3 +1,6 @@
+%% This routine prepares 4 plots for the lidar paper #1 % All
+% comparing lidar and aeronet AOD. First need to run faraday_aeronet.m
+
 %----------------------------------------------------------------
 figure(1); clf;
 x1=min(min(rmsaod));

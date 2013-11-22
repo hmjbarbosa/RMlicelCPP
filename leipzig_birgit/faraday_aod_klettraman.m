@@ -1,3 +1,7 @@
+%% This routine opens the klett and raman output and compare the
+% AOD from both. this is to prove that the LR used for the lidar
+% paper #1 is ok and makes sense.
+
 clear all
 addpath('../matlab');
 addpath('../sc');

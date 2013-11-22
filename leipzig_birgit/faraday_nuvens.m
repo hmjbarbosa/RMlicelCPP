@@ -1,8 +1,14 @@
+%% this routine opens the cirrus data file from Boris and the
+% signal file from my routines and prepare those to be plotted by a
+% second routine. For the paper, I have to run this twice, shifting
+% by 3.5 days in between to make two plots. Otherwise it is too
+% much in the same plot and we cannot see what is going on.
 clear all
 addpath('../matlab');
 addpath('../sc');
 
 jdi=datenum(2011, 8, 30, 0, 0, 0);
+% shift initial date
 %jdi=jdi+3.5;
 jdf=jdi+3.5;
 
@@ -14,7 +20,7 @@ zz(1:maxbin)=(1:maxbin)'*7.5/1e3; % vertical in km
 zz2=(zz.*zz)';
 
 %% cloud data
-load datos_henrique_week.mat
+load faraday_cirrus.mat 
 cloudsjd=datenum(double(Dc(:,1:6)));
 ntimes=size(Dc,1);
 nlayers=Dc(:,7);

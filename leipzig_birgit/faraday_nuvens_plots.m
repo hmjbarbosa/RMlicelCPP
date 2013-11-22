@@ -1,3 +1,6 @@
+%% This routine takes the matrix prepared by faraday_nuvens.m and
+% make the plots for the paper. It read the sonde data as well so
+% that we can have the tropopause line and the line for -25degC.
 figure(1); clf
 set(gcf,'position',[0,300,900,300]); % units in pixels!
 set(gcf,'PaperUnits','inches','PaperSize',[12,4],'PaperPosition',[0 0 12 4])
@@ -22,7 +25,7 @@ hold on;
 plot(time,base*1e-3,'+k');
 plot(time,topo*1e-3,'.m');
 
-load sonde;
+load faraday_sonde.mat
 plot(jdsonde,temp25_alt*1e-3,'-g','linewidth',2);
 plot(jdsonde,tropo_alt*1e-3,'--g','linewidth',2);
 

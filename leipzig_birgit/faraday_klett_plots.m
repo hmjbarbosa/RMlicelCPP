@@ -1,3 +1,5 @@
+%% This routine opens the results from klett analysis for the week
+% of the paper and make the plots for alfa and beta.
 clear all
 
 addpath('../matlab');
@@ -5,8 +7,6 @@ addpath('../sc');
 
 load beta_klett_dry_overlapfinal_set2011.mat
 jdi=datenum(2011, 8, 30, 0, 0, 0);
-%load beta_klett_wet.mat
-%jdi=datenum(2012,  1, 20, 0, 0, 0);
 jdf=jdi+7;
 
 maxbin=floor(5.01/7.5e-3);

@@ -1,3 +1,7 @@
+%% This routines opens the aeronet data sent by Glauber and our
+% klett results and calculate the AOD from both for
+% intercomparison. The plots are now made by another routine.
+
 %clear all
 addpath('../matlab');
 addpath('../sc');
