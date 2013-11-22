@@ -11,7 +11,7 @@ else
 end
 
 % initialize out for faster processing
-%out(1:nx,1:ny)=NaN;
+out(1:nx,1:ny)=NaN;
 
 for i=1:nx
   c=floor((i-1)*(span2-span)/(nx-1)+span+0.5);
