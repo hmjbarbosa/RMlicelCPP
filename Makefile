@@ -3,7 +3,7 @@ CHECK=-fbounds-check -fcheck-new -Wextra -ftrapv -fstack-check
 CFLAGS=-c -Wall -O0  -g $(CHECK) 
 LFLAGS=-Wall -O0  -g $(CHECK) 
 
-NETCDF=-L/usr/lib -lnetcdf 
+NETCDF=-L/usr/local/lib -lnetcdf -I/usr/local/include
 # -pthread -static testing.cpp -lnetcdf -lhdf5_hl -lhdf5 -lz  -lm -lcurl -lidn -llber -lldap -lrt -lgssapi_krb5 -lssl -lcrypto -lz -static-libstdc++ -static-libgcc
 
 PROGS=\

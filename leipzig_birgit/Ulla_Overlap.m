@@ -68,4 +68,10 @@ Pr2(1:n,2) = P(1:n,2).*altsq(1:n);
 %figure(91); grid; 
 %hold on; ylim([0 10e3]);
 %plot(smooth_region(PS(:,1)./PS(:,end),3,500,9,1000,27),alt,'r')
-
+figure(10)
+hold on;
+plot(beta_klett(bin1st:maxbin,1)*1e3, alt(bin1st:maxbin).*1e-3,'b--');
+%Raman_Manaus
+%Raman_beta_Manaus
+addresult
+%

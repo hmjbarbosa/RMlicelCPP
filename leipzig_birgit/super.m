@@ -1,4 +1,5 @@
-todos
+allsyn
+%todos
 n=RefBin(1);
 
 figure(8); set(gcf,'PaperUnits','inches','PaperSize',[3,9],'PaperPosition',[0 0 3 7.8])
