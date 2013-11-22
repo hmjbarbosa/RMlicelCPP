@@ -3,7 +3,7 @@
 % levels. Because built-in contourf() function is VERY slow with
 % large matrices, now we use imsc:
 % http://www.mathworks.com/matlabcentral/fileexchange/16233-sc-powerful-image-rendering
-function [C, h, bar] = gplot2(mat2d, clev, X, Y)
+function [h, bar] = gplot2(mat2d, clev, X, Y)
 
 [nz nt] = size(mat2d);
 
@@ -31,7 +31,7 @@ if ~exist('clev','var') || numel(clev)==0
 end
 [cmap, clim]=cmapclim(clev);
 
-imsc(X, Y, mat2d,clim,cmap,[1 1 1]);
+h=imsc(X, Y, mat2d,clim,cmap,[1 1 1]);
 set(gca,'YDir','normal');
 
 colormap(min(max(cmap,0),1));
