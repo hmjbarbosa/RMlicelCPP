@@ -112,9 +112,9 @@ beta_raman(beta_raman==Inf)=NaN;
 % -------------
 %  Lidar Ratio 
 % -------------
-Lidar_Ratio(bin1st:maxbin) = alpha_raman(bin1st:maxbin)./...
-    nanmysmooth(beta_raman,0,5);
-Lidar_Ratio=nanmysmooth(Lidar_Ratio,0,5);
+Lidar_Ratio(bin1st:maxbin) = nanmysmooth(alpha_raman(bin1st:maxbin),10,100)./...
+    nanmysmooth(beta_raman,30,300);
+%Lidar_Ratio=nanmysmooth(Lidar_Ratio,10,100);
 %Lidar_Ratio(bin1st:up) = alpha_raman(bin1st:up)./beta_raman(bin1st:up)';  
 %Lidar_Ratio_sm(bin1st:up) = alpha_raman_sm(bin1st:up)./beta_raman_sm(bin1st:up);  
 %    

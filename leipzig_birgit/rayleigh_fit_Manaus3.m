@@ -297,14 +297,14 @@ figure(5)
 xx=xx0+4*wdx; yy=yy0+4*wdy;
 set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
 % at lidar levels
-plot(beta_mol(:,1),alt(1:maxbin)*1e-3,'b'); 
+plot(beta_mol(:,1),(alt(1:maxbin)+lidar_altitude)*1e-3,'b'); 
 hold on
-plot(beta_mol(:,2),alt(1:maxbin)*1e-3,'c');
+plot(beta_mol(:,2),(alt(1:maxbin)+lidar_altitude)*1e-3,'c');
 % at sounding levels
 plot(beta_mol_snd(:,1),alt_snd(:)*1e-3,'bo'); 
 plot(beta_mol_snd(:,2),alt_snd(:)*1e-3,'co');
 xlabel('Lidar Beta / m-1')
-ylabel('Height / km')
+ylabel('Altitude a.s.l. / km')
 title('beta scatter for sounding','fontsize',[14]) 
 legend('355', '387', '355 sonde', '387 sonde');
 grid on
@@ -318,7 +318,7 @@ set(gcf,'position',[xx,yy,2*wsx,wsy]); % units in pixels!
 subplot(1,2,1)
 plot(Pr2(1:maxbin,1), alt(1:maxbin)*1e-3); 
 xlabel('range smooth bg-corr signal','fontsize',[10])  
-ylabel('height / km','fontsize',12)
+ylabel('Height a.g.l / km','fontsize',12)
 title('Rayleigh Fit 355','fontsize',14)
 grid on
 hold on
@@ -346,7 +346,7 @@ set(gcf,'position',[xx,yy,2*wsx,wsy]); % units in pixels!
 subplot(1,2,1)
 plot(log(Pr2(1:maxbin,1)),alt(1:maxbin)*1e-3,'b');    
 xlabel('ln range smooth bg-corr signal','fontsize',[10])  
-ylabel('height / km','fontsize',12)
+ylabel('Height a.g.l. / km','fontsize',12)
 title('Rayleigh fit Ln 355' ,'fontsize',14) 
 grid on 
 hold on
