@@ -37,7 +37,7 @@ clear newP newalt
 %%  READ DATA
 %%------------------------------------------------------------------------
 
-filepath = '/home/hbarbosa/Programs/RMlicelUSP/synthetic_signals/';
+filepath = '/Users/hbarbosa/Programs/RMlicelUSP/synthetic_signals/';
 filelist{1}='Elastic_wv1';
 filelist{2}='Raman_wv1';
 
@@ -111,7 +111,9 @@ end
 %------------------------------------------------------------------------
 %  Plots
 %------------------------------------------------------------------------
-return
+if (debug<1)
+  return
+end
 %
 %
 figure(1)
