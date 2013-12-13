@@ -105,7 +105,7 @@ for ch=1:1
   tmpZ=alt (1:maxbin)*1e-3;
   
   % plot to know what is going on
-  if (debug>0)
+  if (debug>1)
     figure(23); clf; hold on;
     scatter(tmpZ,(tmpY),'.');
     hold on; grid on; colorbar;
@@ -223,7 +223,7 @@ toerase=distance>1e12;
     iter=iter+1; 
   end
 
-  if (debug>0)
+  if (debug>1)
     figure(23); 
     plot(tmpZ(200:maxbin), (P_mol(200:maxbin,ch)*a+b), 'r');
   end
