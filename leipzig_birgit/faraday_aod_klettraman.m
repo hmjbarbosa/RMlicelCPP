@@ -34,7 +34,7 @@ figure(1); clf
 hold on; grid on;
 scatter(aodklett2,aodraman2,[],time,'.');
 set(gca,'fontsize',12)
-X=(-0.1:0.05:0.6);
+X=(-0.1:0.05:0.7);
 xlim([min(X) max(X)]);
 ylim([min(X) max(X)]);
 

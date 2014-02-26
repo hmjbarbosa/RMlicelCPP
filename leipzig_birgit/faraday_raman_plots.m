@@ -26,12 +26,14 @@ for i=1:nfile
     alfa(1:maxbin,j)=raman_alpha_aero(1:maxbin,i)*1e3; % Mm-1
   end
 end
-alfa=nanmysmooth(alfa,0,40); % suavizando a curva
-alfa=nanmysmooth(alfa',2, 2)'; % suavizando a curva
+alfa=nanmysmooth(alfa,4,40); % vertical
+alfa=nanmysmooth(alfa',4, 4)'; % tempo
 ldr=alfa./beta;
+ldr=nanmysmooth(ldr,4,40);
+ldr=nanmysmooth(ldr',4,4)';
 
-ldr(alfa<20)=NaN;
-ldr(beta<1)=NaN;
+ldr(alfa<5)=NaN;
+ldr(beta<0.05)=NaN;
 
 % mask shutter closed
 for i=1:nslot
