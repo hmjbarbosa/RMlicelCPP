@@ -42,8 +42,8 @@ for delay = -49:49
     plot(cfun,'m',an(maskout), pc(maskout),'o');
     s=['Delay(bins)=' int2str(delay) '  R^2=' num2str(gof.rsquare)]; 
     title(s);
-    xlabel('Analog [mV]');
-    ylabel('PC [Mhz]');
+    xlabel('BG corrected AN [mV]');
+    ylabel('BG corrected PC [Mhz]');
     pause(0.2);
   end
   i=i+1;
