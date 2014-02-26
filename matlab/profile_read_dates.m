@@ -30,7 +30,7 @@ end
 % Check if any files were found
 nfile=numel(ff);
 if (nfile < 1)
-  disp(['profile_read_dates::EMPTY_DAY!']);
+  disp(['profile_read_dates::NO_FILE_FOUND in directories!']);
   head=[]; chphy=[]; chraw=[];
   return
 end
@@ -55,7 +55,6 @@ if (nfile < 1)
   disp(['profile_read_dates:: jdf= ' datestr(jdf)])
   disp(['profile_read_dates:: oldnfile= ' num2str(oldnfile)]);
   disp(['profile_read_dates:: nfile= ' num2str(nfile)]);
-%  disp(['profile_read_dates:: ']);
   head=[]; chphy=[]; chraw=[];
   return
 end
