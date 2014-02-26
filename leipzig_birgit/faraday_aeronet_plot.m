@@ -7,7 +7,7 @@ x1=min(min(rmsaod));
 x2=max(max(rmsaod));
 [h, bar]=gplot2(rmsaod,(x1:(x2-x1)/100:x2),twid,minbin*7.5e-3);
 hxl=xlabel('Averaging time window [min]');
-hyl=ylabel('Mininum altitude of integration [km]');
+hyl=ylabel('Height of constant extinction layer [km]');
 hzl=ylabel(bar,'AOD RMSE Lidar - Aeronet ');
 grid on;
 
@@ -33,7 +33,7 @@ x1=min(min(corraod));
 x2=max(max(corraod));
 [h, bar]=gplot2(corraod,(x1:(x2-x1)/100:x2),twid,minbin*7.5e-3);
 hxl=xlabel('Averaging time window [min]');
-hyl=ylabel('Mininum altitude of integration [km]');
+hyl=ylabel('Height of constant extinction layer [km]');
 hzl=ylabel(bar,'Correlation AOD Lidar x Aeronet ');
 grid on;
 

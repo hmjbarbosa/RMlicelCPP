@@ -24,8 +24,13 @@ clear alpha_klett
 clear alpha_aero LR_par j i
 % 
 zet_0 = 1;
-LR_par(1:maxbin,1) = 55;
-
+if ~exist('fix_lr_aer','var')
+  disp(['WARNING:: lidar ratio not set! assuming 55 sr^-1...']);
+  LR_par(1:maxbin,1) = 55;
+else
+  disp(['Lidar ratio set to ' num2str(fix_lr_aer) ' sr^-1...']);
+  LR_par(1:maxbin,1) = fix_lr_aer;
+end
 %load('true_LR.mat')
 %LR_par(:,1) = res_lrt(1:maxbin);
 
@@ -124,7 +129,7 @@ figure(8); hold off
 xx=xx0+5*wdx; yy=yy0+5*wdy;
 set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
 plot(beta_klett_total(1:maxbin,1)*1e3, alt(1:maxbin).*1e-3,'r','Linewidth',1); 
-axis([-2 9 0 alt(tope)*1e-3*1.1]); 
+axis([-0.5 5.0 0 alt(tope)*1e-3*1.1]); 
 %axis([-1e-3 0.06 0 alt(tope)*1e-3]); 
 xlabel('BSC / Mm-1 sr-1','fontsize',[14])  
 ylabel('Height / km','fontsize',[14])

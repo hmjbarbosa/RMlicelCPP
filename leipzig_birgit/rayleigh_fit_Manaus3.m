@@ -24,7 +24,12 @@ clear RefBinTop mask_mol
 toextrapolate=1;
 
 %lidar_altitude=100;
-%lidar_altitude=0;
+%
+
+if ~exist('lidar_altitude','var')
+  disp(['WARNING:: lidar altitude not set!!! assuming ZERO-meters...']);
+  lidar_altitude=0;
+end
 
 if toextrapolate==0
   % Set maximum lidar bin to highest altitude of sounding 
