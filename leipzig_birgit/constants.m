@@ -18,12 +18,12 @@
 %
 %    k - Boltzmann constant [m2 kg / s2 K]
 %    Na - Avogadro's number [#]
-%    Mvol - Molar volume [L/mol] at 1013.25hPa and 273.15K
+%    Mvol - Molar volume [m3/mol] at 1013.25hPa and 273.15K
 %    Rgas - Universal gas constant [J/K/mol]
 %    Rair - Dry air gas constant [J/K/kg]
 %    Tstd - Temperature of standard atmosphere [K]
-%    Pstd - Pressure of standard atmosphere [hPa]
-%    Nstd - Molecular density [#/cm3] at Tstd and Pstd
+%    Pstd - Pressure of standard atmosphere [Pa]
+%    Nstd - Molecular density [#/m3] at Tstd and Pstd
 %
 %    Atmospheric Constituents Concentration [ppv] and Molecular weight
 %    [grams per mol] for: N2, O2, Ar, Ne, He, Kr, H2 Xe
@@ -44,7 +44,7 @@
 %------------------------------------------------------------------------
 % User definitions
 %------------------------------------------------------------------------
-co2ppmv = 375; % CO2 concentration [ppmv]
+co2ppmv = 392; % CO2 concentration [ppmv]
 
 %------------------------------------------------------------------------
 % Fixed definitions
@@ -93,14 +93,13 @@ Rair=Rgas/Airmwt*1e3; % Dry air gas constant [J / K / kg]
 % Standard Atmosphere Reference values
 T0=273.15; % zero deg celcius [K]
 Tstd=288.15;  % Temperature [K]
-Pstd=1013.25; % Pressure [hPa]
+Pstd=101325.; % Pressure [Pa]
 
-% Molar volume [L/mol] at Pstd and T0
+% Molar volume [m3/mol] at Pstd and T0
 % Bodhaine et al, 1999
-Mvol=22.4141;    
+Mvol=22.4141e-3;
 
-% Molecular density [#/cm3] at Tstd and Pstd
-% 1000 to convert liter to cm^3
-Nstd=(Na/Mvol/1000)*(T0/Tstd); 
+% Molecular density [#/m3] at Tstd and Pstd
+Nstd=(Na/Mvol)*(T0/Tstd); 
 
 %
