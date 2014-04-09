@@ -1,4 +1,5 @@
-function [rsq,tim] = check_delay_ascii(sig_an, sig_pc, discr, bits)
+function [rsq,tim] = check_delay_ascii(sig_an, sig_pc, discr, bits, ...
+                                       toplot)
 
 % length of data
 n=length(sig_an);
@@ -14,9 +15,12 @@ n=n-50;
 % Resolution (mV) of analog channel)
 resol=discr*1e3/2^bits;
 
-figure(1)
+if (toplot)
+  figure(3); clf;
+end
 i=1;
 for delay = -10:30
+%  delay
   an=sig_an(50+delay:n+delay);
   pc=sig_pc(50:n);
 
@@ -28,7 +32,7 @@ for delay = -10:30
   % now correct for the background
   an=an-anbg;
   pc=pc-pcbg;
-
+  
   % Do a linear fit between both channels
   % and stores the value of rsquare
   [cfun, gof, out]=fit(an(maskout),pc(maskout),'poly1');
@@ -36,22 +40,23 @@ for delay = -10:30
   rsq(i) = gof.rsquare;
 
   % Plot each step to the user
-  if (delay==0)
+  if (toplot && delay==0)
     plot(cfun,'m',an(maskout), pc(maskout),'o');
     s=['Delay(bins)=' int2str(delay) '  R^2=' num2str(gof.rsquare)]; 
     title(s);
-    xlabel('Analog [mV]');
-    ylabel('PC [Mhz]');
+    xlabel('BG Corrected AN [mV]');
+    ylabel('BG Corrected PC [Mhz]');
     pause(0.2);
   end
   i=i+1;
 end
 
-figure(2)
-plot(tim,rsq); grid on;
-title('Correlation between analog and PC');
-%xlabel('Delay(bins)+1');
-xlabel('Delay(bins)');
-ylabel('R^2 from linear fit of PC x AN');
-
+if (toplot)
+  figure(4); clf;
+  plot(tim,rsq,'o-'); grid on;
+  title('Correlation between analog and PC');
+  %xlabel('Delay(bins)+1');
+  xlabel('Delay(bins)');
+  ylabel('R^2 from linear fit of PC x AN');
+end
 %
