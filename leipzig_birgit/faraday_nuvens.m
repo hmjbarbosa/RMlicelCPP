@@ -9,7 +9,7 @@ addpath('../sc');
 
 jdi=datenum(2011, 8, 30, 0, 0, 0);
 % shift initial date
-%jdi=jdi+3.5;
+jdi=jdi+3.5;
 jdf=jdi+3.5;
 
 maxbin=floor(18.01/7.5e-3);

@@ -28,10 +28,10 @@ plot(time,topo*1e-3,'.m');
 load faraday_sonde.mat
 plot(jdsonde,temp25_alt*1e-3,'-g','linewidth',2);
 plot(jdsonde,tropo_alt*1e-3,'--g','linewidth',2);
-
+prettify(gca,bar);
 tmp=datevec(jdi);
 out=sprintf('faraday_cirrus_%4d_%02d_%02d_overlap.png', tmp(1),tmp(2),tmp(3));
 print(out,'-dpng')
-eval(['!mogrify -trim ' out])
+%eval(['!mogrify -trim ' out])
 
 %

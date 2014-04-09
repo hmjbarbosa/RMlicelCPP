@@ -8,7 +8,7 @@ jdi=datenum(2011, 8, 30, 0, 0, 0);
 jdf=jdi+7;
 
 maxbin=floor(5.01/7.5e-3);
-minbin=floor(0.01/7.5e-3);
+minbin=floor(0.75/7.5e-3);
 nslot=ceil((jdf-jdi)*1440+1);
 tt=((1:nslot)-1)/1440+jdi; % horizontal in minutes
 zz(1:maxbin)=(1:maxbin)'*7.5/1e3; % vertical in km
@@ -29,13 +29,15 @@ for i=1:nfile
 %    Pr2(1:maxbin,j)=signal_aero(1:maxbin,i)-3*Sigmean(i);
   end
 end
+for j=2:nslot-1
+  if isnan(P(1,j)) && ~isnan(P(1,j-1)) && ~isnan(P(1,j+1))
+    P(:,j)=(P(:,j-1)+P(:,j+1))*0.5;
+  end
+end
 P(P<=0)=NaN;
 
-for i=1:nfile
-  j=floor((totheads(i).jdi-jdi)*1440+0.5)+2;
-  if (j<=nslot && j>=1)
-    Pr2(1:maxbin,j)=(P(1:maxbin,j).*zz2);
-  end
+for j=1:nslot
+  Pr2(1:maxbin,j)=(P(1:maxbin,j).*zz2);
 end
 Pr2=Pr2/2e3;
 
@@ -60,18 +62,19 @@ imsc(tt,zz(minbin:maxbin),Pr2(minbin:maxbin,:),clim,cmap,...
      [1. 1. 1.],isnan(Pr2(minbin:maxbin,:)),...
      [.7 .7 .7],Pr2(minbin:maxbin,:)==-100)
 set(gca,'YDir','normal');
+set(gca,'yticklabel',sprintf('%.1f|',get(gca,'ytick')));
 colormap(min(max(cmap,0),1));
 caxis(clim);
 bar = colorbar;
-set(get(bar,'ylabel'),'String','Range Corrected Signal (a.u.)','fontsize',14);
+set(get(bar,'ylabel'),'String','Range Corrected Signal (a.u.)');
 
-set(gca,'fontsize',12)
 datetick('x','mm/dd')
-ylabel('Altitude agl (km)','fontsize',14)
+ylabel('Altitude agl (km)')
+prettify(gca,bar);
 tmp=datevec(jdi);
 out=sprintf('faraday_signalr2_%4d_%02d_%02d_overlap.png', tmp(1),tmp(2),tmp(3));
 print(out,'-dpng')
-eval(['!mogrify -trim ' out])
+%eval(['!mogrify -trim ' out])
 
 %----------------------
 %disp(['total count=' num2str(size(P,2))]);

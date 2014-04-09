@@ -8,32 +8,51 @@ addpath('../sc');
 load beta_klett_dry_overlapfinal_set2011_night.mat
 jdi=datenum(2011, 8, 30, 0, 0, 0);
 jdf=jdi+7;
+%jdi=datenum(2011, 9, 1, 0, 0, 0);
+%jdf=jdi+1;
 
-maxbin=floor(5.01/7.5e-3);
-minbin=floor(0.75/7.5e-3);
+nfile=size(raman_beta_aero,2);
 nslot=ceil((jdf-jdi)*1440+1);
-beta(1:maxbin,1:nslot)=NaN;
-alfa(1:maxbin,1:nslot)=NaN;
 tt=((1:nslot)-1)/1440+jdi; % horizontal in minutes
-zz(1:maxbin)=(1:maxbin)'*7.5/1e3; % vertical in km
 
-[nz, nfile]=size(klett_beta_aero);
+ndata=totheads(1).ch(1).ndata;
+dz=totheads(1).ch(1).binw/1e3; % km
+zz=(1:ndata)'*dz; % km
+
+%bin_zz=binning(zz,1,1);
+%bin_beta=binning(raman_beta_aero,5,1)*1e3; % Mm-1
+%bin_alfa=binning(raman_alpha_aero,5,1)*1e3; % Mm-1
+%bin_dz=bin_zz(2)-bin_zz(1);
+%bin_ndata=length(bin_zz);
+bin_zz=zz;
+bin_beta=raman_beta_aero*1e3; % Mm-1
+bin_alfa=raman_alpha_aero*1e3; % Mm-1
+bin_dz=dz;
+bin_ndata=ndata;
+
+maxbin=floor(5.01/bin_dz);
+minbin=floor(1.00/bin_dz);
+
+beta(1:maxbin+100,1:nslot)=NaN;
+alfa(1:maxbin+100,1:nslot)=NaN;
 
 for i=1:nfile
-  j=floor((totheads(i).jdi-jdi)*1440+0.5)+2;
+  j=floor((totheads(i).jdi-jdi)*1440+0.5)+1;
   if (j<=nslot && j>=1)
-    beta(1:maxbin,j)=raman_beta_aero(1:maxbin,i)*1e3; % Mm-1
-    alfa(1:maxbin,j)=raman_alpha_aero(1:maxbin,i)*1e3; % Mm-1
+    beta(1:maxbin+100,j)=bin_beta(1:maxbin+100,i); 
+    alfa(1:maxbin+100,j)=bin_alfa(1:maxbin+100,i); 
   end
 end
-alfa=nanmysmooth(alfa,4,40); % vertical
-alfa=nanmysmooth(alfa',4, 4)'; % tempo
+alfa=nanmysmooth(alfa ,8,80); % vertical
+alfa=nanmysmooth(alfa',6, 6)'; % tempo
 ldr=alfa./beta;
-ldr=nanmysmooth(ldr,4,40);
-ldr=nanmysmooth(ldr',4,4)';
+ldr(alfa<30)=NaN;
+ldr(beta<0.5)=NaN;
+ldr=nanmysmooth(ldr ,4,40);
+ldr=nanmysmooth(ldr',7,7)';
+ldr(alfa<30)=NaN;
+ldr(beta<0.5)=NaN;
 
-ldr(alfa<5)=NaN;
-ldr(beta<0.05)=NaN;
 
 % mask shutter closed
 for i=1:nslot
@@ -46,76 +65,76 @@ for i=1:nslot
   end
 end
 
-figure(1); clf
+f1=figure(1); clf
 set(gcf,'position',[0,50,900,300]); % units in pixels!
 set(gcf,'PaperUnits','inches','PaperSize',[12,4],'PaperPosition',[0 0 12 4])
 
-clev=[0:0.05:5];
+clev=[0.5:0.05:4.5];
 [cmap, clim]=cmapclim(clev);
 imsc(tt,zz(minbin:maxbin),beta(minbin:maxbin,:),clim,cmap,...
      [1. 1. 1.],isnan(beta(minbin:maxbin,:)),...
      [.7 .7 .7],beta(minbin:maxbin,:)==-100)
 set(gca,'YDir','normal');
-colormap(min(max(cmap,0),1));
-caxis(clim);
+set(gca,'yticklabel',sprintf('%.1f|',get(gca,'ytick')));
 bar = colorbar;
-set(get(bar,'ylabel'),'String','Backscatter (Mm^{-1} sr^{-1})','fontsize',14);
-
-set(gca,'fontsize',12)
+set(bar,'ytick',[0.5:1:4.5])
+set(bar,'ylim',clim)
+set(get(bar,'ylabel'),'String','Backscatter (Mm^{-1} sr^{-1})');
 datetick('x','mm/dd')
-ylabel('Altitude agl (km)','fontsize',14)
+ylabel('Altitude agl (km)')
+prettify(gca,bar);
 tmp=datevec(jdi);
 out=sprintf('faraday_betaraman_%4d_%02d_%02d_overlap.png', tmp(1),tmp(2),tmp(3));
 print(out,'-dpng')
-eval(['!mogrify -trim ' out])
+%eval(['!mogrify -trim ' out])
 
 %----------------------
-figure(2); clf
-set(gcf,'position',[0,400,900,300]); % units in pixels!
+f2=figure(2); clf
+set(gcf,'position',[0,200,900,300]); % units in pixels!
 set(gcf,'PaperUnits','inches','PaperSize',[12,4],'PaperPosition',[0 0 12 4])
 
-clev=[0:2:200];
+clev=[40:1:200];
 [cmap, clim]=cmapclim(clev);
-imsc(tt,zz(minbin:maxbin),alfa(minbin:maxbin,:),clim,cmap,...
+h=imsc(tt,bin_zz(minbin:maxbin),alfa(minbin:maxbin,:),clim,cmap,...
      [1. 1. 1.],isnan(alfa(minbin:maxbin,:)),...
-     [.7 .7 .7],alfa(minbin:maxbin,:)==-100)
+     [.7 .7 .7],alfa(minbin:maxbin,:)==-100);
 set(gca,'YDir','normal');
-colormap(min(max(cmap,0),1));
-caxis(clim);
+set(gca,'yticklabel',sprintf('%.1f|',get(gca,'ytick')));
 bar = colorbar;
-set(get(bar,'ylabel'),'String','Extinction (Mm^{-1})','fontsize',14);
-
-set(gca,'fontsize',12)
+set(bar,'ytick',[40:40:200])
+set(bar,'ylim',clim)
+set(get(bar,'ylabel'),'String','Extinction (Mm ^{-1})');
 datetick('x','mm/dd')
-ylabel('Altitude agl (km)','fontsize',14)
+ylabel('Altitude agl (km)')
+prettify(gca,bar);
 tmp=datevec(jdi);
 out=sprintf('faraday_alfaraman_%4d_%02d_%02d_overlap.png', tmp(1),tmp(2),tmp(3));
 print(out,'-dpng')
-eval(['!mogrify -trim ' out])
+%eval(['!mogrify -trim ' out])
 
 %----------------------
-figure(3); clf
-set(gcf,'position',[0,700,900,300]); % units in pixels!
+f3=figure(3); clf
+set(gcf,'position',[0,400,900,300]); % units in pixels!
 set(gcf,'PaperUnits','inches','PaperSize',[12,4],'PaperPosition',[0 0 12 4])
 
-clev=[20:0.8:100];
+clev=[30:0.6:90];
 [cmap, clim]=cmapclim(clev);
 imsc(tt,zz(minbin:maxbin),ldr(minbin:maxbin,:),clim,cmap,...
      [1. 1. 1.],isnan(ldr(minbin:maxbin,:)),...
      [.7 .7 .7],ldr(minbin:maxbin,:)==-100)
 set(gca,'YDir','normal');
-colormap(min(max(cmap,0),1));
-caxis(clim);
+set(gca,'yticklabel',sprintf('%.1f|',get(gca,'ytick')));
 bar = colorbar;
-set(get(bar,'ylabel'),'String','Lidar Ratio (sr)','fontsize',14);
-
-set(gca,'fontsize',12)
+set(bar,'ytick',[30:10:90])
+set(bar,'ylim',clim)
+set(get(bar,'ylabel'),'String','Lidar Ratio (sr)');
 datetick('x','mm/dd')
-ylabel('Altitude agl (km)','fontsize',14)
+ylabel('Altitude agl (km)')
+prettify(gca,bar);
 tmp=datevec(jdi);
 out=sprintf('faraday_LRraman_%4d_%02d_%02d_overlap.png', tmp(1),tmp(2),tmp(3));
 print(out,'-dpng')
-eval(['!mogrify -trim ' out])
+%eval(['!mogrify -trim ' out])
 
 %----------------------
 disp(['total count=' num2str(size(beta,2))]);

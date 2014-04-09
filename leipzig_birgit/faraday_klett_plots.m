@@ -26,6 +26,12 @@ for i=1:nfile
     alfa(1:maxbin,j)=klett_alpha_aero(1:maxbin,i)*1e3; % Mm-1
   end
 end
+for j=2:nslot-1
+  if isnan(data(1,j)) && ~isnan(data(1,j-1)) && ~isnan(data(1,j+1))
+    data(:,j)=(data(:,j-1)+data(:,j+1))*0.5;
+    alfa(:,j)=(alfa(:,j-1)+alfa(:,j+1))*0.5;
+  end
+end
 
 % mask shutter closed
 for i=1:nslot
@@ -37,6 +43,7 @@ for i=1:nslot
   end
 end
 
+%----------------------
 figure(1); clf
 set(gcf,'position',[0,300,900,300]); % units in pixels!
 set(gcf,'PaperUnits','inches','PaperSize',[12,4],'PaperPosition',[0 0 12 4])
@@ -47,14 +54,16 @@ imsc(tt,zz(minbin:maxbin),data(minbin:maxbin,:),clim,cmap,...
      [1. 1. 1.],isnan(data(minbin:maxbin,:)),...
      [.7 .7 .7],data(minbin:maxbin,:)==-100)
 set(gca,'YDir','normal');
+set(gca,'YDir','normal');
+set(gca,'yticklabel',sprintf('%.1f|',get(gca,'ytick')));
 colormap(min(max(cmap,0),1));
 caxis(clim);
 bar = colorbar;
-set(get(bar,'ylabel'),'String','Backscatter (Mm^{-1} sr^{-1})','fontsize',14);
+set(get(bar,'ylabel'),'String','Backscatter (Mm^{-1} sr^{-1})');
 
-set(gca,'fontsize',12)
 datetick('x','mm/dd')
-ylabel('Altitude agl (km)','fontsize',14)
+ylabel('Altitude agl (km)')
+prettify(gca,bar);
 tmp=datevec(jdi);
 out=sprintf('faraday_betaklett_%4d_%02d_%02d_overlap.png', tmp(1),tmp(2),tmp(3));
 print(out,'-dpng')
@@ -71,14 +80,16 @@ imsc(tt,zz(minbin:maxbin),alfa(minbin:maxbin,:),clim,cmap,...
      [1. 1. 1.],isnan(alfa(minbin:maxbin,:)),...
      [.7 .7 .7],alfa(minbin:maxbin,:)==-100)
 set(gca,'YDir','normal');
+set(gca,'YDir','normal');
+set(gca,'yticklabel',sprintf('%.1f|',get(gca,'ytick')));
 colormap(min(max(cmap,0),1));
 caxis(clim);
 bar = colorbar;
-set(get(bar,'ylabel'),'String','Extinction (Mm^{-1})','fontsize',14);
+set(get(bar,'ylabel'),'String','Extinction (Mm^{-1})');
 
-set(gca,'fontsize',12)
 datetick('x','mm/dd')
-ylabel('Altitude agl (km)','fontsize',14)
+ylabel('Altitude agl (km)')
+prettify(gca,bar);
 tmp=datevec(jdi);
 out=sprintf('faraday_alfaklett_%4d_%02d_%02d_overlap.png', tmp(1),tmp(2),tmp(3));
 print(out,'-dpng')

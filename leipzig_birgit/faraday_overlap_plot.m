@@ -34,16 +34,18 @@ for i=1:2
   overlap=mysmooth(final.over(1:n,mask),4,4);
 
   figure(1); clf;
-  set(gca,'position',[0.1,0.075,0.8,0.9]); % units in pixels!
-  set(gcf,'position',[0,0,400,700]); % units in pixels!
-  set(gcf,'PaperUnits','inches','PaperSize',[4,7],'PaperPosition',[0 0 4 7])
+  set(gca,'position',[0.13,0.1,0.77,0.85]); % units in pixels!
+  set(gcf,'position',[0,0,450,650]); % units in pixels!
+  set(gcf,'PaperUnits','inches','PaperSize',[4.5,6.5],'PaperPosition',[0 0 4.5 6.5])
   hold on; grid on;
   plot(overlap,alt); 
   plot(nanmean(overlap,2),alt,'g'  ,'linewidth',3);
   xlabel('Overlap function'); 
   xlim([0 1.2]);
-  ylabel('Range (km)');
+  ylabel('Range [km]');
   text(0.05,5.8,tag{i},'fontsize',16);
+  prettify(gca); grid on;
+%  set(gcf, 'PaperPositionMode', 'auto');
   print(['overlap_' tag{i} '.png'],'-dpng');
 
   %=======================================================================
@@ -60,16 +62,17 @@ for i=1:2
   correction=a/(1+(355./387.)^1.2)*1e3; % in Mm^-1
 
   figure(2); clf;
-  set(gca,'position',[0.1,0.1,0.8,0.8]); % units in pixels!
-  set(gcf,'position',[400,0,400,500]); % units in pixels!
-  set(gcf,'PaperUnits','inches','PaperSize',[4,5],'PaperPosition',[0 0 4 5])
+  set(gca,'position',[0.15,0.13,0.75,0.75]); % units in pixels!
+%  set(gcf, 'PaperPositionMode', 'auto');
+  set(gcf,'position',[400,0,500,625]); % units in pixels!
+  set(gcf,'PaperUnits','inches','PaperSize',[5,6.25],'PaperPosition',[0 0 5 6.25])
   hold on; grid on;
   % all corrections and their mean in colors
   plot(correction(30:end,:),alt(30:end)); 
   plot(mean(correction(30:end,:),2),alt(30:end),'g','linewidth',2); 
-  xlabel('Extinction coeff. increment [Mm-1]'); 
+  xlabel('Extinction coeff. increment [Mm^{-1}]'); 
   xlim([-1e3 15e3]);
-  ylabel('Range (km)');
+  ylabel('Range [km]');
   set(gca,'xtick',[0:3e3:15e3]);
   ax1=gca;
   ax2=axes('position',get(ax1,'position'),'xaxislocation','top', ...
@@ -83,6 +86,8 @@ for i=1:2
   xlim([-1/15 1]);
   text(0.05,2.8,tag{i},'fontsize',16);
   xlabel('Overlap function')
+  prettify(ax1); grid on;
+  prettify(ax2); grid on;
   print(['overlap_alpha_correction_' tag{i} '.png'],'-dpng');
 
   %=======================================================================
@@ -94,14 +99,14 @@ for i=1:2
   figure(3); 
   if (i==1) 
     clf;
-    set(gca,'position',[0.1,0.1,0.8,0.8]); % units in pixels!
-    set(gcf,'position',[800,0,400,500]); % units in pixels!
-    set(gcf,'PaperUnits','inches','PaperSize',[4,5],'PaperPosition',[0 0 4 5])
+    set(gca,'position',[0.15,0.13,0.75,0.75]); % units in pixels!
+    set(gcf,'position',[800,0,500,625]); % units in pixels!
+    set(gcf,'PaperUnits','inches','PaperSize',[5,6.25],'PaperPosition',[0 0 5 6.25])
     corerror=std(correction,0,2);
     plot(corerror(55:end),alt(55:end),'b','linewidth',2); 
     hold on; grid on;
-    xlabel('Extinction coeff. error [Mm-1]');
-    ylabel('Range (km)');
+    xlabel('Extinction coeff. error [Mm^{-1}]');
+    ylabel('Range [km]');
     xlim([-50 800]);
     set(gca,'xtick',[0:160:800]);
     ax3=gca;
@@ -121,6 +126,8 @@ for i=1:2
     plot(nanmean(tmp,2)+1*nanstd(tmp,0,2),alt,'r--','parent',ax4);
     plot(nanmean(tmp,2)-1*nanstd(tmp,0,2),alt,'r--','parent',ax4);
     xlim([-1/16 1]);
+    prettify(ax3); grid on;
+    prettify(ax4); grid on;
     print(['overlap_alpha_error.png'],'-dpng');
   end
 
