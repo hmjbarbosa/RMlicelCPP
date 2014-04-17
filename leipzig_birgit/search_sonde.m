@@ -30,20 +30,20 @@
 %    using datenum()
 %
 %------------------------------------------------------------------------
-function [radiofile] = search_sonde(radiodir,stationid,jd)
+function [radiofile allradiofiles allradiojd] = search_sonde(radiodir,stationid,jd)
 
-ff=dirpath(radiodir,[stationid '*.dat']);
+allradiofiles=dirpath(radiodir,[stationid '*.dat']);
 
 % Check if any files were found
-nfile=numel(ff);
+nfile=numel(allradiofiles);
 if (nfile < 1)
   disp(['search_sonde:: no files found!']);
   return
 end
 
-% from all files listed, check those closer to [jdi, jdf]
+% loop through all files and get the julian date of each one
 for i=1:nfile
-  path_name=ff{i};
+  path_name=allradiofiles{i};
   n=numel(path_name);
   name=path_name(n-23:n);
   
@@ -59,10 +59,12 @@ for i=1:nfile
   date(5)=0;
   date(6)=0;
 
-  sondejd(i)=datenum(date);
+  allradiojd(i)=datenum(date);
 end
-[minjd, posjd]=min(abs(sondejd-jd));
 
-radiofile=ff{posjd};
+% from all files listed, check those closer to jd
+[minjd, posjd]=min(abs(allradiojd-jd));
+
+radiofile=allradiofiles{posjd};
 disp(['search_sonde:: distance to jd = ' num2str(minjd) ' days']);
 %
