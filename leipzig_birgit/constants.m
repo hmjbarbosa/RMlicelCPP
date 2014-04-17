@@ -107,5 +107,6 @@ Mvol=22.4141e-3;
 
 % Molecular density [#/m3] at Tstd and Pstd
 Nstd=(Na/Mvol)*(T0/Tstd); 
+disp(['constants:: Nstd = ' num2str(Nstd) ' #/m3']);
 
 %
