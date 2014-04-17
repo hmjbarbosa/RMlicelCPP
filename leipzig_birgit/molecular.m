@@ -56,18 +56,19 @@
 %
 %------------------------------------------------------------------------
 
+clear sigma_std Pf_mol alpha_std dn300 dnAir fAir fAr fCO2 fN2 fO2 ...
+    gammaAir nAir rhoAir alpha_mol_snd beta_mol_snd LR_mol
+
 %------------------------------------------------------------------------
-% User definitions
+% User definitions (should be done before calling the routine)
 %------------------------------------------------------------------------
 
-% tipical: 354.68 386.73 532.06 607.4 1064.09
+% tipical: 354.68 386.73 532.06 607.4 1064.09 * 1e-6
+% Units should be [m]. Example:
+%
+% lambda=[0.355 0.387 0.408]*1e-6; % [m]
 
-%lambda=[0.35468 0.53206 1.06409];
-%lambda=[0.355 0.532 1.064]*1e-6; % [m]
-
-lambda=[0.355 0.387 0.408]*1e-6; % [m]
-
-disp(['*** molecular: wlen = ' num2str(lambda*1e6) ' um']);
+disp(['molecular:: wlen = ' num2str(lambda*1e6) ' um']);
 
 %%------------------------------------------------------------------------
 %% REFRACTIVE INDEX WITH CO2 CORRECTION 
@@ -161,7 +162,7 @@ sigma_std = 24 * (pi^3) * ((nAir.^2-1).^2) .* fAir ./...
 % Bucholtz (1995), eq (9), units [m^-1]
 % Nstd was calculated in #/m^3
 alpha_std = Nstd * sigma_std; 
-disp(['*** molecular: alpha_std = ' num2str(alpha_std*1e6) ' Mm^-1']);
+disp(['molecular:: alpha_std = ' num2str(alpha_std*1e6) ' Mm^-1']);
 
 % Bucholtz (1995), eq (10), units [m^-1]
 % scaling for each P and T in the column 

@@ -41,10 +41,16 @@
 %
 %------------------------------------------------------------------------
 
+clear Airmwt Armwt Arppv CO2mwt CO2ppv H2mwt H2ppv Hemwt ...
+    Heppv Krmwt Krppv Mvol N2mwt N2ppv Na Nemwt Neppv Nstd ...
+    O2mwt O2ppv Pstd Rair Rgas T0 Tstd Xemwt Xeppv k
+
 %------------------------------------------------------------------------
-% User definitions
+% User definitions (should be done before calling the routine)
 %------------------------------------------------------------------------
-co2ppmv = 392; % CO2 concentration [ppmv]
+% co2ppmv = 392; % CO2 concentration [ppmv]
+
+disp(['constants:: co2ppmv = ' num2str(co2ppmv)]);
 
 %------------------------------------------------------------------------
 % Fixed definitions

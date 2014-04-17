@@ -42,18 +42,20 @@ clear drct_snd sknt_snd rho_snd nlev_snd
 % missing data. usually happens at higher altitudes. the reading
 % mechanism, in this case, must rely on the constant width of the
 % fields. 
-% => Now these are defined from outside
-% radiofile=['./Manaus/82332_110901_00.dat']
-% radiofile=['./Manaus/82332_120119_00.dat']
 
-disp(['*** read radiosounding data ' radiofile]);
+disp(['read_sonde:: read radiosounding data ' radiofile]);
 
 fid=fopen(radiofile,'r'); 
-% read the headers
-for j=1:5
-  eval(['headerline_sonde' num2str(j) '=fgetl(fid);']);
-end   
-% read sounding data
+% read the header, data starts after the second line of '-----'
+for i=1:2
+  while ~feof(fid)
+    sondedata = fgetl(fid);
+    if ~isempty(sondedata) && strncmp(sondedata,'-------',7)
+      break
+    end
+  end
+end
+% read sounding data, data stops when a new line starts with 'Station...'
 i=0;
 while ~feof(fid);
   sondedata = fgetl(fid);
@@ -96,9 +98,8 @@ while ~feof(fid);
       sknt_snd(i,1)=str2num(sondedata(51:56))/0.514; % speed in m/s
     end
     
-%1002.0     84   29.8   23.8     70  18.94    100      3  302.8  359.2  306.2
-% P = rho*R*T, R=287.05 J/kg/K
-% 100 corrects hPa to Pa, hence rho in kg/m3
+    % P = rho*R*T, R=287.05 J/kg/K
+    % 100 corrects hPa to Pa, hence rho in kg/m3
     rho_snd(i,1)=100*pres_snd(i,1)./temp_snd(i,1)/Rair;
   else
     break    
