@@ -1,6 +1,6 @@
 %------------------------------------------------------------------------
 % M-File:
-%    read_sonde_Manaus.m
+%    read_sonde.m
 %
 % Authors:
 %    H.M.J. Barbosa (hbarbosa@if.usp.br), IF, USP, Brazil
@@ -34,16 +34,16 @@
 %    Then execute this script.
 %
 %------------------------------------------------------------------------
-clear fid sondedata
-clear pres_snd alt_snd temp_snd dwpt_snd relh_snd 
-clear drct_snd sknt_snd rho_snd nlev_snd
+
+clear fid sondedata pres_snd alt_snd temp_snd dwpt_snd relh_snd ...
+    drct_snd sknt_snd rho_snd nlev_snd
 
 % cannot read as a table because wyoming files have empty space for
 % missing data. usually happens at higher altitudes. the reading
 % mechanism, in this case, must rely on the constant width of the
 % fields. 
 
-disp(['read_sonde:: read radiosounding data ' radiofile]);
+disp(['read_sonde:: input file = ' radiofile]);
 
 fid=fopen(radiofile,'r'); 
 % read the header, data starts after the second line of '-----'
@@ -109,7 +109,12 @@ fclose(fid);
 
 % number of levels in sounding
 nlev_snd=max(size(pres_snd));
+disp(['read_sonde:: nlev_snd = ' num2str(nlev_snd)]);
 
+disp(['read_sonde:: highest = ' ...
+      num2str(pres_snd(nlev_snd)) ' hPa / ' ... 
+      num2str(alt_snd(nlev_snd)) ' m ']);
+      
 %------------------------------------------------------------------------
 %  Plots
 %------------------------------------------------------------------------
@@ -143,7 +148,4 @@ xlabel(ax2,'density / kg/m3')
 line(rho_snd,alt_snd,'Color','b','Parent',ax2);
 grid on
 hold off
-%
-%
-disp('End of program: read_sonde_Manaus.m, Vers. 1.0 06/2012')
 %
