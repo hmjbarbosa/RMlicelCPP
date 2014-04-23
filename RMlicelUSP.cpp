@@ -180,6 +180,7 @@ void header_read(FILE *fp, RMDataFile *rm, bool debug)
   int n, YY, MM, DD, hh, mn, ss;
   long int pos;
   char tmp[128];
+  //double xx;
 
   // Line 1
   n=fscanf(fp,"%s", rm->file);
@@ -208,11 +209,17 @@ void header_read(FILE *fp, RMDataFile *rm, bool debug)
   if (n!=3) header_read_error();
 
   rm->start = RM_Date(YY,MM,DD,hh,mn,ss, UTC);
+  //xx=rm->start.GetJD();
+  //std::cerr << "header_read1= " << rm->start.write2hms() << '\t' << (xx-floor(xx))*1440 << '\n';
 
   n=fscanf(fp,"%2d/%2d/%4d",&DD,&MM,&YY);
   if (n!=3) header_read_error();
   n=fscanf(fp,"%2d:%2d:%2d",&hh,&mn,&ss);
+  if (n!=3) header_read_error();
+
   rm->end = RM_Date(YY,MM,DD,hh,mn,ss, UTC);
+  //xx=rm->end.GetJD();
+  //std::cerr << "header_read2= " << rm->end.write2hms() << '\t' << (xx-floor(xx))*1440 << '\n';
 
   if (n!=3) header_read_error();
   n=fscanf(fp,"%d",&rm->alt);
@@ -604,21 +611,24 @@ void profile_add (RMDataFile *acum, RMDataFile toadd)
 
   /* ************** RM DATA FILE **********************************   */
   /* ************** SUMS   ****************************************   */
-
+  //std::cerr << toadd.start.write2hms(':') << '\t' << acum->start.write2hms(':') << endl;
+  //std::cerr << toadd.end.write2hms(':') << '\t' << acum->end.write2hms(':') << endl;
+  //std::cerr << toadd.end.GetJD() - acum->end.GetJD() << endl;
   // update start/end dates
   if (toadd.start < acum->start) {
     acum->start = RM_Date(toadd.start);
   }
   if (toadd.end > acum->end ) {
+    //std::cerr << "entrou\n";
     acum->end = RM_Date(toadd.end);
   }
 
   // Number of files added
   acum->idum++;
-  if (acum->idum>99) {
-    fprintf(stderr,"Maximum number of files to average is 100!\n");
-    exit(1);    
-  }
+//  if (acum->idum>99) {
+//    fprintf(stderr,"Maximum number of files to average is 100!\n");
+//    exit(1);    
+//  }
 
   // average T0,P0
   acum->T0=((acum->T0)*(acum->idum)+toadd.T0)/(acum->idum+1);

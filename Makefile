@@ -1,5 +1,6 @@
 CC=g++
-CHECK=-fbounds-check -fcheck-new -Wextra -ftrapv -fstack-check 
+#CHECK=-fbounds-check -fcheck-new -Wextra -ftrapv -fstack-check 
+CHECK=-fbounds-check -Wextra -ftrapv 
 CFLAGS=-c -Wall -O0  -g $(CHECK) 
 LFLAGS=-Wall -O0  -g $(CHECK) 
 

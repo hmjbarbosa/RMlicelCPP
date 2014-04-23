@@ -53,6 +53,7 @@ RM_Date::RM_Date(const int year, const int mon, const int day,
   this->ss = sec;
   this->utc = utc;
 
+  //  std::cerr << "antes\n";
   this->CalcJD();
 }
 
@@ -245,7 +246,8 @@ void RM_Date::CalcJD()
      3L * ((lyear + 4900L + (lmonth - 14L) / 12L) / 100L) / 4L;
 
    // julian day is integer at noon (half day through)
-   jd = (double) jd12h - 0.5;// + hour / 24.0;
+   // hmjb: we subtract - 0.5 so that it starts at midnight (??? need check)
+   jd = (double) jd12h - 0.5 + double(secd) / double(secinday);
 }
 
 //______________________________________________________________________________
@@ -293,7 +295,7 @@ void RM_Date::CalcDate()
   //printf("ss= %d %d %d\n",ss, mn, hh);
 
   //d1->jd = jd;
-  jd12h = floor(jd+0.5);
+  jd12h = floor(jd + 0.5 - double(secd)/double(secinday));
 
   t1 = jd12h + 68569L;
   t2 = 4L * t1 / 146097L;

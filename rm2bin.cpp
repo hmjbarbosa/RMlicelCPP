@@ -1,4 +1,5 @@
 #include "RMlicelUSP.h"
+#include "TimeDate.h"
 #include <unistd.h>
 
 /*
@@ -23,7 +24,32 @@ int main (int argc, char *argv[])
 {
   RMDataFile XX, XAve;
   FILE *fout;
-  
+//  RM_Date tmp;
+//  double xx;
+//
+//  tmp = RM_Date(2014,2,1,0,0,0, -4);
+//  xx=tmp.GetJD();
+//  std::cerr << tmp.write2YMD() << '\n';
+//  std::cerr << tmp.write2hms() << '\n';
+//  std::cerr << tmp.GetJD()-2.4566e6 << '\n';
+//  std::cerr << tmp.GetSecD() << '\n';
+//
+//  tmp = RM_Date(2014,2,1,11,59,0, -4);
+//  xx=tmp.GetJD();
+//  std::cerr << tmp.write2YMD() << '\n';
+//  std::cerr << tmp.write2hms() << '\n';
+//  std::cerr << tmp.GetJD()-2.4566e6 << '\n';
+//  std::cerr << tmp.GetSecD() << '\n';
+//
+//  tmp = RM_Date(2014,2,1,12,0,0, -4);
+//  xx=tmp.GetJD();
+//  std::cerr << tmp.write2YMD() << '\n';
+//  std::cerr << tmp.write2hms() << '\n';
+//  std::cerr << tmp.GetJD()-2.4566e6 << '\n';
+//  std::cerr << tmp.GetSecD() << '\n';
+//
+//  return 0;
+
   if (argc<3) {
     printf("Usage: \n");
     printf(" %s <output file> <list of input files>\n",argv[0]);

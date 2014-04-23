@@ -70,6 +70,7 @@ class RM_Date {
   int GetSec()    { return (RM_Date::ss);  };
   float GetUTC()  { return (RM_Date::utc); };
   double GetJD()  { return (RM_Date::jd);  };
+  int GetSecD()  { return (RM_Date::secd);  };
 
   // get functions
   void SetYear (const int Year ) { RM_Date::yy=Year ; CalcJD(); };
