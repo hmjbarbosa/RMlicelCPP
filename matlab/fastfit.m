@@ -82,11 +82,12 @@ XYmed=nanmean(Y.*X);
 % be found for all (i,j) points by just multiplying the matrices.
 a=(XYmed-Xmed.*Ymed)./(X2med-Xmed2);
 b=Ymed-a.*Xmed;
-clear Xmed XYSmed;
+clear Xmed XYmed;
 
 % With the coefficients, calculate the value 
 % interpolated at each Xij
-fval = bsxfun(@plus, bsxfun(@times,X,a), b);
+%fval = bsxfun(@plus, bsxfun(@times,X,a), b);
+fval = a*X + b;
 
 % Calculate squared errors at each ij
 Err2=(Y-fval).^2;

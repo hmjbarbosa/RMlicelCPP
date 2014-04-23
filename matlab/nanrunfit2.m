@@ -31,68 +31,71 @@
 %    SPAN=2*nside+1 to evaluate the running mean values in the
 %    above equations.
 %
-function [fval, a, b, relerr, Smed] = nanrunfit2(S, z, nside, nside2)
+function [fval, a, b, relerr, Ymed] = nanrunfit2(Y, X, nside, nside2)
 
-[nz, nt] = size(S);
+[nX, nt] = size(Y);
 
-if ~exist('z','var') z(:,1)=(1:nz)'; end
+if ~exist('X','var') X(:,1)=(1:nX)'; end
 if ~exist('nside','var') nside=5; end
 
-S(isnan(z))=nan;
-z(isnan(S))=nan;
+Y(isnan(X))=nan;
+X(isnan(Y))=nan;
 
-% smooth(S,SPAN) is a running average using SPAN points. Therefore,
+% smooth(Y,SPAN) is a running average using SPAN points. Therefore,
 % for odd SPAN, the number of points on each side of central point is
 % the same, i.e., (SPAN-1)/2
 %span=1+2*nside;
 span=nside;
 span2=nside2;
-% calculate <z>
-zmed=nanmysmooth(z,span,span2);
-% calculate <z>^2
-zmed2=zmed.*zmed;
-% calculate <z*z>
-z2(:,1)=z(:,1).*z(:,1);
-z2med=nanmysmooth(z2,span,span2);
-clear z2;
+% calculate <X>
+Xmed=nanmysmooth(X,span,span2);
+% calculate <X>^2
+Xmed2=Xmed.*Xmed;
+% calculate <X*X>
+X2(:,1)=X(:,1).*X(:,1);
+X2med=nanmysmooth(X2,span,span2);
+clear X2;
 
 % repeat the values on all nt rows
 for j=2:nt
-  z(:,j)=z(:,1);
-  zmed(:,j)=zmed(:,1);
-  zmed2(:,j)=zmed2(:,1);
-  z2med(:,j)=z2med(:,1);
+  X(:,j)=X(:,1);
+  Xmed(:,j)=Xmed(:,1);
+  Xmed2(:,j)=Xmed2(:,1);
+  X2med(:,j)=X2med(:,1);
 end
 
-% calculate <S> and <z*S> for all nt rows
+% calculate <Y> and <X*Y> for all nt rows
 for j=1:nt
-  Smed(:,j)=nanmysmooth(S(:,j),span,span2);
-  zSmed(:,j)=nanmysmooth(S(:,j).*z(:,j),span,span2);
+  Ymed(:,j)=nanmysmooth(Y(:,j),span,span2);
+  XYmed(:,j)=nanmysmooth(Y(:,j).*X(:,j),span,span2);
 end
 
 %
-% Because all of our z and S matrices are nz x nt, the solution can
+% Because all of our X and Y matrices are nX x nt, the solution can
 % be found for all (i,j) points by just multiplying the matrices.
 %
-a=(zSmed-zmed.*Smed)./(z2med-zmed2);
-b=(Smed.*z2med-zmed.*zSmed)./(z2med-zmed2);
-clear z2med zmed2 zmed zSmed;
+a=(XYmed-Xmed.*Ymed)./(X2med-Xmed2);
+%b=(Ymed.*X2med-Xmed.*XYmed)./(X2med-Xmed2);
+%clear X2med Xmed2 Xmed XYmed;
+b=Ymed-a.*Xmed;
+clear Xmed XYmed;
 
-% With the coefficients, calculate the value interpolated at each zi
-% note: IF dz is varying uniformly (e.g heights), fval == Smed
-% but IF z is the molecular signal, then fval != Smed
-fval = a.*z + b;
+% With the coefficients, calculate the value interpolated at each Xi
+% note: IF dX is varying uniformly (e.g heights), fval == Ymed
+% but IF X is the molecular signal, then fval != Ymed
+fval = a.*X + b;
 
-% calculate <abs(S-fval)>/<y> for all nt rows
-Sfval=(S-fval).^2;
+% Calculate squared errors at each ij
+Err2=(Y-fval).^2;
+
 for j=1:nt
   % it is necessary to force 'moving average' because absolute
   % errors are random and smooth() algorithm would try to use
   % 'robust' method instead.
-  Sfvalmed(:,j)=nanmysmooth(Sfval(:,j),span,span2);
+  Err2med(:,j)=nanmysmooth(Err2(:,j),span,span2);
 end
-relerr=sqrt(Sfvalmed);
+relerr=sqrt(Err2med);
 
-clear Sfvalmed Sfval;
+clear Err2med Err2;
 return
 %
