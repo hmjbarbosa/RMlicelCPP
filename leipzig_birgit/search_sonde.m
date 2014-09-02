@@ -66,6 +66,6 @@ end
 [minjd, posjd]=min(abs(allradiojd-jd));
 
 radiofile=allradiofiles{posjd};
-disp(['search_sonde:: radiofile = ' radiofile]);
+disp(['search_sonde:: closest date = ' datestr(datestr(allradiojd(posjd)))]);
 disp(['search_sonde:: distance to jd = ' num2str(minjd) ' days']);
 %

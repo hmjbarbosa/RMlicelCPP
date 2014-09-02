@@ -25,18 +25,12 @@
 %    rho_snd(nlev_snd, 1) - column with density in kg/m3
 %    alt_snd(nlev_snd, 1) - column with altitude in m
 %
-% Usage
-%
-%    First run: 
-%
-%        constants.m
-%
-%    Then execute this script.
 %
 %------------------------------------------------------------------------
 function [sonde] = read_sonde_Wyoming(radiofile)
 
-constants;
+T0=273.15;
+Rair=287.0471;
 
 sonde.fname=radiofile;
 

@@ -34,7 +34,7 @@
 %    Then execute this script.
 %
 %------------------------------------------------------------------------
-clear radiofile sondedata
+clear sondedata
 clear temp_snd pres_snd rho_snd alt_snd nlev_snd
 
 % cannot read as a table because wyoming files have empty space for
@@ -42,7 +42,7 @@ clear temp_snd pres_snd rho_snd alt_snd nlev_snd
 % mechanism, in this case, must rely on the constant width of the
 % fields. 
 %radiofile=['./Manaus/82332_110901_00.dat']
-radiofile=['./Manaus/82332_120119_00.dat']
+%radiofile=['./Manaus/82332_120119_00.dat']
 
 disp(['*** read radiosounding data ' radiofile]);
 
@@ -57,7 +57,7 @@ while ~feof(fid);
   sondedata = fgetl(fid);
   if ~isempty(sondedata)
     i=i+1;
-    pres_snd(i,1)=str2num(sondedata(1:7));  % P in hPa!
+    pres_snd(i,1)=str2num(sondedata(1:7))*100;  % P in Pa!
     alt_snd(i,1)=str2num(sondedata(8:14)); % in m 
     temp_snd(i,1)=T0 + str2num(sondedata(15:21)); % T in K
 % P = rho*R*T, R=287.05 J/kg/K
