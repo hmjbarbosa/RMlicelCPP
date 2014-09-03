@@ -8,8 +8,7 @@ wdx=260; xx0=-wsx;
 wdy=0;   yy0=50;
 
 % read physics constants
-co2ppmv=400.;
-constants
+cte=constants(400.);
 
 wjdi(01)=datenum('24-Aug-2014 19:00:00'); 
 wjdf(01)=datenum('24-Aug-2014 21:00:00');

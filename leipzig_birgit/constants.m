@@ -8,7 +8,23 @@
 % Description
 %
 %    Defines important physic's constants, most of which are used
-%    by the molecular scattering calculation.
+%    by the molecular scattering calculation. Everything is kept in
+%    a matlab structure.
+%
+%    The first optional input is the concentration of CO2 in ppmv. A
+%    normalization is applied to keep the sum of the concentrations of
+%    all gases = 1 ppmv of Air. Calling the function without arguments
+%    sets 400 ppmv of CO2.
+%
+%    The second optional input is the debug level. 
+%    =0 nothing is written to the screen
+%    =1 writes constants
+%    =2 writes constants, gases and units
+%
+% Input
+%
+%    co2ppmv - Optional CO2 concentration [ppmv]
+%    debug - level of message output
 %
 % Ouput
 %
@@ -26,7 +42,9 @@
 %
 % Usage
 %
-%    Input the desired CO2 concentration and execute the M-file.
+%    For 380 ppmv of CO2, call the function as:
+%       out = constants(380);
+%       out. 
 %
 % References
 % 
@@ -35,13 +53,20 @@
 %    Wallace and Hobbs, Atmospheric science (2nd Edition)
 %    Bodhaine et al, 1999: J. Atmos. Ocea. Tech, v. 16, p.1854
 %
+function [cte] = constants(co2ppmv,debug)
 
-clear cte
+if ~exist('co2ppmv','var')
+  co2ppv=400.e-6;
+else
+  co2ppv=co2ppmv*1e-6;
+end
+
+if ~exist('debug','var')
+  debug=0;
+end
+
+% Init counter for fields in the .units{} structure
 j=0;
-
-%------------------------------------------------------------------------
-% Fixed definitions
-%------------------------------------------------------------------------
 
 % Atmospheric Constituents Concentration
 % ref: Seinfeld and Pandis (1998)
@@ -68,7 +93,7 @@ cte.gas{5}='He';  cte.ppv(5)=5.20e-6;  cte.mwt(5)=4.0030e-3;
 cte.gas{6}='Kr';  cte.ppv(6)=1.10e-6;  cte.mwt(6)=83.800e-3;
 cte.gas{7}='H2';  cte.ppv(7)=5.80e-7;  cte.mwt(7)=2.0160e-3;
 cte.gas{8}='Xe';  cte.ppv(8)=9.00e-8;  cte.mwt(8)=131.29e-3;
-cte.gas{9}='CO2'; cte.ppv(9)=4.00e-4;  cte.mwt(9)=44.010e-3; 
+cte.gas{9}='CO2'; cte.ppv(9)=co2ppv;   cte.mwt(9)=44.010e-3; 
 
 % force normalization depending of CO2 concentration
 cte.ppv=cte.ppv/sum(cte.ppv);
@@ -138,7 +163,14 @@ cte.units{j,3}='[# / m3]';
 cte.Nstd=cte.Na/cte.Mvol; 
 
 %
-cte
-[[cte.units{1,:} cte.gas]', [cte.units{2,:} num2cell(cte.ppv)]', [cte.units{3,:} num2cell(cte.mwt)]']
-cte.units
+if (debug>0)
+  % print the basic structure with the values of the constants
+  cte
+end
+if (debug>1)
+  % print gas, concentration and molar weight with columns description
+  [[cte.units{1,:} cte.gas]', [cte.units{2,:} num2cell(cte.ppv)]', [cte.units{3,:} num2cell(cte.mwt)]']
+  % print the units
+  cte.units
+end
 %
