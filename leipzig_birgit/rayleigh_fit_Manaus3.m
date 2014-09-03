@@ -33,7 +33,7 @@ end
 
 if toextrapolate==0
   % Set maximum lidar bin to highest altitude of sounding 
-  maxbin=floor((alt_snd(nlev_snd)-lidar_altitude)*1e-3/r_bin);
+  maxbin=floor((alt_snd(nlev_snd)-lidar_altitude)/r_bin);
 
   % Simple linear interpolation within the souding range
   beta_mol(:,1) = interp1(alt_snd, beta_mol_snd(:,1), ... 
@@ -95,7 +95,7 @@ end
 %%------------------------------------------------------------------------
 
 % for elastic and raman channels
-for ch=1:1
+for ch=1:2
 
   %%------------------------------------------------------------------------
   %%  LOOP ON RAYLEIGH FIT FOR DETERMINATION OF MOLECULAR RANGE
@@ -107,7 +107,7 @@ for ch=1:1
   % Select data
   tmpX=P_mol(1:maxbin,ch);
   tmpY=P    (1:maxbin,ch);
-  tmpZ=alt (1:maxbin)*1e-3;
+  tmpZ=alt (1:maxbin);
   
   % plot to know what is going on
   if (debug>1)
@@ -119,10 +119,10 @@ for ch=1:1
 
   % crop regions that we know will never be molecular
   if ~exist('bottomlayer','var')
-    bottomlayer=5;
+    bottomlayer=5e3;
   end
   if ~exist('toplayer','var')
-    toplayer=10;
+    toplayer=10e3;
   end
   tmpY(1:floor(bottomlayer/r_bin))=NaN;
   tmpY(floor(toplayer/r_bin):end)=NaN;
@@ -174,7 +174,7 @@ for ch=1:1
 distance=(tmpY-fval)./sqrt(fval);
 toerase=distance>1e12;
     
-    cloudsize=floor(0.1/r_bin);
+    cloudsize=floor(100/r_bin);
     n1=find(~isnan(distance),1); % first good point
     n2=max(find(~isnan(distance))); % last good point
 
@@ -333,16 +333,16 @@ plot(Pr2(RefBinTop(1),1), alt(RefBinTop(1))*1e-3,'r*');
 hold off
 legend('Lidar', 'Rayleigh Fit', 'Reference Bin'); 
 %   
-%subplot(1,2,2)
-%plot(Pr2(1:maxbin,2), alt(1:maxbin)*1e-3); 
-%xlabel('range smooth bg-corr signal','fontsize',[10])  
-%title('Rayleigh Fit 387','fontsize',14)
-%grid on
-%hold on
-%plot(Pr2_mol(1:maxbin,2), alt(1:maxbin)*1e-3,'g','LineWidth',2); 
-%plot(Pr2(RefBin(2),2), alt(RefBin(2))*1e-3,'r*');
-%plot(Pr2(RefBinTop(2),2), alt(RefBinTop(2))*1e-3,'r*');
-%legend('Lidar', 'Rayleigh Fit', 'Reference Bin'); 
+subplot(1,2,2)
+plot(Pr2(1:maxbin,2), alt(1:maxbin)*1e-3); 
+xlabel('range smooth bg-corr signal','fontsize',[10])  
+title('Rayleigh Fit 387','fontsize',14)
+grid on
+hold on
+plot(Pr2_mol(1:maxbin,2), alt(1:maxbin)*1e-3,'g','LineWidth',2); 
+plot(Pr2(RefBin(2),2), alt(RefBin(2))*1e-3,'r*');
+plot(Pr2(RefBinTop(2),2), alt(RefBinTop(2))*1e-3,'r*');
+legend('Lidar', 'Rayleigh Fit', 'Reference Bin'); 
 %
 % -------------
 figure(7); clf
@@ -360,16 +360,16 @@ plot(log(Pr2(RefBin(1),1)), alt(RefBin(1))*1e-3,'r*');
 plot(log(Pr2(RefBinTop(1),1)), alt(RefBinTop(1))*1e-3,'r*');
 hold off
 %
-%subplot(1,2,2)
-%plot(log(Pr2(1:maxbin,2)),alt(1:maxbin)*1e-3,'b');  
-%xlabel('ln range smooth bg-corr signal','fontsize',[10])  
-%title('Rayleigh fit Ln 387' ,'fontsize',14) 
-%grid on
-%hold on
-%plot(log(Pr2_mol(1:maxbin,2)),alt(1:maxbin)*1e-3,'g','LineWidth',2);   
-%plot(log(Pr2(RefBin(2),2)), alt(RefBin(2))*1e-3,'r*');
-%plot(log(Pr2(RefBinTop(2),2)), alt(RefBinTop(2))*1e-3,'r*');
-%hold off
+subplot(1,2,2)
+plot(log(Pr2(1:maxbin,2)),alt(1:maxbin)*1e-3,'b');  
+xlabel('ln range smooth bg-corr signal','fontsize',[10])  
+title('Rayleigh fit Ln 387' ,'fontsize',14) 
+grid on
+hold on
+plot(log(Pr2_mol(1:maxbin,2)),alt(1:maxbin)*1e-3,'g','LineWidth',2);   
+plot(log(Pr2(RefBin(2),2)), alt(RefBin(2))*1e-3,'r*');
+plot(log(Pr2(RefBinTop(2),2)), alt(RefBinTop(2))*1e-3,'r*');
+hold off
 %
 disp('End of program: rayleigh_fit_Manaus.m, Vers. 1.0 06/12')
 

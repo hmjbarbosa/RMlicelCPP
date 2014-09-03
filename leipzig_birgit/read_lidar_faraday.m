@@ -1,6 +1,6 @@
 %------------------------------------------------------------------------
 % M-File:
-%    read_ascii_Manaus.m
+%    read_lidar_faraday.m
 %
 % Authors:
 %    H.M.J. Barbosa (hbarbosa@if.usp.br), IF, USP, Brazil
@@ -30,7 +30,7 @@
 % Ouput
 %
 %    rangebins - number of bins in lidar signal
-%    r_bin     - vertical resolution in [km]
+%    r_bin     - vertical resolution in [m]
 %    alt  (rangebins, 1) - altitude in [m]
 %    altsq(rangebins, 1) - altitude squared in [m2]
 %
@@ -43,10 +43,7 @@
 %
 %------------------------------------------------------------------------
 
-clear datain
-clear nfile heads chphy
-clear altsq alt rangebins r_bin
-clear glue355 glue387 P Pr2
+clear nfile heads chphy altsq alt rangebins r_bin glue355 glue387 P Pr2
 
 %%------------------------------------------------------------------------
 %%  READ DATA
@@ -61,9 +58,7 @@ if (nfile<1) return; end
 
 %% RANGE IN METERS
 rangebins=heads(1).ch(1).ndata;
-for i=1:rangebins
-  alt(i,1)=(7.5*i);
-end
+alt(:,1)=(1:rangebins)*heads(1).ch(1).binw;
 
 %%------------------------------------------------------------------------
 %% RANGE CORRECTION AND OTHER SIGNAL PROCESSING
@@ -72,8 +67,8 @@ end
 % calculate the range^2 [m^2]
 altsq = alt.*alt;
 
-% bin height in km
-r_bin=(alt(2)-alt(1))*1e-3; 
+% bin height in m
+r_bin=(alt(2)-alt(1)); 
 
 % matrix to hold lidar received power P(z, lambda)
 % anything user needs: time average, bg correction, glueing, etc..
@@ -81,6 +76,9 @@ r_bin=(alt(2)-alt(1))*1e-3;
 %% GLUE ANALOG+PC
 glue355=glue(chphy(1).data, heads(1).ch(1), chphy(2).data, heads(1).ch(2));
 glue387=glue(chphy(3).data, heads(1).ch(3), chphy(4).data, heads(1).ch(4));
+
+%glue355=chphy(1).data;
+%glue387=chphy(3).data;
 
 if (debug>0)
   figure(100)
@@ -101,45 +99,46 @@ for j = 1:2
   Pr2(:,j) = P(:,j).*altsq(:);
 end
 
-if (debug<2)
-  return
-end
 %------------------------------------------------------------------------
 %  Plots
 %------------------------------------------------------------------------
+if (debug<2)
+  return
+end
+
 %
 %
 figure(1)
 xx=xx0+1*wdx; yy=yy0+1*wdy;
 set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
-plot(P(:,1),alt*1.e-3,'b')
-xlabel('smooth bg-corr signal','fontsize',[10])  
-ylabel('altitude (km)','fontsize',[10])
 grid on
-hold on;
+hold on
+xlabel('signal','fontsize',[10])  
+ylabel('altitude (km)','fontsize',[10])
+plot(P(:,1),alt*1.e-3,'b')
 plot(P(:,2),alt*1.e-3,'c')
 hold off
 %
 figure(2)
 xx=xx0+2*wdx; yy=yy0+2*wdy;
 set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
-plot(Pr2(:,1),alt*1.e-3,'b')
-xlabel('range corrected smooth bg-corr signal','fontsize',[10])  
-ylabel('altitude (km)','fontsize',[10])
 grid on
-hold on ;
+hold on
+xlabel('RCS','fontsize',[10])  
+ylabel('altitude (km)','fontsize',[10])
+plot(Pr2(:,1),alt*1.e-3,'b')
 plot(Pr2(:,2),alt*1.e-3,'c')
 hold off
 % 
 figure(3)
 xx=xx0+3*wdx; yy=yy0+3*wdy;
 set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
-plot(log(P(:,1)),alt*1.e-3,'b')
-xlabel('log of smooth bg-corr signal','fontsize',[10])  
-ylabel('altitude (km)','fontsize',[10])
 grid on
 hold on
+xlabel('log RCS','fontsize',[10])  
+ylabel('altitude (km)','fontsize',[10])
+plot(log(P(:,1)),alt*1.e-3,'b')
 plot(log(P(:,2)),alt*1.e-3,'c')
 hold off
 % 
-% end of program read_ascii_Manaus.m ***    
+% end of program read_lidar_faraday.m ***    

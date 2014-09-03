@@ -39,19 +39,12 @@ clear Lidar_Ratio
 %
 % define upper boundary from Raman Ext coeff
 up = RefBin(2);
-%up=1400;
+
 %------------------------------------
 % reference value for beta particle
 %------------------------------------
 Ref_1=up;
 beta_par(1,Ref_1)= 1e-12;  % in km
-%beta_par(1,Ref_1)= 9.1e-5;  % in km
-%beta_par(1,Ref_1)= 8e-3; % in case of cirrus
-%
-%figure(123)
-%clf
-%hold on
-%for up=RefBin(2):-1:RefBin(2)-100
   
 p_ave_raman_1(up,1)=0;
 m_ave_raman_1(up,1)=0;
@@ -83,11 +76,6 @@ for i=maxbin : -1 : bin1st
   exp_n_1(i,1) = exp(+(p_ave_elast_1(i,1) + m_ave_elast_1(i,1))*r_bin);
 end
 
-%plot(exp_z_1(200:up)./exp_n_1(200:up),alt(200:up))
-%pause
-%end
-%return
-
 % -------------------------
 % calculate beta Raman
 % -------------------------
@@ -116,7 +104,6 @@ Lidar_Ratio(bin1st:maxbin) = nanmysmooth(alpha_raman(bin1st:maxbin),10,100)./...
     nanmysmooth(beta_raman,30,300);
 %Lidar_Ratio=nanmysmooth(Lidar_Ratio,10,100);
 %Lidar_Ratio(bin1st:up) = alpha_raman(bin1st:up)./beta_raman(bin1st:up)';  
-%Lidar_Ratio_sm(bin1st:up) = alpha_raman_sm(bin1st:up)./beta_raman_sm(bin1st:up);  
 %    
 % +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 %   Plots
@@ -132,8 +119,7 @@ end
 figure(10); clf;
 xx=xx0+3*wdx; yy=yy0+3*wdy;
 % Klett
-%plot(beta_aerosol_sm(1,bin1st:tope-1), alt(bin1st:tope-1).*1e-3,'b--');
-plot(beta_klett(bin1st:maxbin,1)*1e3, alt(bin1st:maxbin).*1e-3,'b--');
+plot(beta_klett(bin1st:maxbin,1)*1e6, alt(bin1st:maxbin).*1e-3,'b--');
 set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
 axis([-2 9 0 alt(tope-1)*1e-3*1.1]);
 xlabel('BSC Mm-1 sr-1','fontsize',[12])  
@@ -142,11 +128,10 @@ title(['Raman'],'fontsize',[14])
 grid on
 hold on
 % Raman
-plot(beta_raman(bin1st:maxbin)*1e3, alt(bin1st:maxbin).*1e-3,'r')
-plot(beta_klett(RefBin(1),1)*1e3, alt(RefBin(1))*1e-3,'r*');
-plot(beta_klett(RefBin(2),1)*1e3, alt(RefBin(2))*1e-3,'g*');
+plot(beta_raman(bin1st:maxbin)*1e6, alt(bin1st:maxbin).*1e-3,'r')
+plot(beta_klett(RefBin(1),1)*1e6, alt(RefBin(1))*1e-3,'r*');
+plot(beta_klett(RefBin(2),1)*1e6, alt(RefBin(2))*1e-3,'g*');
 legend('Klett', 'Raman', 'RefBin 355', 'RefBin 387')
-%legend('Klett', 'Raman')
 hold off
 %  
 % -------------- 
@@ -157,7 +142,6 @@ rLR_1 = size(Lidar_Ratio(1,:));
 %  
 figure(11); clf;
 xx=xx0+2*wdx; yy=yy0+2*wdy;
-%plot(Lidar_Ratio_sm(bin1st:rLR_1(2)),alt(bin1st:rLR_1(2)).*1e-3,'b')
 plot(Lidar_Ratio(bin1st:rLR_1(2)),alt(bin1st:rLR_1(2)).*1e-3,'b')
 set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
 axis([0 100 0 alt(tope-1)*1e-3*1.1]); 

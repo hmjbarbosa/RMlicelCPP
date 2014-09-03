@@ -28,7 +28,7 @@ lidar_altitude=100;
 
 if toextrapolate==0
   % Set maximum lidar bin to highest altitude of sounding 
-  maxbin=floor((alt_snd(nlev_snd)-lidar_altitude)*1e-3/r_bin);
+  maxbin=floor((alt_snd(nlev_snd)-lidar_altitude)/r_bin);
 
   % Simple linear interpolation within the souding range
   beta_mol(:,1) = interp1(alt_snd, beta_mol_snd(:,1), ... 
@@ -78,8 +78,9 @@ end
 % back-scatter.
 for j = 1:2
   for i=1:maxbin
-    % calculate Pr2_mol in km-1 
+    % calculate Pr2_mol in [m-1] 
     Pr2_mol(i,j)=beta_mol(i,j)*exp(-tau(i,j)-tau(i,1));
+    % calculate P_mol in [m-3] 
     P_mol(i,j)=beta_mol(i,j)*exp(-tau(i,j)-tau(i,1))./altsq(i);
   end
 end
@@ -102,23 +103,18 @@ for ch=1:2
   % Select data
   tmpX=P_mol(1:maxbin,ch);
   tmpY=P    (1:maxbin,ch);
-  tmpZ=alt (1:maxbin)*1e-3;
+  tmpZ=alt  (1:maxbin);
   
-  % plot to know what is going on
-  if (debug>0)
-    figure(23); clf; hold on;
-    scatter(tmpZ,(tmpY),'.');
-    hold on; grid on; colorbar;
-    title('ALL POINTS');
-  end
-
   % crop regions that we know will never be molecular
   if ~exist('bottomlayer','var')
-    bottomlayer=7;
+    bottomlayer=10e3;
   end
   if ~exist('toplayer','var')
-    toplayer=25;
+    toplayer=15e3;
   end
+  s1=floor(bottomlayer/r_bin);
+  s2=floor(toplayer/r_bin);
+  
   tmpY(1:floor(bottomlayer/r_bin))=NaN;
   tmpY(floor(toplayer/r_bin):end)=NaN;
   if (ch>1)
@@ -138,12 +134,6 @@ for ch=1:2
   disp(['lowest used at height=' num2str(minZ) ]);
   disp(['highest used at height=' num2str(maxZ) ]);
 
-  if (debug>1)
-    figure(25); clf; hold on;
-    plot(tmpZ,good,'o-');grid on; title('good');
-    xlabel(['n1= ' num2str(n1) ' alt=' num2str(alt(n1))]);
-  end
-  
   % Initialize counter for the number of NaN data points
   nmask=sum(isnan(tmpY)); nmask_old=-1;
 
@@ -155,77 +145,17 @@ for ch=1:2
     
     % Do a linear fit using all remaining points
     [a, b, fval, sa, sb, chi2red, ndf] = fastfit(tmpX,tmpY);
-    % For each point, exclude those which are too far away 
-    %
-    % NOTE1: this exclusion does not depend on having the BG corrected
-    % because it is a linear proportion between P and P_mol
-    %
-    % NOTE2: it would be better to draw the confidence curves
-    % (hyperbola) as the error is larger near the ends. Here
-    % sqrt(chi2red) is used as a measure of the uncertainty.
-%    distance=(tmpY-fval)./sqrt(chi2red);
-%    toerase=distance>3;
-% this is assuming noise = sqrt(# fotons)
-distance=(tmpY-fval)./sqrt(fval);
-toerase=distance>1e12;
-    
-    cloudsize=floor(0.1/r_bin);
-    n1=find(~isnan(distance),1); % first good point
-    n2=max(find(~isnan(distance))); % last good point
-
-    for i=n1:maxbin-cloudsize
-      if (all(distance(i:i+cloudsize)>1))
-        toerase(i-4*cloudsize:maxbin)=1;
-        break;
-      end
-    end
-
-    for i=n1:maxbin-cloudsize
-      if all(isnan(distance(i:i+cloudsize)))
-        toerase(i:maxbin)=1;
-        break;
-      end
-    end
-
-    if (debug>1)
-      figure(26); clf; hold on; grid;
-      plot(alt(n1:n2)*1e-3,distance(n1:n2),'.'); 
-      plot(alt(toerase)*1e-3,distance(toerase),'og'); 
-    end
-
-    % update the plot window
-    if (debug>1)
-      figure(24); clf; hold on;
-      plot(tmpZ(~isnan(tmpY)),tmpY(~isnan(tmpY)),'.');
-      plot(tmpZ(~isnan(tmpY)),tmpX(~isnan(tmpY))*a+b,'r-');
-      plot(tmpZ(toerase),tmpY(toerase),'og');
-      hold on; grid on;
-      xlabel('Z'); ylabel('P, Pmol Fit');
-      legend('lidar','mol*A+B');
-      title('MOLECULAR POINTS');
-      colorbar;
-      if (debug>2)
-	ginput(1);
-      end
-    end
-
-    tmpY(toerase)=nan;
     
     % Recompute the mask counter
     nmask=sum(isnan(tmpY));
     
     % output interaction info for reading
     disp(['iter= ' num2str(iter) ' nmask=' num2str(nmask) ...
-	  ' a=' num2str(a) ' sa=' num2str(sa) ... 
-	  ' b=' num2str(b) ' sb=' num2str(sb) ... 
-	  ' chi2red=' num2str(chi2red) ' ndf=' num2str(ndf) ]); 
+          ' a=' num2str(a,'%9.4e') ' sa=' num2str(sa,'%9.4e') ... 
+          ' b=' num2str(b,'%9.4e') ' sb=' num2str(sb,'%9.4e') ... 
+          ' chi2red=' num2str(chi2red,'%9.4e') ' ndf=' num2str(ndf) ]); 
     
     iter=iter+1; 
-  end
-
-  if (debug>0)
-    figure(23); 
-    plot(tmpZ(200:maxbin), (P_mol(200:maxbin,ch)*a+b), 'r');
   end
 
   %% SET THE REFERENCE BIN
@@ -246,17 +176,18 @@ toerase=distance>1e12;
 
   % Don't try to remove BG if linear coef. is compatible with bg=0
   if (abs(b/sb)>3)
+  %if (b/sb>3)
     bg(ch)=b;
   else
     bg(ch)=0;
   end
   errbg(ch)=sb;
-  disp(['ch= ' num2str(ch) '  last BG= ' num2str(bg(ch)) ]);
+  disp(['ch= ' num2str(ch) '  last BG= ' num2str(bg(ch),'%9.4e') ]);
  
   %% APPLY THE CALCULATED BG
   P  (:,ch) = P(:,ch)-bg(ch);
-  n1=find(P(:,ch)<=0, 1);
-  P(n1:end,ch)=NaN;
+  %n1=find(P(:,ch)<=0, 1);
+  %P(n1:end,ch)=NaN;
   Pr2(:,ch) = P(:,ch).*altsq(:);
   
   %% APPLY THE SCALLING
@@ -267,22 +198,10 @@ toerase=distance>1e12;
   P(RefBin(ch),ch)=P_mol(RefBin(ch),ch);
   Pr2(RefBin(ch),ch)=Pr2_mol(RefBin(ch),ch);
 
-  % ref bin outra vez... procurando pelo mais proximo.
-%  delta=abs(P(RefBin(ch),ch)-P_mol(RefBin(ch),ch));
-%  for i=1:maxbin
-%    if (~isnan(tmpY(i)))
-%      if (abs(P(i,ch)-P_mol(i,ch)) < delta);
-%        RefBin(ch)=i;
-%        delta=abs(P(i,ch)-P_mol(i,ch));
-%        [i/1000 alt(i)/1000 delta]
-%      end
-%    end
-%  end
-  
 end % channel loop
 
 RefBin
-alt(RefBin)*1e-3
+alt(RefBin)'*1e-3
 
 %------------------------------------------------------------------------
 %  Plots
@@ -296,13 +215,13 @@ figure(5)
 xx=xx0+4*wdx; yy=yy0+4*wdy;
 set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
 % at lidar levels
-plot(beta_mol(:,1),alt(1:maxbin)*1e-3,'b'); 
+plot(beta_mol(:,1)*1e6,alt(1:maxbin)*1e-3,'b'); 
 hold on
-plot(beta_mol(:,2),alt(1:maxbin)*1e-3,'c');
+plot(beta_mol(:,2)*1e6,alt(1:maxbin)*1e-3,'c');
 % at sounding levels
-plot(beta_mol_snd(:,1),alt_snd(:)*1e-3,'bo'); 
-plot(beta_mol_snd(:,2),alt_snd(:)*1e-3,'co');
-xlabel('Lidar Beta / m-1')
+plot(beta_mol_snd(:,1)*1e6,alt_snd(:)*1e-3,'bo'); 
+plot(beta_mol_snd(:,2)*1e6,alt_snd(:)*1e-3,'co');
+xlabel('Lidar Beta / Mm-1')
 ylabel('Height / km')
 title('beta scatter for sounding','fontsize',[14]) 
 legend('355', '387', '355 sonde', '387 sonde');
@@ -327,16 +246,16 @@ plot(Pr2(RefBinTop(1),1), alt(RefBinTop(1))*1e-3,'r*');
 hold off
 legend('Lidar', 'Rayleigh Fit', 'Reference Bin'); 
 %   
-%subplot(1,2,2)
-%plot(Pr2(1:maxbin,2), alt(1:maxbin)*1e-3); 
-%xlabel('range smooth bg-corr signal','fontsize',[10])  
-%title('Rayleigh Fit 387','fontsize',14)
-%grid on
-%hold on
+subplot(1,2,2)
+plot(Pr2(1:maxbin,2), alt(1:maxbin)*1e-3); 
+xlabel('range smooth bg-corr signal','fontsize',[10])  
+title('Rayleigh Fit 387','fontsize',14)
+grid on
+hold on
 %plot(Pr2_mol(1:maxbin,2), alt(1:maxbin)*1e-3,'g','LineWidth',2); 
 %plot(Pr2(RefBin(2),2), alt(RefBin(2))*1e-3,'r*');
 %plot(Pr2(RefBinTop(2),2), alt(RefBinTop(2))*1e-3,'r*');
-%legend('Lidar', 'Rayleigh Fit', 'Reference Bin'); 
+legend('Lidar', 'Rayleigh Fit', 'Reference Bin'); 
 %
 % -------------
 figure(7); clf
@@ -349,21 +268,21 @@ ylabel('height / km','fontsize',12)
 title('Rayleigh fit Ln 355' ,'fontsize',14) 
 grid on 
 hold on
-plot(log(Pr2_mol(1:maxbin,1)),alt(1:maxbin)*1e-3,'g','LineWidth',2);   
-plot(log(Pr2(RefBin(1),1)), alt(RefBin(1))*1e-3,'r*');
-plot(log(Pr2(RefBinTop(1),1)), alt(RefBinTop(1))*1e-3,'r*');
+%plot(log(Pr2_mol(1:maxbin,1)),alt(1:maxbin)*1e-3,'g','LineWidth',2);   
+%plot(log(Pr2(RefBin(1),1)), alt(RefBin(1))*1e-3,'r*');
+%plot(log(Pr2(RefBinTop(1),1)), alt(RefBinTop(1))*1e-3,'r*');
 hold off
 %
-%subplot(1,2,2)
-%plot(log(Pr2(1:maxbin,2)),alt(1:maxbin)*1e-3,'b');  
-%xlabel('ln range smooth bg-corr signal','fontsize',[10])  
-%title('Rayleigh fit Ln 387' ,'fontsize',14) 
-%grid on
-%hold on
+subplot(1,2,2)
+plot(log(Pr2(1:maxbin,2)),alt(1:maxbin)*1e-3,'b');  
+xlabel('ln range smooth bg-corr signal','fontsize',[10])  
+title('Rayleigh fit Ln 387' ,'fontsize',14) 
+grid on
+hold on
 %plot(log(Pr2_mol(1:maxbin,2)),alt(1:maxbin)*1e-3,'g','LineWidth',2);   
 %plot(log(Pr2(RefBin(2),2)), alt(RefBin(2))*1e-3,'r*');
 %plot(log(Pr2(RefBinTop(2),2)), alt(RefBinTop(2))*1e-3,'r*');
-%hold off
+hold off
 %
 disp('End of program: rayleigh_fit_Manaus.m, Vers. 1.0 06/12')
 

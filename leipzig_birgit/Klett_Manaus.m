@@ -128,7 +128,7 @@ tope=RefBin(1);%floor(4/r_bin);
 figure(8); hold off
 xx=xx0+5*wdx; yy=yy0+5*wdy;
 set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
-plot(beta_klett_total(1:maxbin,1)*1e3, alt(1:maxbin).*1e-3,'r','Linewidth',1); 
+plot(beta_klett_total(1:maxbin,1)*1e6, alt(1:maxbin).*1e-3,'r','Linewidth',1);
 axis([-0.5 5.0 0 alt(tope)*1e-3*1.1]); 
 %axis([-1e-3 0.06 0 alt(tope)*1e-3]); 
 xlabel('BSC / Mm-1 sr-1','fontsize',[14])  
@@ -136,9 +136,9 @@ ylabel('Height / km','fontsize',[14])
 title(['Klett'],'fontsize',[14]) 
 grid on
 hold on
-plot(beta_mol (1:maxbin,1)*1e3, alt(1:maxbin).*1e-3,'g','Linewidth',1); 
-plot(beta_klett(1:maxbin,1)*1e3, alt(1:maxbin).*1e-3,'b','Linewidth',1); 
-plot(beta_klett(RefBin(1),1)*1e3, alt(RefBin(1)).*1e-3,'r*');
+plot(beta_mol (1:maxbin,1)*1e6, alt(1:maxbin).*1e-3,'g','Linewidth',1);
+plot(beta_klett(1:maxbin,1)*1e6, alt(1:maxbin).*1e-3,'b','Linewidth',1);
+plot(beta_klett(RefBin(1),1)*1e6, alt(RefBin(1)).*1e-3,'r*');
 legend('Total', 'Molecular', 'Klett', 'Reference Bin'); 
 plot(bb(1:maxbin)*1e3, alt(1:maxbin).*1e-3,'k','Linewidth',2);
 hold off

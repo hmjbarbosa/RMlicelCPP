@@ -35,7 +35,14 @@ bin1st = 1;
 % Angstrom coefficient 
 %aang = 1;    % European Urban
 % aang = 0.2;   % Saharan Desert Dust   
-aang = 1.2;    % Manaus = clean Amazon = 1.2+-0.4 dry season 
+%aang = 1.2;    % Manaus = clean Amazon = 1.2+-0.4 dry season 
+if ~exist('fix_angstrom','var')
+  disp(['WARNING:: angstrom coeff not set! assuming 1.2 ...']);
+  aang = 1.2;
+else
+  disp(['angstrom coeff set to ' num2str(fix_angstrom) ]);
+  aang = fix_angstrom;
+end
 
 % Scalling between Elastic and Raman, i.e., 
 % aer_ext(elastic) = aer_ext(raman) * (elastic/raman) ^ angstron
@@ -90,17 +97,17 @@ clear angfit
 %end
 %% 2nd order central
 for i=bin1st+1:maxbin-1
-  angfit(i,3)=(tmp(i+1)-tmp(i-1))/(alt(i+1)-alt(i-1))*1e3;
+  angfit(i,3)=(tmp(i+1)-tmp(i-1))/(alt(i+1)-alt(i-1));
 end
 % 2nd order backward
 %for i=bin1st+2:maxbin
 for i=maxbin:maxbin
-  angfit(i,3)=(tmp(i-2)-4*tmp(i-1)+3*tmp(i))/(alt(i)-alt(i-2))*1e3;
+  angfit(i,3)=(tmp(i-2)-4*tmp(i-1)+3*tmp(i))/(alt(i)-alt(i-2));
 end
 % 2nd order forward
 %for i=bin1st:maxbin-2
 for i=bin1st:bin1st
-  angfit(i,3)=(-3*tmp(i)+4*tmp(i+1)-tmp(i+2))/(alt(i+2)-alt(i))*1e3;
+  angfit(i,3)=(-3*tmp(i)+4*tmp(i+1)-tmp(i+2))/(alt(i+2)-alt(i));
 end
 %% 3rd order backward
 %for i=bin1st+2:maxbin-1
@@ -149,7 +156,7 @@ end
 figure(9);
 xx=xx0+4*wdx; yy=yy0+4*wdy;
 % Klett
-plot(alpha_klett(bin1st:maxbin,1)*1e3,alt(bin1st:maxbin)*1e-3,'b--')
+plot(alpha_klett(bin1st:maxbin,1)*1e6,alt(bin1st:maxbin)*1e-3,'b--')
 set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
 axis([-15 400 0 alt(tope-1)*1e-3*1.1]); 
 xlabel('Extinction / Mm^-1','fontsize',[12])  
@@ -158,10 +165,10 @@ title(['Raman'],'fontsize',[14])
 grid on
 hold on 
 % Raman 
-plot(alpha_raman(bin1st:maxbin)*1e3,alt(bin1st:maxbin)*1e-3,'r');
+plot(alpha_raman(bin1st:maxbin)*1e6,alt(bin1st:maxbin)*1e-3,'r');
 %plot(alpha_raman_sm(bin1st:RefBin(2))*1e3,alt(bin1st:RefBin(2))*1e-3,'r');
-plot(alpha_klett(RefBin(1),1)*1e3, alt(RefBin(1))*1e-3,'r*');
-plot(alpha_klett(RefBin(2),1)*1e3, alt(RefBin(2))*1e-3,'g*');
+plot(alpha_klett(RefBin(1),1)*1e6, alt(RefBin(1))*1e-3,'r*');
+plot(alpha_klett(RefBin(2),1)*1e6, alt(RefBin(2))*1e-3,'g*');
 legend('Klett', 'Raman', 'RefBin 355', 'RefBin 387')
 hold off
 %
