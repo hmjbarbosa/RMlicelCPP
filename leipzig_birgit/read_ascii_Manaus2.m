@@ -43,7 +43,6 @@
 %
 %------------------------------------------------------------------------
 
-clear jdi jdf datain
 clear nfile heads chphy
 clear altsq alt rangebins r_bin
 clear glue355 glue387 P Pr2
@@ -52,39 +51,40 @@ clear glue355 glue387 P Pr2
 %%  READ DATA
 %%------------------------------------------------------------------------
 
-addpath('../matlab');
-addpath('../sc');
-%datain='../../Raymetrics_data';
-datain='/home/lidar_data/data';
-jdi=datenum(2012, 1, 20, 23,  0, 0);
-jdf=datenum(2012, 1, 20, 23, 60, 0);
-jdi=datenum('29-Jul-2011 06:31:30'); jdf=datenum('29-Jul-2011 08:19:47')
-
-[nfile, heads, chphy]=profile_read_dates(datain, jdi, jdf, 10, 0.004, ...
-					 0, 4000);
-
-%% RANGE IN METERS
-rangebins=heads(1).ch(1).ndata;
-for i=1:rangebins
-  alt(i,1)=(7.5*i);
+if ~exist('jdi','var') | ~exist('jdf','var')
+  disp('ERROR:: initial and/or final julian dates not set!');
+  return
 end
+if ~exist('datain','var') 
+  disp('ERROR:: path to lidar data not set!');
+  return
+end
+
+[nfile, heads, chphy]=profile_read_dates(datain, jdi, jdf, 5, 0.004, 0, 4000);
+
+% range [m]
+rangebins=heads(1).ch(1).ndata;
+
+% bin height [m]
+r_bin=heads(1).ch(1).binw;
+for i=1:rangebins
+  alt(i,1)=(r_bin*i);
+end
+
+% calculate the range^2 [m^2]
+altsq = alt.*alt;
 
 %%------------------------------------------------------------------------
 %% RANGE CORRECTION AND OTHER SIGNAL PROCESSING
 %%------------------------------------------------------------------------
 
-% calculate the range^2 [m^2]
-altsq = alt.*alt;
-
-% bin height in km
-r_bin=(alt(2)-alt(1))*1e-3; 
-
 % matrix to hold lidar received power P(z, lambda)
 % anything user needs: time average, bg correction, glueing, etc..
 
 %% GLUE ANALOG+PC
-glue355=glue(chphy(1).data, heads(1).ch(1), chphy(2).data, heads(1).ch(2));
-%glue387=glue(chphy(3).data, heads(1).ch(3), chphy(4).data, heads(1).ch(4));
+%function [glued] = glue(anSignal, anChannel, pcSignal, pcChannel, toplot)
+glue355=chphy(1).data;
+glue387=chphy(3).data;
 
 figure(100)
 tmp=remove_bg(glue355, 500, -10);
@@ -93,17 +93,10 @@ for j=1:nfile
 end
 gplot2(tmp);
 
-%figure(200)
-%tmp2=remove_bg(glue387, 500, -10);
-%for j=1:nfile
-%  tmp2(:,j)=tmp2(:,j).*altsq(:);
-%end
-%gplot2(tmp2);
-
 P(:,1)=squeeze(nanmean(glue355,2));
-%P(:,2)=squeeze(nanmean(glue387,2));
-%P(:,1)=squeeze(nanmean(chphy(1).data,2));
-P(:,2)=squeeze(nanmean(chphy(4).data,2));
+P(:,2)=squeeze(nanmean(glue387,2));
+P(:,1)=remove_bg(P(:,1),500,-10);
+P(:,2)=remove_bg(P(:,2),500,-10);
 
 % range corrected signal Pz2(z, lambda)
 for j = 1:2
