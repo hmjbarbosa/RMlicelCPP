@@ -55,9 +55,7 @@
 %    Peck and Reeder, 1973: J. Opt. Soc. Ame., v 62 (8), p. 958
 %
 %------------------------------------------------------------------------
-
-clear sigma_std Pf_mol alpha_std dn300 dnAir fAir fAr fCO2 fN2 fO2 ...
-    gammaAir nAir rhoAir alpha_mol_snd beta_mol_snd LR_mol
+function [mol] = molecular(lambda, snd, cte, debug)
 
 %------------------------------------------------------------------------
 % User definitions (should be done before calling the routine)
@@ -67,6 +65,7 @@ clear sigma_std Pf_mol alpha_std dn300 dnAir fAir fAr fCO2 fN2 fO2 ...
 % Units should be [m]. Example:
 %
 % lambda=[0.355 0.387 0.408]*1e-6; % [m]
+mol.lambda = lambda;
 
 disp(['molecular:: wlen = ' num2str(lambda*1e6) ' um']);
 
@@ -80,20 +79,20 @@ disp(['molecular:: wlen = ' num2str(lambda*1e6) ' um']);
 %% or Bodhaine et al (1999), Eq (4)
 if (lambda > 0.23e-6)
   %% lambda > 0.23 microns
-  dn300 = (5791817 ./ (238.0185 - 1./(lambda*1e6).^2) + ...
+  mol.dn300 = (5791817 ./ (238.0185 - 1./(lambda*1e6).^2) + ...
 	167909 ./ (57.362 - 1./(lambda*1e6).^2))*1e-8; 
 else
   %% lambda <= 0.23 microns
-  dn300 = (8060.51 + 2480990 ./ (132.274 - 1./(lambda*1e6).^2) + ...
+  mol.dn300 = (8060.51 + 2480990 ./ (132.274 - 1./(lambda*1e6).^2) + ...
 	14455.7 ./ (39.32957 - 1./(lambda*1e6).^2))*1e-8;
 end
 
 %% Correct for different concentration of CO2
 %% Bodhaine et al (1999), Eq (19)
-dnAir = dn300 .* (1 + (0.54 * (co2ppmv*1e-6 - 0.0003)));
+mol.dnAir = mol.dn300 .* (1 + (0.54 * (cte.CO2ppv - 0.0003)));
 
 %% Actual index of refraction at 300 ppmv CO2
-nAir = 1 + dnAir;
+mol.nAir = 1 + mol.dnAir;
 
 %%------------------------------------------------------------------------
 %% KING FACTOR AND DEPOLARIZATION RATIO
@@ -103,20 +102,21 @@ nAir = 1 + dnAir;
 % or Bodhaine et al (1999), Eqs (5) and (6)
 
 % Nitrogen
-fN2 = 1.034 + (3.17e-4 ./ ((lambda*1e6).^2));
+mol.fN2 = 1.034 + (3.17e-4 ./ ((lambda*1e6).^2));
 % Oxygen 
-fO2 = 1.096 + (1.385e-3 ./ ((lambda*1e6).^2)) + (1.448e-4 ./ ((lambda*1e6).^4));
+mol.fO2 = 1.096 + (1.385e-3 ./ ((lambda*1e6).^2)) + (1.448e-4 ./ ((lambda*1e6).^4));
 % Argon
-fAr = 1;
+mol.fAr = [1.0 1.0];
 % Carbon dioxide
-fCO2 = 1.15;
+mol.fCO2 = [1.15 1.15];
 
 % Bodhaine et al (1999) Eq (23)
 % NOTE: numerator and denominator are not written in percent
 
 % Standard dry air mixture with co2ppmv
-fAir = (N2ppv*fN2 + O2ppv*fO2 + Arppv*fAr + co2ppmv*1e-6*fCO2)./...
-       (N2ppv     + O2ppv     + Arppv     + co2ppmv*1e-6);
+mol.fAir = (cte.N2ppv*mol.fN2 + cte.O2ppv*mol.fO2 + cte.Arppv*mol.fAr ...
+	    + cte.CO2ppv*mol.fCO2)./ (cte.N2ppv     + cte.O2ppv ...
+				      + cte.Arppv     + cte.CO2ppv);
 %
 % Depolarization ratio estimated from King's factor
 %
@@ -129,7 +129,7 @@ fAir = (N2ppv*fN2 + O2ppv*fO2 + Arppv*fAr + co2ppmv*1e-6*fCO2)./...
 %	  (0.78084      +0.20946      +0.00934      +co2ppmv*1e-6)
 %
 % hmjb - What is the correct way?
-rhoAir = (6*fAir-6)./(3+7*fAir);
+mol.rhoAir = (6*mol.fAir-6)./(3+7*mol.fAir);
 
 %%------------------------------------------------------------------------
 %% RAYLEIGH PHASE FUNCTION AT 180deg
@@ -137,8 +137,8 @@ rhoAir = (6*fAir-6)./(3+7*fAir);
 
 % Chandrasekhar (Chap. 1, p. 49)
 % or Bucholtz (1995), eqs (12) and (13)
-gammaAir = rhoAir./(2-rhoAir);
-Pf_mol = 0.75*((1+3.*gammaAir)+(1-gammaAir)*(cos(pi)^2))./(1+2.*gammaAir);
+mol.gammaAir = mol.rhoAir./(2-mol.rhoAir);
+mol.Pf_mol = 0.75*((1+3.*mol.gammaAir)+(1-mol.gammaAir)*(cos(pi)^2))./(1+2.*mol.gammaAir);
 
 %%------------------------------------------------------------------------
 %% RAYLEIGH TOTAL SCATERING CROSS SECTION
@@ -147,8 +147,8 @@ Pf_mol = 0.75*((1+3.*gammaAir)+(1-gammaAir)*(cos(pi)^2))./(1+2.*gammaAir);
 % McCartney (1976)
 % units: lambda [m], Nstd [#/m^3]
 % hence sigma_std is in [m2]
-sigma_std = 24 * (pi^3) * ((nAir.^2-1).^2) .* fAir ./...
-    ( (lambda.^4) .* (Nstd^2) .* (((nAir.^2)+2).^2) );
+mol.sigma_std = 24 * (pi^3) * ((mol.nAir.^2-1).^2) .* mol.fAir ./...
+    ( (lambda.^4) .* (cte.Nstd^2) .* (((mol.nAir.^2)+2).^2) );
 
 %%------------------------------------------------------------------------
 %% RAYLEIGH VOLUME-SCATTERING COEFFICIENT
@@ -161,14 +161,14 @@ sigma_std = 24 * (pi^3) * ((nAir.^2-1).^2) .* fAir ./...
 
 % Bucholtz (1995), eq (9), units [m^-1]
 % Nstd was calculated in #/m^3
-alpha_std = Nstd * sigma_std; 
-disp(['molecular:: alpha_std = ' num2str(alpha_std*1e6) ' Mm^-1']);
+mol.alpha_std = cte.Nstd * mol.sigma_std; 
+disp(['molecular:: alpha_std = ' num2str(mol.alpha_std*1e6) ' Mm^-1']);
 
 % Bucholtz (1995), eq (10), units [m^-1]
 % scaling for each P and T in the column 
 % pres_snd in Pa
 % temp_snd in K  -> see units in constants.m
-alpha_mol_snd = ((pres_snd./temp_snd) * Tstd/Pstd) * alpha_std;
+mol.alpha_mol_snd = ((snd.pres./snd.temp) * cte.Tstd/cte.Pstd) * mol.alpha_std;
 
 %%------------------------------------------------------------------------
 %% RAYLEIGH ANGULAR VOLUME-SCATTERING COEFFICIENT
@@ -176,7 +176,7 @@ alpha_mol_snd = ((pres_snd./temp_snd) * Tstd/Pstd) * alpha_std;
 
 % Rayleigh extinction to backscatter ratio
 % ie, Rayleigh lidar ratio [sr]
-LR_mol = (4*pi)./Pf_mol; 
+mol.LR_mol = (4*pi)./mol.Pf_mol; 
 
 % In traditional lidar notation, Bucholtz (1995) eq (14) defines the
 % backscattering coeficient. Here the usual greek letter 'beta' is
@@ -184,6 +184,6 @@ LR_mol = (4*pi)./Pf_mol;
 
 % Multiply by phase function for -180deg and divide by 4pi steradians 
 % Units: [m]-1 [sr]-1
-beta_mol_snd = alpha_mol_snd*diag(LR_mol.^-1); 
+mol.beta_mol_snd = mol.alpha_mol_snd*diag(mol.LR_mol.^-1); 
 
 %

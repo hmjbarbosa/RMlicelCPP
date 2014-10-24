@@ -20,7 +20,6 @@ jd=jdi; ff={};
 %while (jd<jdf)
 while (floor(jd)<ceil(jdf))
   time=datevec(jd);
-%  dir=sprintf('%s/%02d/%d/%02d',basedir,time(1)-2000,time(2),time(3));
   dir=sprintf('%s/%04d/%d/%02d',basedir,time(1),time(2),time(3));
   disp(['profile_read_dates::OPENING dir=' dir]);
   tmpf=dirpath(dir,'RM*');

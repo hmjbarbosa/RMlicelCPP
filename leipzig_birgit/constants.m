@@ -85,15 +85,15 @@ cte.units{j,1}='mwt';
 cte.units{j,2}='Molecular weight';
 cte.units{j,3}='[kg / mol]';
 %
-cte.gas{1}='N2';  cte.ppv(1)=0.78084;  cte.mwt(1)=28.013e-3;
-cte.gas{2}='O2';  cte.ppv(2)=0.20946;  cte.mwt(2)=31.999e-3;
-cte.gas{3}='Ar';  cte.ppv(3)=0.00934;  cte.mwt(3)=39.948e-3;
-cte.gas{4}='Ne';  cte.ppv(4)=1.80e-5;  cte.mwt(4)=20.180e-3;
-cte.gas{5}='He';  cte.ppv(5)=5.20e-6;  cte.mwt(5)=4.0030e-3;
-cte.gas{6}='Kr';  cte.ppv(6)=1.10e-6;  cte.mwt(6)=83.800e-3;
-cte.gas{7}='H2';  cte.ppv(7)=5.80e-7;  cte.mwt(7)=2.0160e-3;
-cte.gas{8}='Xe';  cte.ppv(8)=9.00e-8;  cte.mwt(8)=131.29e-3;
-cte.gas{9}='CO2'; cte.ppv(9)=co2ppv;   cte.mwt(9)=44.010e-3; 
+cte.gas{1}='N2';  cte.ppv(1)=0.78084;  cte.mwt(1)=28.013e-3; cte.N2ppv=cte.ppv(1);
+cte.gas{2}='O2';  cte.ppv(2)=0.20946;  cte.mwt(2)=31.999e-3; cte.O2ppv=cte.ppv(2);
+cte.gas{3}='Ar';  cte.ppv(3)=0.00934;  cte.mwt(3)=39.948e-3; cte.Arppv=cte.ppv(3);
+cte.gas{4}='Ne';  cte.ppv(4)=1.80e-5;  cte.mwt(4)=20.180e-3; cte.Neppv=cte.ppv(4);
+cte.gas{5}='He';  cte.ppv(5)=5.20e-6;  cte.mwt(5)=4.0030e-3; cte.Heppv=cte.ppv(5);
+cte.gas{6}='Kr';  cte.ppv(6)=1.10e-6;  cte.mwt(6)=83.800e-3; cte.Krppv=cte.ppv(6);
+cte.gas{7}='H2';  cte.ppv(7)=5.80e-7;  cte.mwt(7)=2.0160e-3; cte.H2ppv=cte.ppv(7);
+cte.gas{8}='Xe';  cte.ppv(8)=9.00e-8;  cte.mwt(8)=131.29e-3; cte.Xeppv=cte.ppv(8);
+cte.gas{9}='CO2'; cte.ppv(9)=co2ppv;   cte.mwt(9)=44.010e-3; cte.CO2ppv=cte.ppv(9);
 
 % force normalization depending of CO2 concentration
 cte.ppv=cte.ppv/sum(cte.ppv);

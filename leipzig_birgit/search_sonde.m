@@ -21,13 +21,9 @@
 %
 % Input
 %
-%    pathname - Complete path or just the filename of the
-%    radiosonde file. 
 %
 % Ouput
 %
-%    date - A date vector that can be converted to julian date
-%    using datenum()
 %
 %------------------------------------------------------------------------
 function [radiofile allradiofiles allradiojd] = search_sonde(radiodir,stationid,jd)
