@@ -17,7 +17,8 @@ datain='/Users/hbarbosa/DATA/Tiwa_LIDAR';
 lambda=[0.532]*1e-6; % [m]
 
 % date periods
-start_jd=datenum('17-Aug-2014 13:00:00');
+%start_jd=datenum('17-Aug-2014 13:00:00');
+start_jd=datenum('10-Sep-2014 13:00:00');
 end_jd=datenum('04-Oct-2014 13:00:00');
 
 % read once just to keep everything in memory
@@ -28,7 +29,7 @@ fix_lr_aer=55.;
 lidar_altitude=50.;
 
 % loop over all dates
-nprof=0;
+%nprof=0;
 jdi=start_jd;
 while jdi<end_jd 
   jdf=jdi+1;
@@ -40,6 +41,7 @@ while jdi<end_jd
   save_alpha_klett(1:rangebins,1:ntimes)=NaN;
 
   for k=1:ntimes
+    save_times(k)=times(k);
     if (count(k)>0)
 
       radiofile=search_sonde_again(allradio, alljd, times(k));
@@ -54,14 +56,19 @@ while jdi<end_jd
 
       Klett_Manaus
     
-      nprof=nprof+1;
-      save_beta_klett(:,nprof) = beta_klett(:,1);
-      save_alpha_klett(:,nprof) = alpha_klett(:,1);
-
+%      nprof=nprof+1;
+      save_beta_klett(:,k) = beta_klett(:,1);
+      save_alpha_klett(:,k) = alpha_klett(:,1);
+      
       %  Raman_Manaus
       %  Raman_beta_Manaus
     end
   end
+  
+  save(['tiwa' datestr(times(1)) '.mat'],...
+       'save_times','save_beta_klett','save_alpha_klett')
+  
+  clear glue355 glue387 save_times_save_beta_klett save_alpha_klett
   
   jdi=jdf;
 end
