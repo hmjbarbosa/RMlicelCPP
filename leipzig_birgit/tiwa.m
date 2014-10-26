@@ -18,8 +18,9 @@ lambda=[0.532]*1e-6; % [m]
 
 % date periods
 %start_jd=datenum('17-Aug-2014 13:00:00');
-start_jd=datenum('10-Sep-2014 13:00:00');
-end_jd=datenum('04-Oct-2014 13:00:00');
+start_jd=datenum('9-Sep-2014 13:00:00');
+end_jd=datenum('10-Sep-2014 13:00:00');
+%end_jd=datenum('04-Oct-2014 13:00:00');
 
 % read once just to keep everything in memory
 [radiofile allradio alljd]=search_sonde(radiodir,'82332',start_jd);
