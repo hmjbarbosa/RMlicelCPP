@@ -68,6 +68,9 @@ if isempty(dtime) dtime=0.004; end
 
 [nfile, heads, chphy]=...
     profile_read_dates(datain, jdi, jdf, dbin, dtime, 0, 4000);
+if (nfile==0)
+  return
+end
 
 % range [m]
 rangebins=heads(1).ch(1).ndata;

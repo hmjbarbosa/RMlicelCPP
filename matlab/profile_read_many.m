@@ -125,7 +125,7 @@ for nf=1:nfile
   % time-stamp of current file
   if (nf>1)
     if (head(nf).jdf < head(nf-1).jdf)
-      ['WARNING: list of files not in chronological order!']
+      ['WARNING: list of files not in chronological order! file: ' list{nf}]
     end
   end
   

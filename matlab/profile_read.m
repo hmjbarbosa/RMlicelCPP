@@ -43,6 +43,9 @@ if isempty(maxz) maxz=0; end
 
 %% OPEN FILE
 fp=fopen(fname,'r');
+if (fp < 0)
+  error(['fail to open file: ' fname]);
+end
 
 %% READ HEADER LINE #1
 head.file=fscanf(fp,'%s',[1,1]);
