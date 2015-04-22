@@ -1,6 +1,8 @@
-function [glued] = glue_single(anSignal, anChannel, pcSignal, pcChannel, toplot)
+function [glued a b] = glue_single(anSignal, anChannel, pcSignal, pcChannel, toplot)
 
 N=ndims(anSignal);
+a=nan;
+b=nan;
 if (N>1)
   [nx ny] = size(anSignal);
   if (ny>1 || N>2)
@@ -35,10 +37,19 @@ if exist('toplot','var')
   disp(['std_an=' num2str(std_an) '  std_pc=' num2str(std_pc)]);
 end
 
+%if (bg_pc+3*std_pc > 10.)
+%  glued=anSignal;
+%  if exist('toplot','var')
+%    disp(['error #0']);
+%  end  
+%  return
+%end
+
 % Create a mask for the region where analog and PC are thought to be
 % proportional: below 7MHZ and above 5*resolution
-mask=(anSignal>5*resol) & (anSignal>bg_an+3*std_an) & (anSignal~=NaN) & ...
-     (pcSignal<15.)     & (pcSignal>bg_pc+3*std_pc) & (pcSignal~=NaN);
+mask=(anSignal>5*resol) & (anSignal>bg_an+5*std_an) & (anSignal~=NaN) & ...
+     (pcSignal<45.)     & (pcSignal>bg_pc+5*std_pc) & (pcSignal~=NaN) & ...
+     (pcSignal>0.1);
 
 % limits of fit region. result of min() or max() is an array with the
 % corresponding values for each column
@@ -90,24 +101,30 @@ glued=glued';
 
 % Plot glue function 
 if exist('toplot','var')
+%  figure(1); clf; grid on;
+%  h=hist(anSignal); set(h,'linecolor','r'); hold on;
+%  h=hist(pcSignal); set(h,'linecolor','b'); 
+
+  figure(2); clf
   plot(cfun,'m',anSignal(mask), pcSignal(mask),'o');
   title('Linear fit for glueing');
   xlabel('anSignal (mV)');
   ylabel('pcSignal (MHz)');
   grid on;
   cfun
-  pause;
 
   % Plot glued and PC
+  figure(3)
   semilogy(idx,pcSignal,'r');
   hold on;
   semilogy(idx,glued,'b');
-  semilogy(idx(mask),pcSignal(mask),'.g');
-  semilogy(idx,anSignal,'.m');
+  semilogy(idx(mask),pcSignal(mask),'g');
+  semilogy(idx,anSignal,'m');
   legend('Uncorrected PC','Scaled Analog','fit region','analog');
   xlabel('#bins');
   ylabel('PC (MHz)');
   hold off;
+  pause;
 end
 
 %
