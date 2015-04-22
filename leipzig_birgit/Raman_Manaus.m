@@ -21,7 +21,6 @@ clear bin1st aang lambda_aang
 clear log_raman
 clear fval angfit linfit relerr smed
 clear alpha_raman
-%clear alpha_raman_sm
 clear signal
 clear lambda_aang tmp
 %
@@ -33,8 +32,8 @@ clear lambda_aang tmp
 bin1st = 1; 
 
 % Angstrom coefficient 
-%aang = 1;    % European Urban
-% aang = 0.2;   % Saharan Desert Dust   
+%aang = 1.0;    % European Urban
+%aang = 0.2;    % Saharan Desert Dust   
 %aang = 1.2;    % Manaus = clean Amazon = 1.2+-0.4 dry season 
 if ~exist('fix_angstrom','var')
   disp(['WARNING:: angstrom coeff not set! assuming 1.2 ...']);
@@ -55,16 +54,12 @@ lambda_aang = (355/387)^aang;
 
 % Calculate term to be derived
 tmp=NaN(maxbin,1);
-%inp=nanmysmooth(Pr2(:,2),0,20);
 for i = 1:maxbin
   if (Pr2(i,2)==0)
-%  if (inp(i)==0)
     tmp(i,1)=NaN;
   else
     tmp(i,1) = log(alpha_mol(i,2)./Pr2(i,2));
-%    tmp(i,1) = log(alpha_mol(i,2)./inp(i));
   end
-%  log_raman(2,i) = log(alpha_mol(i,2)./Pr2(i,2)'); % 387 nm
 end 
 
 % Compute the derivative as a simple linear fit centered in each
@@ -84,32 +79,37 @@ end
 
 % DERIVATIVE
 clear angfit
-%angfit(:,9)=angfit2;
-%% 1st order backward
+
+%% 1ST ORDER BACKWARD
 %for i=bin1st+1:maxbin
 %%for i=maxbin:maxbin
 %  angfit(i,1)=(tmp(i)-tmp(i-1))/(alt(i)-alt(i-1))*1e3;
 %end
-%% 1st order forward
+
+%% 1ST ORDER FORWARD
 %for i=bin1st:maxbin-1
 %%for i=bin1st:bin1st
 %  angfit(i,2)=(tmp(i+1)-tmp(i))/(alt(i+1)-alt(i))*1e3;
 %end
-%% 2nd order central
+
+%% 2ND ORDER CENTRAL
 for i=bin1st+1:maxbin-1
   angfit(i,3)=(tmp(i+1)-tmp(i-1))/(alt(i+1)-alt(i-1));
 end
-% 2nd order backward
+
+% 2ND ORDER BACKWARD
 %for i=bin1st+2:maxbin
 for i=maxbin:maxbin
   angfit(i,3)=(tmp(i-2)-4*tmp(i-1)+3*tmp(i))/(alt(i)-alt(i-2));
 end
-% 2nd order forward
+
+% 2ND ORDER FORWARD
 %for i=bin1st:maxbin-2
 for i=bin1st:bin1st
   angfit(i,3)=(-3*tmp(i)+4*tmp(i+1)-tmp(i+2))/(alt(i+2)-alt(i));
 end
-%% 3rd order backward
+
+%% 3RD ORDER BACKWARD
 %for i=bin1st+2:maxbin-1
 %  angfit(i,6)=(tmp(i-2)-6*tmp(i-1)+3*tmp(i)+2*tmp(i+1))/(alt(i+1)-alt(i-2))*1e3/2;
 %end
@@ -126,25 +126,16 @@ end
 
 alpha_raman = NaN(maxbin,1);
 alpha_raman2= NaN(maxbin,1);
+
+% try different derivatives
 for j=3:3
-%for i=bin1st:RefBin(2)
-for i=bin1st:maxbin
-%  alpha_raman(i,j) = (angfit(i-bin1st+1,j)./tmp(i)-alpha_mol(i,1)-alpha_mol(i,2))./(1+lambda_aang);
-  alpha_raman2(i,j) = (angfit(i,j)-alpha_mol(i,1)-alpha_mol(i,2))./(1+lambda_aang);
+  for i=bin1st:maxbin
+    alpha_raman2(i,j) = (angfit(i,j)-alpha_mol(i,1)-alpha_mol(i,2))./(1+lambda_aang);
+  end
 end
-end
-%figure(88); clf;
-%n=50;
-%plot(alpha_raman2(1:n,:),'o-')
-%legend('1b','1f','2c','2b','2f','3b','3f','4c','tmp');
-%hold on;
-%plot(alpha_klett(1:n,1),'ko--')
-%ylim([-1.35 1.50])
 
 alpha_raman=alpha_raman2(:,3);
-
-%alpha_raman=nanmysmooth(alpha_raman2(:,3),0,5);
-alpha_raman=nanmysmooth(alpha_raman2(:,3),0,200);
+%alpha_raman=nanmysmooth(alpha_raman2(:,3),40,200);
 
 % -------------
 %   plot data
@@ -153,20 +144,22 @@ if (debug==0)
   return
 end
 
-figure(9);
-xx=xx0+4*wdx; yy=yy0+4*wdy;
+tope=1000;
+
+figure
+temp=get(gcf,'position'); temp(3)=260; temp(4)=650;
+set(gcf,'position',temp); % units in pixels!
+hold off
 % Klett
 plot(alpha_klett(bin1st:maxbin,1)*1e6,alt(bin1st:maxbin)*1e-3,'b--')
-set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
-axis([-15 400 0 alt(tope-1)*1e-3*1.1]); 
+%set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
+axis([-15 1200 0 alt(tope-1)*1e-3*1.1]); 
 xlabel('Extinction / Mm^-1','fontsize',[12])  
 ylabel('Height / km','fontsize',[12])
 title(['Raman'],'fontsize',[14]) 
-grid on
-hold on 
+grid on; hold on 
 % Raman 
 plot(alpha_raman(bin1st:maxbin)*1e6,alt(bin1st:maxbin)*1e-3,'r');
-%plot(alpha_raman_sm(bin1st:RefBin(2))*1e3,alt(bin1st:RefBin(2))*1e-3,'r');
 plot(alpha_klett(RefBin(1),1)*1e6, alt(RefBin(1))*1e-3,'r*');
 plot(alpha_klett(RefBin(2),1)*1e6, alt(RefBin(2))*1e-3,'g*');
 legend('Klett', 'Raman', 'RefBin 355', 'RefBin 387')

@@ -134,14 +134,14 @@ for ch=1:nch
   % update the plot window
   if (debug>2)
     figure(24); clf; hold on;
-    plot(tmpZ(~isnan(tmpY)),tmpY(~isnan(tmpY)),'.');
-    plot(tmpZ(~isnan(tmpY)),tmpX(~isnan(tmpY))*a+b,'r-');
+    plot(tmpX(~isnan(tmpY)),tmpY(~isnan(tmpY)),'.');
+    plot(tmpX(~isnan(tmpY)),tmpX(~isnan(tmpY))*a+b,'r-','linewidth',1.5);
     %      plot(tmpZ(toerase),tmpY(toerase),'og');
     hold on; grid on;
-    xlabel('Z'); ylabel('P, Pmol Fit');
+    xlabel('Pmol (r)'); ylabel('P (r)');
     legend('lidar','mol*A+B');
     title('MOLECULAR POINTS');
-    colorbar;
+%    colorbar;
     if (debug>3)
       ginput(1);
     end
@@ -218,9 +218,9 @@ if (debug<2)
 end
 %
 % -------------
-figure(5)
-xx=xx0+4*wdx; yy=yy0+4*wdy;
-set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
+figure
+temp=get(gcf,'position'); temp(3)=260; temp(4)=650;
+set(gcf,'position',temp); % units in pixels!
 % at lidar levels
 plot(beta_mol(:,1),(alt(1:maxbin)+lidar_altitude)*1e-3,'b'); 
 hold on
@@ -241,14 +241,14 @@ hold off
 %
 %
 % -------------
-figure(6); clf
-xx=xx0+1*wdx; yy=yy0+1*wdy;
-set(gcf,'position',[xx,yy,2*wsx,wsy]); % units in pixels!
+figure
+temp=get(gcf,'position'); temp(3)=260; temp(4)=650;
+set(gcf,'position',temp); % units in pixels!
 if (nch>1)
   subplot(1,2,1)
 end
 plot(Pr2(1:maxbin,1), alt(1:maxbin)*1e-3); 
-xlabel('range smooth bg-corr signal','fontsize',[10])  
+xlabel('Pr2','fontsize',[10])  
 ylabel('Height a.g.l / km','fontsize',12)
 title('Rayleigh Fit 355','fontsize',14)
 grid on
@@ -273,14 +273,14 @@ if (nch>1)
 end
 %
 % -------------
-figure(7); clf
-xx=xx0+3*wdx; yy=yy0+3*wdy;
-set(gcf,'position',[xx,yy,2*wsx,wsy]); % units in pixels!
+figure
+temp=get(gcf,'position'); temp(3)=260; temp(4)=650;
+set(gcf,'position',temp); % units in pixels!
 if (nch>1)
   subplot(1,2,1)
 end
 plot(log(Pr2(1:maxbin,1)),alt(1:maxbin)*1e-3,'b');    
-xlabel('ln range smooth bg-corr signal','fontsize',[10])  
+xlabel('log(Pr2)','fontsize',[10])  
 ylabel('Height a.g.l. / km','fontsize',12)
 title('Rayleigh fit Ln 355' ,'fontsize',14) 
 grid on 

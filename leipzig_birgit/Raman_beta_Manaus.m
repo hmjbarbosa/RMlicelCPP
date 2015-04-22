@@ -94,7 +94,7 @@ for i=maxbin : -1 : bin1st
                                  beta_mol(Ref_1,1))*signals_1(i,1)*exp_z_1(i,1)/exp_n_1(i,1);
 end
 beta_raman(beta_raman==Inf)=NaN;
-%beta_raman=nanmysmooth(beta_raman,0,25);
+beta_raman=nanmysmooth(beta_raman,0,25);
 
 % 
 % -------------
@@ -112,16 +112,19 @@ if (debug==0)
   return
 end
 
+tope=1000;
+
 % ------------------------
 % Backscatter coeffcient
 % ------------------------
 %
-figure(10); clf;
-xx=xx0+3*wdx; yy=yy0+3*wdy;
+figure
+clf
+temp=get(gcf,'position'); temp(3)=260; temp(4)=650;
+set(gcf,'position',temp); % units in pixels!
 % Klett
 plot(beta_klett(bin1st:maxbin,1)*1e6, alt(bin1st:maxbin).*1e-3,'b--');
-set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
-axis([-2 9 0 alt(tope-1)*1e-3*1.1]);
+axis([-2 15 0 alt(tope-1)*1e-3*1.1]);
 xlabel('BSC Mm-1 sr-1','fontsize',[12])  
 ylabel('Height agl / km','fontsize',[12])
 title(['Raman'],'fontsize',[14]) 
@@ -140,10 +143,11 @@ hold off
 return
 rLR_1 = size(Lidar_Ratio(1,:));
 %  
-figure(11); clf;
-xx=xx0+2*wdx; yy=yy0+2*wdy;
+figure
+clf
+temp=get(gcf,'position'); temp(3)=260; temp(4)=650;
+set(gcf,'position',temp); % units in pixels!
 plot(Lidar_Ratio(bin1st:rLR_1(2)),alt(bin1st:rLR_1(2)).*1e-3,'b')
-set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
 axis([0 100 0 alt(tope-1)*1e-3*1.1]); 
 xlabel('Lidar Ratio / sr','fontsize',[12])  
 ylabel('Height agl / km','fontsize',[12])
