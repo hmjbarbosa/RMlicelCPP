@@ -106,9 +106,9 @@ mol.fN2 = 1.034 + (3.17e-4 ./ ((lambda*1e6).^2));
 % Oxygen 
 mol.fO2 = 1.096 + (1.385e-3 ./ ((lambda*1e6).^2)) + (1.448e-4 ./ ((lambda*1e6).^4));
 % Argon
-mol.fAr = [1.0 1.0];
+mol.fAr = 1.0*ones(size(lambda));
 % Carbon dioxide
-mol.fCO2 = [1.15 1.15];
+mol.fCO2 = 1.15*ones(size(lambda));
 
 % Bodhaine et al (1999) Eq (23)
 % NOTE: numerator and denominator are not written in percent
