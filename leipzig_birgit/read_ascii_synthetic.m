@@ -37,7 +37,8 @@ clear newP newalt
 %%  READ DATA
 %%------------------------------------------------------------------------
 
-filepath = '/Users/hbarbosa/Programs/RMlicelUSP/synthetic_signals/';
+filepath = datadir;
+%'/Users/hbarbosa/Programs/RMlicelUSP/synthetic_signals/';
 filelist{1}='Elastic_wv1';
 filelist{2}='Raman_wv1';
 
@@ -72,17 +73,15 @@ rangebins=size(channel,1);
 % calculate the range^2 [m^2]
 altsq = alt.*alt;
 
-% bin height in km
-r_bin=(alt(2)-alt(1))*1e-3; 
-
-noise=0*randn(size(channel));
-%load ruido_ruim.mat
-noisechannel=channel+noise;
+% bin height in [m]
+r_bin=(alt(2)-alt(1)); 
 
 % matrix to hold lidar received power P(z, lambda)
 % anything user needs: time average, bg correction, glueing, etc..
-%P=smooth_region(squeeze(nanmean(noisechannel,3)), 3, 400, 7, 800, 10);
-P=squeeze(nanmean(noisechannel,3));
+
+%P=smooth_region(squeeze(nanmean(channel,3)), 3, 400, 7, 800, 10);
+P=squeeze(nanmean(channel,3));
+P(:,2)=NaN;
 %clear channel;
 
 % binning
@@ -111,42 +110,57 @@ end
 %------------------------------------------------------------------------
 %  Plots
 %------------------------------------------------------------------------
-if (debug<1)
+if (debug<2)
   return
 end
 %
-%
-figure(1)
-xx=xx0+1*wdx; yy=yy0+1*wdy;
-set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
-plot(P(:,1),alt*1.e-3,'b')
-xlabel('smooth bg-corr signal','fontsize',[10])  
-ylabel('altitude (km)','fontsize',[10])
+figure
+temp=get(gcf,'position'); temp(3)=260; temp(4)=650;
+set(gcf,'position',temp); % units in pixels!
+plot(P(:,1),alt*1.e-3,'b','linewidth',1.5)
+xlabel('P(r)','fontsize',[14])  
+ylabel('altitude (km)','fontsize',[14])
 grid on
 hold on
 plot(P(:,2),alt*1.e-3,'c')
-hold off
+hold off;ylim([0 20])
 %
-figure(2)
-xx=xx0+2*wdx; yy=yy0+2*wdy;
-set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
-plot(Pr2(:,1),alt*1.e-3,'b')
-xlabel('range corrected smooth bg-corr signal','fontsize',[10])  
-ylabel('altitude (km)','fontsize',[10])
+if (debug<3)
+  return
+end
+set(gcf,'PaperUnits','inches','PaperSize',[3,9],'PaperPosition',[0 0 3 7.8]);
+prettify(gca); grid on;
+print('earlinet_P.png','-dpng');
+
+figure
+temp=get(gcf,'position'); temp(3)=260; temp(4)=650;
+set(gcf,'position',temp); % units in pixels!
+plot(Pr2(:,1),alt*1.e-3,'b','linewidth',1.5)
+xlabel('P(r)*r2','fontsize',[14])  
+ylabel('altitude (km)','fontsize',[14])
 grid on
 hold on 
 plot(Pr2(:,2),alt*1.e-3,'c')
-hold off
+hold off;ylim([0 20])
+set(gcf,'PaperUnits','inches','PaperSize',[3,9],'PaperPosition',[0 0 3 7.8]);
+prettify(gca); grid on;
+print('earlinet_Pr2.png','-dpng');
+
 % 
-figure(3)
-xx=xx0+3*wdx; yy=yy0+3*wdy;
-set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
-plot(log(P(:,1)),alt*1.e-3,'b')
-xlabel('log of smooth bg-corr signal','fontsize',[10])  
-ylabel('altitude (km)','fontsize',[10])
+figure
+temp=get(gcf,'position'); temp(3)=260; temp(4)=650;
+set(gcf,'position',temp); % units in pixels!
+plot(log(P(:,1)),alt*1.e-3,'b','linewidth',1.5)
+xlabel('log(P(r)*r2)','fontsize',[14])  
+ylabel('altitude (km)','fontsize',[14])
 grid on
 hold on
 plot(log(P(:,2)),alt*1.e-3,'c')
-hold off
+hold off;ylim([0 20])
+set(gcf,'PaperUnits','inches','PaperSize',[3,9],'PaperPosition',[0 0 3 7.8]);
+prettify(gca); grid on;
+print('earlinet_logPr2.png','-dpng');
+
+
 % 
 % end of program read_ascii_synthetic.m ***    
