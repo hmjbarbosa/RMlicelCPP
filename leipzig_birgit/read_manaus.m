@@ -44,7 +44,8 @@
 %------------------------------------------------------------------------
 %function [nfile heads chphy] = read_manaus(datain, jdi, jdf, dbin, dtime)
 
-clear nfile heads chphy altsq alt rangebins r_bin glue355 glue387 P Pr2
+clear nfile heads chphy altsq alt rangebins r_bin glue355 glue387 ...
+    P Pr2 altsq times ntimes count idx tmp data
 
 %%------------------------------------------------------------------------
 %%  READ DATA
@@ -67,7 +68,7 @@ if ~exist('dtime','var') dtime=0.004; end
 if isempty(dtime) dtime=0.004; end
 
 [nfile, heads, chphy]=...
-    profile_read_dates(datain, jdi, jdf, dbin, dtime, 0, 4000);
+    profile_read_dates(datain, jdi, jdf, dbin, dtime, 0);
 if (nfile==0)
   return
 end
@@ -102,51 +103,73 @@ tmp=datevec(maxjd); tmp(4)=0; tmp(5)=0; tmp(6)=0; maxday=datenum(tmp)+1;
 %% RANGE CORRECTION AND OTHER SIGNAL PROCESSING
 %%------------------------------------------------------------------------
 
-% matrix to hold lidar received power P(z, lambda)
-% anything user needs: time average, bg correction, glueing, etc..
-
-%% GLUE ANALOG+PC
-%function [glued] = glue(anSignal, anChannel, pcSignal, pcChannel, toplot)
-
 % Divide the period between minday and maxday into intervals of
 % size dt minutes
-dt=5.; % min
+dt=10.; % min
+
 % Create the vector of times 
 times=(0:dt:(maxday-minday)*1440)/1440.+minday;
 ntimes=length(times);
 
 % Initialize variables
-glue355(rangebins, ntimes)=0;
-glue387(rangebins, ntimes)=0;
-count(ntimes)=0;
+%hmjb 6/apr/2015 - estava errado, estava zerando apenas a 
+% ultima posicao, e os tres vetores nao eram "clear" em cima
+glue355(1:rangebins, 1:ntimes)=0;
+glue387(1:rangebins, 1:ntimes)=0;
+data(1:rangebins, 1:ntimes,heads(1).nch)=0;
+count(1:ntimes)=0;
 
 % Go over all profiles read and accumulate them into time-bins of
 % size dt-minutes
 clear list
 for j=1:nfile
   % to which bin should the j-th profile contribute
-  idx=floor((heads(j).jdi-minday)*1440./dt);
+  idx=floor((heads(j).jdi-minday)*1440./dt)+1;
+
   % how many profiles were added to this bin? 
   count(idx)=count(idx)+1;
   % accumulate the data
-  glue355(:,idx)=glue355(:,idx)+chphy(1).data(:,j);
-  glue387(:,idx)=glue387(:,idx)+chphy(3).data(:,j);
+  for k=1:heads(1).nch
+    data(:,idx,k)=data(:,idx,k)+chphy(1).data(:,k);
+  end
 end
 % For each dt interval, divide sum / counts
 for j=1:ntimes
   if (count(j)>0)
-    glue355(:,j)=glue355(:,j)./count(j);
-    glue387(:,j)=glue387(:,j)./count(j);
+    data(:,j,:)=data(:,j,:)/count(j);
   end
 end
 % And set as NaN if no profile were read into that bin
-glue355(:,count==0)=NaN;
-glue387(:,count==0)=NaN;
+data(:,count==0,:)=NaN;
+glue355=glue(data(:,:,1), heads(1).ch(1),data(:,:,2),heads(1).ch(2),1);
+glue387=glue(data(:,:,3), heads(1).ch(3),data(:,:,4),heads(1).ch(4),1);
 
 %------------------------------------------------------------------------
 %  Plots
 %------------------------------------------------------------------------
 %
+
+figure(100)
+tmp=remove_bg(chphy(1).data, 500, 3);
+tmp(tmp==0)=nan;
+for j=1:nfile
+  tmp(:,j)=tmp(:,j).*altsq(:);
+end
+gplot2(log(tmp(1:1334,:)),[],[],alt(1:1334)*1e-3);
+title([datestr(heads(1).jdi) ' to ' datestr(heads(end).jdf)])
+
+figure(101)
+tmp=remove_bg(glue355, 500, 3);
+tmp(tmp==0)=nan;
+for j=1:ntimes
+  tmp(:,j)=tmp(:,j).*altsq(:);
+end
+gplot2(log(tmp(1:1334,:)),[],times,alt(1:1334)*1e-3);
+datetick('x',15,'keeplimits')
+drawnow
+
+%gplot2(tmp(1:2000,:),[0:2e7:2e9],[],alt(1:2000)*1e-3);
+
 if (debug<2)
   return
 end

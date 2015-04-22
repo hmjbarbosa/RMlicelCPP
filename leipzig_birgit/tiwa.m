@@ -1,63 +1,81 @@
 clear all
+close all
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% USER CONFIG
+
+% Level of debuging messages and graphs
 debug=0;
 
-% windows' size
-wsx=250; wsy=650; 
-% displacement for next window
-wdx=260; xx0=-wsx;
-% start position
-wdy=0;   yy0=50;
+% Radiosonde station ID
+stationid='82332';
+
+% Location of radiosonde files. Expected directory structure is: 
+%    radiodir/stationid_YYYY_MM_DD_HHZ.dat
+%    YYYY year with 4 digits
+%    MM   month with 2 digits
+%    DD   day with 2 digits
+radiodir=['/Users/hbarbosa/SkyDrive/sondagens/' stationid '/dat'];
+
+datain='/Users/hbarbosa/DATA/Tiwa_LIDAR';
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % read physics constants
 cte=constants(400., debug);
 
-radiodir='/Users/hbarbosa/SkyDrive/sondagens/dat';
-datain='/Users/hbarbosa/DATA/Tiwa_LIDAR';
-%lambda=[0.532 0.607]*1e-6; % [m]
-lambda=[0.532]*1e-6; % [m]
+lambda=[0.532 0.607]*1e-6; % [m]
 
 % date periods
 %start_jd=datenum('17-Aug-2014 13:00:00');
-start_jd=datenum('9-Sep-2014 13:00:00');
-end_jd=datenum('10-Sep-2014 13:00:00');
+start_jd=datenum('11-Sep-2014 19:00:00');
+end_jd=datenum('12-Sep-2014 5:00:00');
 %end_jd=datenum('04-Oct-2014 13:00:00');
 
 % read once just to keep everything in memory
 [radiofile allradio alljd]=search_sonde(radiodir,'82332',start_jd);
 
 % info...
-fix_lr_aer=55.;
+fix_lr_aer=60.;
 lidar_altitude=50.;
+fix_angstrom=1.2;
+dbin=9;
+dtime=0.004;
 
 % loop over all dates
-%nprof=0;
 jdi=start_jd;
 while jdi<end_jd 
-  jdf=jdi+1;
+  jdf=min(jdi+1,end_jd);
 
-  read_manaus
+  read_tiwa
 
   % loop sobre os perfis medios de comprimento dt minutos
   save_beta_klett(1:rangebins,1:ntimes)=NaN;
   save_alpha_klett(1:rangebins,1:ntimes)=NaN;
+  save_beta_raman (1:rangebins,1:ntimes) = nan;
+  save_alpha_raman(1:rangebins,1:ntimes) = nan;
+  save_ldr_raman  (1:rangebins,1:ntimes) = nan;
 
   for k=1:ntimes
     save_times(k)=times(k);
-    if (count(k)>0)
+    tmp=datevec(times(k));
+    % night time only
+    if (count(k)>0 & (tmp(4)<5 | tmp(4)>6))
 
       radiofile=search_sonde_again(allradio, alljd, times(k));
       snd=read_sonde_Wyoming(radiofile, debug);
       mol=molecular(lambda, snd, cte, debug);
 
       P(:,1)=glue355(:,k);
+      P(:,2)=glue387(:,k);
       
       bottomlayer=6.5e3;%m
-      toplayer=10e3;%m
+      toplayer=12e3;%m
       rayleigh_fit
 
       Klett_Manaus
     
-%      nprof=nprof+1;
       save_beta_klett(:,k) = beta_klett(:,1);
       save_alpha_klett(:,k) = alpha_klett(:,1);
       
@@ -69,7 +87,7 @@ while jdi<end_jd
   save(['tiwa' datestr(times(1)) '.mat'],...
        'save_times','save_beta_klett','save_alpha_klett')
   
-  clear glue355 glue387 save_times_save_beta_klett save_alpha_klett
+%  clear glue355 glue387 save_times_save_beta_klett save_alpha_klett
   
   jdi=jdf;
 end
