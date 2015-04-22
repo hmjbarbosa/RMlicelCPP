@@ -49,29 +49,37 @@ while it < 15
   Klett_Manaus;
 
   PS(:,itnum+1) = P(:,1);
-  
-%  figure(90); clf
-%  plot(beta_raman(1:n),'r')
-%  hold on;
-%  plot(beta_klett(1:n),'b')
+
+  if (debug>1)
+    figure(90); clf
+    plot(beta_raman(1:n),'r')
+    hold on;
+    plot(beta_klett(1:n),'b')
+  end
   
   figure(91); clf
   plot(overlap,alt(1:n)*1e-3)
   grid; 
-%  ginput(1);
+  
+  if (debug>1)
+    ginput(1);
+  end
 end
 %overlap=PS(:,1)./PS(:,end);
 P(1:n,2)=P(1:n,2)./overlap(1:n);
 Pr2(1:n,2) = P(1:n,2).*altsq(1:n);
 
-%figure(90); grid
-%figure(91); grid; 
-%hold on; ylim([0 10e3]);
-%plot(smooth_region(PS(:,1)./PS(:,end),3,500,9,1000,27),alt,'r')
+if (debug>1)
+  figure(90); grid
+end
+figure(91); grid; 
+hold on; ylim([0 15e3]);
+plot(smooth_region(PS(:,1)./PS(:,end),3,500,9,1000,27),alt,'r')
+
 figure(10)
 hold on;
-plot(beta_klett(bin1st:maxbin,1)*1e3, alt(bin1st:maxbin).*1e-3,'b--');
+plot(beta_klett(bin1st:maxbin,1)*1e3, alt(bin1st:maxbin),'b--');
 %Raman_Manaus
 %Raman_beta_Manaus
-addresult
+%addresult
 %
