@@ -34,67 +34,88 @@
 %    Then execute this script.
 %
 %------------------------------------------------------------------------
-clear radiofile sondedata
-clear temp_snd pres_snd rho_snd alt_snd nlev_snd
+addpath('../matlab')
 
 % cannot read as a table because wyoming files have empty space for
 % missing data. usually happens at higher altitudes. the reading
 % mechanism, in this case, must rely on the constant width of the
 % fields. 
 
-jdi=datenum(2012, 1, 20, 23,  0, 0);
-jdf=datenum(2012, 1, 20, 23, 60, 0);
-
 % input dir
-dir='/home/hbarbosa/Programs/sondagens/dat';
+dir='/Users/hbarbosa/Skydrive/sondagens/82332/dat';
 disp(['*** read radiosounding data from dir:' dir]);
 
 % create file list
-addpath('../matlab')
-ff=dirpath(dir,'82332*dat');
+
+ff=dirpath(dir,'82332_2014_*dat');
 nfile=numel(ff);
 
 % loop over all files
-for nf=1:nfile
-  nf
-  ff{nf}
+for i=1:nfile
+  ff{i}  
+  tmp=read_sonde_Wyoming(ff{i});
+
+  sonde.fname{i}=tmp.fname;
+  sonde.code(i)=tmp.code;
+  sonde.station{i}=tmp.station;
+  sonde.jd(i)=tmp.jd;
+  sonde.date(:,i)=tmp.date(1,:);
+
+  if (i>1)
+    nlev=max(sonde.nlev);
+    if (tmp.nlev > nlev)
+      sonde.pres(nlev+1:tmp.nlev,:)=NaN;
+      sonde.alt (nlev+1:tmp.nlev,:)=NaN;
+      sonde.temp(nlev+1:tmp.nlev,:)=NaN;
+      sonde.rho (nlev+1:tmp.nlev,:)=NaN;
+      sonde.dwpt(nlev+1:tmp.nlev,:)=NaN;
+      sonde.relh(nlev+1:tmp.nlev,:)=NaN;
+      sonde.wdir(nlev+1:tmp.nlev,:)=NaN;
+      sonde.wvel(nlev+1:tmp.nlev,:)=NaN;
+    end
+  end
   
-  sonde(nf)=read_sonde_Wyoming(ff{nf});
+  sonde.nlev(i)=tmp.nlev;
+
+  sonde.pres(1:tmp.nlev,i)=tmp.pres(1:tmp.nlev,1);   
+  sonde.alt (1:tmp.nlev,i)=tmp.alt (1:tmp.nlev,1);   
+  sonde.temp(1:tmp.nlev,i)=tmp.temp(1:tmp.nlev,1);   
+  sonde.rho (1:tmp.nlev,i)=tmp.rho (1:tmp.nlev,1);   
+  sonde.dwpt(1:tmp.nlev,i)=tmp.dwpt(1:tmp.nlev,1);   
+  sonde.relh(1:tmp.nlev,i)=tmp.relh(1:tmp.nlev,1);   
+  sonde.wdir(1:tmp.nlev,i)=tmp.wdir(1:tmp.nlev,1);   
+  sonde.wvel(1:tmp.nlev,i)=tmp.wvel(1:tmp.nlev,1);   
+     
+  sonde.id{i}=tmp.id;
+  sonde.number(i)=tmp.number;
+  sonde.time{i}=tmp.time;
+  sonde.lat(i)=tmp.lat;
+  sonde.lon(i)=tmp.lon;
+  sonde.elev(i)=tmp.elev;
+  sonde.showalter(i)=tmp.showalter;
+  sonde.lift(i)=tmp.lift;
+  sonde.liftv(i)=tmp.liftv;
+  sonde.sweat(i)=tmp.sweat;
+  sonde.kidx(i)=tmp.kidx;
+  sonde.crosidx(i)=tmp.crosidx;
+  sonde.vertidx(i)=tmp.vertidx;
+  sonde.totlidx(i)=tmp.totlidx;
+  sonde.cape(i)=tmp.cape;
+  sonde.cine(i)=tmp.cine;
+  sonde.cinev(i)=tmp.cinev;
+  sonde.eqlb(i)=tmp.eqlb;
+  sonde.eqlbv(i)=tmp.eqlbv;
+  sonde.lfc(i)=tmp.lfc;
+  sonde.lfcv(i)=tmp.lfcv;
+  sonde.brich(i)=tmp.brich;
+  sonde.brichcap(i)=tmp.brichcap;
+  sonde.lcltemp(i)=tmp.lcltemp;
+  sonde.lclpres(i)=tmp.lclpres;
+  sonde.mixedpot(i)=tmp.mixedpot;
+  sonde.mixedratio(i)=tmp.mixedratio;
+  sonde.thick500(i)=tmp.thick500;
+  sonde.pwat(i)=tmp.pwat;
 
 end
-return  
 
-%------------------------------------------------------------------------
-%  Plots
-%------------------------------------------------------------------------
-%
-%
-% -------------
-figure(4)
-xx=xx0+5*wdx; yy=yy0+5*wdy;
-set(gcf,'position',[xx,yy,wsx,wsy]); % units in pixels!
-plot(temp_snd,alt_snd*1e-3,'Color','r');
-hold on
-ax1 = gca;
-set(ax1,'XColor','r','YColor','k','XAxisLocation','bottom')
-ylabel(ax1,'Height / km')
-xlabel(ax1,'Temperature / K')
-xlimits = get(ax1,'XLim');
-ylimits = get(ax1,'YLim');
-xinc = (xlimits(2)-xlimits(1))/5;
-yinc = (ylimits(2)-ylimits(1))/5;
-
-set(ax1,'XTick',[xlimits(1):xinc:xlimits(2)],...
-        'YTick',[ylimits(1):yinc:ylimits(2)]);
-
-ax2 = axes('Position',get(ax1,'Position'),'XAxisLocation','top',...
-           'YAxisLocation','right','Color','none',...
-           'XColor','b','YColor','k');
-xlabel(ax2,'density / kg/m3')
-line(rho_snd,alt_snd,'Color','b','Parent',ax2);
-grid on
-hold off
-%
-%
-disp('End of program: read_sonde_Manaus.m, Vers. 1.0 06/2012')
 %
