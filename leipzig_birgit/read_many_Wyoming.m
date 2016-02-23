@@ -42,17 +42,19 @@ addpath('../matlab')
 % fields. 
 
 % input dir
-dir='/Users/hbarbosa/Skydrive/sondagens/82332/dat';
+%dir='/Users/hbarbosa/Skydrive/sondagens/82332/dat';
+%dir='/Users/hbarbosa/Dropbox/00_ANALYSIS/sondagens/82332/dat';
+dir='/Users/hbarbosa/Dropbox/00_ANALYSIS/sondagens/81729/dat';
 disp(['*** read radiosounding data from dir:' dir]);
 
 % create file list
 
-ff=dirpath(dir,'82332_2014_*dat');
+ff=dirpath(dir,'*dat');
 nfile=numel(ff);
 
 % loop over all files
-for i=1:nfile
-  ff{i}  
+for i=1314:nfile
+  disp([num2str(i) ' ' ff{i}])
   tmp=read_sonde_Wyoming(ff{i});
 
   sonde.fname{i}=tmp.fname;

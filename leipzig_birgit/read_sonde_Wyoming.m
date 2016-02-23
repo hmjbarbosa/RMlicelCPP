@@ -157,6 +157,22 @@ while ~feof(fid)
     
 end 
 
+% note, 23/feb/2016 we need to fill variables with something!
+% in the rare case where none of the lines of the files had useful
+% data. For instance, when the Pres, Temp or Height columns are
+% completely missing. 
+if ~isfield(snd,'pres')
+  snd.pres(1,1)=nan;
+  snd.temp(1,1)=nan;
+  snd.alt(1,1)=nan;
+  snd.rho(1,1)=nan;
+  snd.dwpt(1,1)=nan;
+  snd.relh(1,1)=nan;
+  snd.wdir(1,1)=nan;
+  snd.wvel(1,1)=nan;
+  snd.nlev=0;
+end
+
 % number of levels in sounding
 snd.nlev(1,1)=max(size(snd.pres));
 
@@ -202,91 +218,120 @@ while ~feof(fid)
   aline=fgetl(fid);
   ipos=findstr('Observations',aline); if ~isempty(ipos) break; end; 
   if ~isempty(findstr('Station identifier',aline)) 
-    snd.id=sscanf(aline(findstr(':',aline)+1:end),'%s');
+    [snd.id,count,errmsg]=sscanf(aline(findstr(':',aline)+1:end),'%s');
+    if (count==0) snd.id=nan; end
   end
   if ~isempty(findstr('Station number',aline)) 
-    snd.number=sscanf(aline(findstr(':',aline)+1:end),'%d');
+    [snd.number,count,errmsg]=sscanf(aline(findstr(':',aline)+1:end),'%d');
+    if (count==0) snd.number=nan; end
   end
   if ~isempty(findstr('Observation time',aline)) 
-    snd.time=sscanf(aline(findstr(':',aline)+1:end),'%s');
+    [snd.time,count,errmsg]=sscanf(aline(findstr(':',aline)+1:end),'%s');
+    if (count==0) snd.time=nan; end
   end
   if ~isempty(findstr('Station latitude',aline)) 
-    snd.lat=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    [snd.lat,count,errmsg]=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    if (count==0) snd.lat=nan; end
   end
   if ~isempty(findstr('Station longitude',aline)) 
-    snd.lon=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    [snd.lon,count,errmsg]=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    if (count==0) snd.lon=nan; end
   end
   if ~isempty(findstr('Station elevation',aline)) 
-    snd.elev=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    [snd.elev,count,errmsg]=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    if (count==0) snd.elev=nan; end
   end
   if ~isempty(findstr('Showalter index',aline)) 
-    snd.showalter=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    [snd.showalter,count,errmsg]=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    if (count==0) snd.showalter=nan; end
   end
   if ~isempty(findstr('Lifted index:',aline)) 
-    snd.lift=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    [snd.lift,count,errmsg]=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    if (count==0) snd.lift=nan; end
   end
   if ~isempty(findstr('LIFT computed using virtual temperature',aline)) 
-    snd.liftv=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    [snd.liftv,count,errmsg]=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    if (count==0) snd.liftv=nan; end
   end
   if ~isempty(findstr('SWEAT index',aline)) 
-    snd.sweat=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    [snd.sweat,count,errmsg]=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    if (count==0) snd.sweat=nan; end
   end
   if ~isempty(findstr('K index',aline)) 
-    snd.kidx=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    [snd.kidx,count,errmsg]=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    if (count==0) snd.kidx=nan; end
   end
   if ~isempty(findstr('Cross totals index',aline)) 
-    snd.crosidx=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    [snd.crosidx,count,errmsg]=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    if (count==0) snd.crosidx=nan; end
   end
   if ~isempty(findstr('Vertical totals index',aline)) 
-    snd.vertidx=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    [snd.vertidx,count,errmsg]=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    if (count==0) snd.vertidx=nan; end
   end
   if ~isempty(findstr('Convective Available Potential Energy',aline)) 
-    snd.totlidx=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    [snd.totlidx,count,errmsg]=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    if (count==0) snd.totlidx=nan; end
   end
   if ~isempty(findstr('CAPE using virtual temperature',aline)) 
-    snd.cape=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    [snd.cape,count,errmsg]=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    if (count==0) snd.cape=nan; end
   end
   if ~isempty(findstr('Convective Inhibition',aline)) 
-    snd.cine=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    [snd.cine,count,errmsg]=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    if (count==0) snd.cine=nan; end
   end
   if ~isempty(findstr('CINS using virtual temperature',aline)) 
-    snd.cinev=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    [snd.cinev,count,errmsg]=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    if (count==0) snd.cinev=nan; end
   end
   if ~isempty(findstr('Equilibrum Level',aline)) 
-    snd.eqlb=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    [snd.eqlb,count,errmsg]=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    if (count==0) snd.eqlb=nan; end
   end
   if ~isempty(findstr('Equilibrum Level using virtual temperature',aline)) 
-    snd.eqlbv=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    [snd.eqlbv,count,errmsg]=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    if (count==0) snd.eqlbv=nan; end
   end
   if ~isempty(findstr('Level of Free Convection',aline)) 
-    snd.lfc=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    [snd.lfc,count,errmsg]=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    if (count==0) snd.lfc=nan; end
   end
   if ~isempty(findstr('LFCT using virtual temperature',aline)) 
-    snd.lfcv=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    [snd.lfcv,count,errmsg]=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    if (count==0) snd.lfcv=nan; end
   end
   if ~isempty(findstr('Bulk Richardson Number',aline)) 
-    snd.brich=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    [snd.brich,count,errmsg]=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    if (count==0) snd.brich=nan; end
   end
   if ~isempty(findstr('Bulk Richardson Number using CAPV',aline)) 
-    snd.brichcap=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    [snd.brichcap,count,errmsg]=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    if (count==0) snd.brichcap=nan; end
   end
   if ~isempty(findstr('Temp [K] of the Lifted Condensation Level',aline)) 
-    snd.lcltemp=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    [snd.lcltemp,count,errmsg]=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    if (count==0) snd.lcltemp=nan; end
   end
   if ~isempty(findstr('Pres [hPa] of the Lifted Condensation Level',aline)) 
-    snd.lclpres=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    [snd.lclpres,count,errmsg]=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    if (count==0) snd.lclpres=nan; end
   end
   if ~isempty(findstr('Mean mixed layer potential temperature',aline)) 
-    snd.mixedpot=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    [snd.mixedpot,count,errmsg]=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    if (count==0) snd.mixedpot=nan; end
   end
   if ~isempty(findstr('Mean mixed layer mixing ratio',aline)) 
-    snd.mixedratio=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    [snd.mixedratio,count,errmsg]=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    if (count==0) snd.mixedratio=nan; end
   end
   if ~isempty(findstr('1000 hPa to 500 hPa thickness',aline)) 
-    snd.thick500=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    [snd.thick500,count,errmsg]=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    if (count==0) snd.thick500=nan; end
   end
   if ~isempty(findstr('Precipitable water [mm] for entire sounding',aline)) 
-    snd.pwat=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    [snd.pwat,count,errmsg]=sscanf(aline(findstr(':',aline)+1:end),'%f');
+    if (count==0) snd.pwat=nan; end
   end
 end
 
