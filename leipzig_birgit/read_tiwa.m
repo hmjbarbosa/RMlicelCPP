@@ -105,7 +105,7 @@ tmp=datevec(maxjd); tmp(4)=0; tmp(5)=0; tmp(6)=0; maxday=datenum(tmp)+1;
 
 % Divide the period between minday and maxday into intervals of
 % size dt minutes
-dt=10.; % min
+dt=1000.; % min
 
 % Create the vector of times 
 times=(0:dt:(maxday-minday)*1440)/1440.+minday;
@@ -155,7 +155,7 @@ tmp(tmp==0)=nan;
 for j=1:nfile
   tmp(:,j)=tmp(:,j).*altsq(:);
 end
-gplot2(log(tmp(1:1334,:)),[],[],alt(1:1334)*1e-3);
+gplot2(log(tmp(1:3000,:)),[],[],alt(1:3000)*1e-3);
 title([datestr(heads(1).jdi) ' to ' datestr(heads(end).jdf)])
 
 figure(101)
@@ -164,7 +164,7 @@ tmp(tmp==0)=nan;
 for j=1:ntimes
   tmp(:,j)=tmp(:,j).*altsq(:);
 end
-gplot2(log(tmp(1:1334,:)),[],times,alt(1:1334)*1e-3);
+gplot2(log(tmp(1:3000,:)),[],times,alt(1:3000)*1e-3);
 datetick('x',15,'keeplimits')
 drawnow
 

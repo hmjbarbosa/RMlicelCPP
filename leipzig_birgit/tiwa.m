@@ -15,7 +15,7 @@ stationid='82332';
 %    YYYY year with 4 digits
 %    MM   month with 2 digits
 %    DD   day with 2 digits
-radiodir=['/Users/hbarbosa/SkyDrive/sondagens/' stationid '/dat'];
+radiodir=['/Users/hbarbosa/Dropbox/00_ANALYSIS/sondagens/' stationid '/dat'];
 
 datain='/Users/hbarbosa/DATA/Tiwa_LIDAR';
 
@@ -62,7 +62,7 @@ while jdi<end_jd
     tmp=datevec(times(k));
     % night time only
     if (count(k)>0 & (tmp(4)<5 | tmp(4)>6))
-
+debug=0;
       radiofile=search_sonde_again(allradio, alljd, times(k));
       snd=read_sonde_Wyoming(radiofile, debug);
       mol=molecular(lambda, snd, cte, debug);
@@ -70,8 +70,12 @@ while jdi<end_jd
       P(:,1)=glue355(:,k);
       P(:,2)=glue387(:,k);
       
-      bottomlayer=6.5e3;%m
-      toplayer=12e3;%m
+      bottomlayer=25e3;%m
+      toplayer=35e3;%m
+debug=5;
+clear fix_lr_aer
+LR_par(1:1467,1)=60;
+LR_par(1468:8190,1)=22;
       rayleigh_fit
 
       Klett_Manaus

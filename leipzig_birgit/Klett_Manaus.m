@@ -21,15 +21,17 @@ clear extinktion
 clear beta_klett_total beta_bv
 clear beta_klett 
 clear alpha_klett 
-clear alpha_aero LR_par j i
+clear alpha_aero j i
 % 
 zet_0 = 1;
-if ~exist('fix_lr_aer','var')
-  disp(['WARNING:: lidar ratio not set! assuming 55 sr^-1...']);
-  LR_par(1:maxbin,1) = 55;
-else
-  disp(['Lidar ratio set to ' num2str(fix_lr_aer) ' sr^-1...']);
-  LR_par(1:maxbin,1) = fix_lr_aer;
+if ~exist('LR_par','var')
+  if ~exist('fix_lr_aer','var')
+    disp(['WARNING:: lidar ratio not set! assuming 55 sr^-1...']);
+    LR_par(1:maxbin,1) = 55;
+  else
+    disp(['Lidar ratio set to ' num2str(fix_lr_aer) ' sr^-1...']);
+    LR_par(1:maxbin,1) = fix_lr_aer;
+  end
 end
 %load('true_LR.mat')
 %LR_par(:,1) = res_lrt(1:maxbin);
