@@ -277,9 +277,9 @@ void header_printf(FILE *fp, RMDataFile rm,
   fprintf(fp,"\r\n");
   
   // Line 2
-  fprintf(fp,"%1s",beg);
-  fprintf(fp,"%s%1s",rm.site,sep);
-  fprintf(fp,"%s%1s",rm.start.write2DMY('/').c_str(),sep);
+  fprintf(fp,"%s",beg);
+  fprintf(fp,"%s%s",rm.site,sep);
+  fprintf(fp,"%s%s",rm.start.write2DMY('/').c_str(),sep);
   fprintf(fp,"%s%1s",rm.start.write2hms().c_str(),sep);
   fprintf(fp,"%s%1s",rm.end.write2DMY('/').c_str(),sep);
   fprintf(fp,"%s%1s",rm.end.write2hms().c_str(),sep);
@@ -732,7 +732,6 @@ int profile_read (const char* fname, RMDataFile *rm, bool debug, bool noraw)
         fprintf(stderr,"\n -------- channel: : %d \n", i);
         fprintf(stderr,"\n amount of data read: %d \n", (int) nread);
       }
-      //      cerr << "aqui\n"<<endl;
       if(nread<(sizeof(bin)*rm->ch[i].ndata)) {
         if(file_error(fp)!=0) {
           fprintf(stderr,"\nblock %d corrupt",i+1);
@@ -741,7 +740,7 @@ int profile_read (const char* fname, RMDataFile *rm, bool debug, bool noraw)
           return(1);
         }
       }
-      //      cerr << "aqui2\n"<<endl;
+
       // convert data to physical units
       if (!rm->ch[i].photons)
         dScale = rm->ch[i].nshoots*pow(2,rm->ch[i].bits)/(rm->ch[i].discr*1.e3);

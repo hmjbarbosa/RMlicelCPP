@@ -14,6 +14,8 @@
 #include "TimeDate.h"
 #include "mylidar.h"
 
+using std::string;
+
 #define UTC -4 // local time zone
 
 /*

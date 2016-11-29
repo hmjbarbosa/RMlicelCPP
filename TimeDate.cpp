@@ -1,4 +1,6 @@
 #include "TimeDate.h"
+#include <string>
+using std::string;
 
 //ClassImp(RM_Date)
 
@@ -168,7 +170,7 @@ void RM_Date::RoundMinutes()
  */
 std::string RM_Date::write2nc()
 {
-  char strdate[26];
+  char strdate[27];
   int h, m;
   h=int(this->utc);
   m=int((this->utc-h)*60);
@@ -186,14 +188,20 @@ std::string RM_Date::write2nc()
  */
 std::string RM_Date::write2YMD(const char sep) 
 {
-  char strdate[10];
+  char strdate[11];
   sprintf(strdate,"%04d%1c%02d%1c%02d", yy,sep, mm,sep, dd);
   return(strdate);
 }
 std::string RM_Date::write2DMY(const char sep) 
 {
-  char strdate[10];
+  char strdate[11];
+  //std::cerr << "aqui w " << dd << sep << mm << sep << yy << "\n";
+  //std::cerr << "|" << yy << "|\n";
+  //std::cerr << "|" << printf(" %d %c %d ; %c ; %d ; ", dd,sep, mm,sep,yy) << "|" << yy << std::endl;
   sprintf(strdate,"%02d%1c%02d%1c%04d", dd,sep, mm,sep, yy);
+  //std::cerr << "aqui w 1a\n";
+  //std::string str(strdate);
+  //return(str);
   return(strdate);
 }
 
@@ -206,7 +214,7 @@ std::string RM_Date::write2DMY(const char sep)
  */
 std::string RM_Date::write2hms(const char sep) 
 {
-  char strdate[8];
+  char strdate[9];
   sprintf(strdate,"%02d%1c%02d%1c%02d",hh,sep,mn,sep,ss);
   return(strdate);
 }
