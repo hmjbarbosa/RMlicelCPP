@@ -44,7 +44,7 @@ up = RefBin(2);
 % reference value for beta particle
 %------------------------------------
 Ref_1=up;
-beta_par(1,Ref_1)= 1e-12;  % in km
+beta_par(1,Ref_1)= 0e-12;  % in km
   
 p_ave_raman_1(up,1)=0;
 m_ave_raman_1(up,1)=0;
@@ -94,7 +94,7 @@ for i=maxbin : -1 : bin1st
                                  beta_mol(Ref_1,1))*signals_1(i,1)*exp_z_1(i,1)/exp_n_1(i,1);
 end
 beta_raman(beta_raman==Inf)=NaN;
-beta_raman=nanmysmooth(beta_raman,0,25);
+%beta_raman=nanmysmooth(beta_raman,0,25);
 
 % 
 % -------------

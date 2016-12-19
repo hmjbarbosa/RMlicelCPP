@@ -55,7 +55,7 @@ lambda_aang = (355/387)^aang;
 % Calculate term to be derived
 tmp=NaN(maxbin,1);
 for i = 1:maxbin
-  if (Pr2(i,2)==0)
+  if (Pr2(i,2)<=0)
     tmp(i,1)=NaN;
   else
     tmp(i,1) = log(alpha_mol(i,2)./Pr2(i,2));
@@ -74,8 +74,8 @@ end
 %tmp=mysmooth(tmp2,10,10);
 %tmp=nanmysmooth(tmp,0,25);
 
-%[fval,angfit2,linfit,relerr,smed]=nanrunfit2(...
-%    tmp(bin1st:maxbin), alt(bin1st:maxbin).*1e-3, 5, 5);
+[fval,angfit2,linfit,relerr,smed]=nanrunfit2(...
+    tmp(bin1st:maxbin), alt(bin1st:maxbin), 5, 5);
 
 % DERIVATIVE
 clear angfit
@@ -130,12 +130,12 @@ alpha_raman2= NaN(maxbin,1);
 % try different derivatives
 for j=3:3
   for i=bin1st:maxbin
-    alpha_raman2(i,j) = (angfit(i,j)-alpha_mol(i,1)-alpha_mol(i,2))./(1+lambda_aang);
+    alpha_raman2(i,j) = (angfit2(i,1)-alpha_mol(i,1)-alpha_mol(i,2))./(1+lambda_aang);
   end
 end
 
-alpha_raman=alpha_raman2(:,3);
-%alpha_raman=nanmysmooth(alpha_raman2(:,3),40,200);
+%alpha_raman=alpha_raman2(:,3);
+alpha_raman=nanmysmooth(alpha_raman2(:,3),20,200);
 
 % -------------
 %   plot data

@@ -105,7 +105,7 @@ tmp=datevec(maxjd); tmp(4)=0; tmp(5)=0; tmp(6)=0; maxday=datenum(tmp)+1;
 
 % Divide the period between minday and maxday into intervals of
 % size dt minutes
-dt=10.; % min
+dt=5.; % min
 
 % Create the vector of times 
 times=(0:dt:(maxday-minday)*1440)/1440.+minday;
@@ -130,7 +130,7 @@ for j=1:nfile
   count(idx)=count(idx)+1;
   % accumulate the data
   for k=1:heads(1).nch
-    data(:,idx,k)=data(:,idx,k)+chphy(1).data(:,k);
+    data(:,idx,k)=data(:,idx,k)+chphy(k).data(:,j);
   end
 end
 % For each dt interval, divide sum / counts
@@ -141,13 +141,17 @@ for j=1:ntimes
 end
 % And set as NaN if no profile were read into that bin
 data(:,count==0,:)=NaN;
-glue355=glue(data(:,:,1), heads(1).ch(1),data(:,:,2),heads(1).ch(2),1);
-glue387=glue(data(:,:,3), heads(1).ch(3),data(:,:,4),heads(1).ch(4),1);
+glue355=glue(data(:,:,1), heads(1).ch(1),data(:,:,2),heads(1).ch(2));
+glue387=glue(data(:,:,3), heads(1).ch(3),data(:,:,4),heads(1).ch(4));
+
+glue355=remove_bg(glue355,1000,-10);
+glue387=remove_bg(glue387,1000,-10);
 
 %------------------------------------------------------------------------
 %  Plots
 %------------------------------------------------------------------------
 %
+ntop=1200;
 
 figure(100)
 tmp=remove_bg(chphy(1).data, 500, 3);
@@ -155,18 +159,34 @@ tmp(tmp==0)=nan;
 for j=1:nfile
   tmp(:,j)=tmp(:,j).*altsq(:);
 end
-gplot2(log(tmp(1:1334,:)),[],[],alt(1:1334)*1e-3);
+[h bar]=gplot2(log(tmp(100:ntop,:)),[],[],alt(100:ntop)*1e-3);
+ylabel(bar,'Log RCS')
 title([datestr(heads(1).jdi) ' to ' datestr(heads(end).jdf)])
+xlabel('Bins (#)')
+ylabel('Altitude (km)')
+prettify(gca,bar)
+drawnow
+tmp=datevec(jdi);
+print(['T0e_RCS_fullres_' num2str(tmp(3)) '_' num2str(tmp(2)) '.png'],'-dpng')
 
 figure(101)
-tmp=remove_bg(glue355, 500, 3);
-tmp(tmp==0)=nan;
-for j=1:ntimes
-  tmp(:,j)=tmp(:,j).*altsq(:);
+tmp2=remove_bg(glue355, 500, 3);
+tmp2(tmp2==0)=nan;
+tmp=nan(size(tmp2));
+for j=2:ntimes-1
+  tmp(:,j)=nanmean(tmp2(:,j-1:j+1),2).*altsq(:);
 end
-gplot2(log(tmp(1:1334,:)),[],times,alt(1:1334)*1e-3);
+[h bar]=gplot2(log(tmp(100:ntop,:)),[],times,alt(100:ntop)*1e-3);
+ylabel(bar,'Log RCS')
+title([datestr(heads(1).jdi) ' to ' datestr(heads(end).jdf)])
+xlim([jdi jdf])
 datetick('x',15,'keeplimits')
+xlabel('Time (#)')
+ylabel('Altitude (km)')
+prettify(gca,bar)
 drawnow
+tmp=datevec(jdi);
+print(['T0e_RCS_30min_' num2str(tmp(3)) '_' num2str(tmp(2)) '.png'],'-dpng')
 
 %gplot2(tmp(1:2000,:),[0:2e7:2e9],[],alt(1:2000)*1e-3);
 

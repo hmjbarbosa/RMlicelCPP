@@ -176,14 +176,16 @@ for ch=1:nch
   end
 
   % Don't try to remove BG if linear coef. is compatible with bg=0
+  b=0;%17/jul removendo no read_tiwa, com 1000 bins no final do perfil
+  
   if (abs(b/sb)>3)
     bg(ch)=b;
   else
     bg(ch)=0;
   end
   errbg(ch)=sb;
-  if (debug>1)
-    disp(['ch= ' num2str(ch) '  last BG= ' num2str(bg(ch)) ]);
+  if (debug>=0)
+    disp(['rayleigh_fit::ch= ' num2str(ch) '  last BG= ' num2str(bg(ch)) ]);
   end
  
   %% APPLY THE CALCULATED BG
@@ -198,8 +200,14 @@ for ch=1:nch
   Pr2_mol(1:maxbin,ch) = P_mol(1:maxbin,ch).*altsq(1:maxbin);
 
   %% FORCE THE REFERENCE BIN TO BE MOLECULAR
-  P(RefBin(ch),ch)=P_mol(RefBin(ch),ch);
-  Pr2(RefBin(ch),ch)=Pr2_mol(RefBin(ch),ch);
+  if isnan(RefBin(ch))
+    disp(['Warning, undefined RefBin for channel: ' num2str(ch)])
+    RefBin(ch)=1;
+    RefBinTop(ch)=1;
+  else
+    P(RefBin(ch),ch)=P_mol(RefBin(ch),ch);
+    Pr2(RefBin(ch),ch)=Pr2_mol(RefBin(ch),ch);
+  end
 
 end % channel loop
 

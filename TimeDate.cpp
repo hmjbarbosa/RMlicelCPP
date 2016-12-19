@@ -195,13 +195,7 @@ std::string RM_Date::write2YMD(const char sep)
 std::string RM_Date::write2DMY(const char sep) 
 {
   char strdate[11];
-  //std::cerr << "aqui w " << dd << sep << mm << sep << yy << "\n";
-  //std::cerr << "|" << yy << "|\n";
-  //std::cerr << "|" << printf(" %d %c %d ; %c ; %d ; ", dd,sep, mm,sep,yy) << "|" << yy << std::endl;
   sprintf(strdate,"%02d%1c%02d%1c%04d", dd,sep, mm,sep, yy);
-  //std::cerr << "aqui w 1a\n";
-  //std::string str(strdate);
-  //return(str);
   return(strdate);
 }
 

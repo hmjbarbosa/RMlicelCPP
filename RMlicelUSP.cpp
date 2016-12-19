@@ -86,27 +86,27 @@ void channel_read(FILE *fp, channel *ch)
  */
 void channel_printf(FILE *fp, channel ch, const char* beg, const char* sep) 
 {
-  fprintf(fp,"%1s",beg);
-  fprintf(fp,"%1d%1s",ch.active,sep);
-  fprintf(fp,"%1d%1s",ch.photons,sep); 
-  fprintf(fp,"%1d%1s",ch.elastic,sep);
-  fprintf(fp,"%05d%1s",ch.ndata,sep);
-  fprintf(fp,"%1d%1s",1,sep);
-  fprintf(fp,"%04d%1s",ch.pmtv,sep);
-  fprintf(fp,"%04.2f%1s",ch.binw,sep);
-  fprintf(fp,"%05d.%1c%1s",ch.wlen,ch.pol,sep);
-  fprintf(fp,"%1d%1s",0,sep);
-  fprintf(fp,"%1d%1s",0,sep);
-  fprintf(fp,"%02d%1s",0,sep);
-  fprintf(fp,"%03d%1s",0,sep); 
-  fprintf(fp,"%02d%1s",ch.bits,sep);
-  fprintf(fp,"%06d%1s",ch.nshoots,sep);
+  fprintf(fp,"%s",beg);
+  fprintf(fp,"%1d%s",ch.active,sep);
+  fprintf(fp,"%1d%s",ch.photons,sep); 
+  fprintf(fp,"%1d%s",ch.elastic,sep);
+  fprintf(fp,"%05d%s",ch.ndata,sep);
+  fprintf(fp,"%1d%s",1,sep);
+  fprintf(fp,"%04d%s",ch.pmtv,sep);
+  fprintf(fp,"%04.2f%s",ch.binw,sep);
+  fprintf(fp,"%05d.%1c%s",ch.wlen,ch.pol,sep);
+  fprintf(fp,"%1d%s",0,sep);
+  fprintf(fp,"%1d%s",0,sep);
+  fprintf(fp,"%02d%s",0,sep);
+  fprintf(fp,"%03d%s",0,sep); 
+  fprintf(fp,"%02d%s",ch.bits,sep);
+  fprintf(fp,"%06d%s",ch.nshoots,sep);
   if (!ch.photons) {
-    fprintf(fp,"%05.3f%1s",ch.discr,sep);
-    fprintf(fp,"%-17s%1s",ch.tr,sep);
+    fprintf(fp,"%05.3f%s",ch.discr,sep);
+    fprintf(fp,"%-17s%s",ch.tr,sep);
   } else {
-    fprintf(fp,"%06.4f%1s",ch.discr,sep);
-    fprintf(fp,"%-16s%1s",ch.tr,sep);
+    fprintf(fp,"%06.4f%s",ch.discr,sep);
+    fprintf(fp,"%-16s%s",ch.tr,sep);
   }
 
   fprintf(fp,"\r\n");
@@ -151,7 +151,8 @@ void channel_debug_raw(channel ch)
     fprintf(stderr,"bin=%d",k);
     for (int i=k; i<ch.ndata && i<k+20; i++)
       fprintf(stderr," %d",ch.raw[i]);
-    k+=19; fprintf(stderr,"\n"); 
+    k+=19; 
+    fprintf(stderr,"\n"); 
   }
 }
 
@@ -272,32 +273,32 @@ void header_printf(FILE *fp, RMDataFile rm,
                    const char* beg, const char* sep) 
 {
   // line 1
-  fprintf(fp,"%1s",beg);
-  fprintf(fp,"%-76s%1s",rm.file,sep);
+  fprintf(fp,"%s",beg);
+  fprintf(fp,"%-76s%s",rm.file,sep);
   fprintf(fp,"\r\n");
   
   // Line 2
   fprintf(fp,"%s",beg);
   fprintf(fp,"%s%s",rm.site,sep);
   fprintf(fp,"%s%s",rm.start.write2DMY('/').c_str(),sep);
-  fprintf(fp,"%s%1s",rm.start.write2hms().c_str(),sep);
-  fprintf(fp,"%s%1s",rm.end.write2DMY('/').c_str(),sep);
-  fprintf(fp,"%s%1s",rm.end.write2hms().c_str(),sep);
-  fprintf(fp,"%04d%1s",rm.alt,sep);
-  fprintf(fp,"%06.1f%1s",rm.lon,sep);
-  fprintf(fp,"%06.1f%1s",rm.lat,sep);
-  fprintf(fp,"%02d%1s",rm.zen,sep);
-  fprintf(fp,"%02d%1s",rm.idum,sep);
-  fprintf(fp,"%4.1f%1s",rm.T0,sep);
+  fprintf(fp,"%s%s",rm.start.write2hms().c_str(),sep);
+  fprintf(fp,"%s%s",rm.end.write2DMY('/').c_str(),sep);
+  fprintf(fp,"%s%s",rm.end.write2hms().c_str(),sep);
+  fprintf(fp,"%04d%s",rm.alt,sep);
+  fprintf(fp,"%06.1f%s",rm.lon,sep);
+  fprintf(fp,"%06.1f%s",rm.lat,sep);
+  fprintf(fp,"%02d%s",rm.zen,sep);
+  fprintf(fp,"%02d%s",rm.idum,sep);
+  fprintf(fp,"%4.1f%s",rm.T0,sep);
   fprintf(fp,"%6.1f\r\n",rm.P0);
 
   // Line 3
-  fprintf(fp,"%1s",beg);
-  fprintf(fp,"%07d%1s",rm.nshoots,sep);
-  fprintf(fp,"%04d%1s",rm.nhz,sep);
-  fprintf(fp,"%07d%1s",rm.nshoots2,sep);
-  fprintf(fp,"%04d%1s",rm.nhz2,sep);
-  fprintf(fp,"%02d%1s",rm.nch,sep);
+  fprintf(fp,"%s",beg);
+  fprintf(fp,"%07d%s",rm.nshoots,sep);
+  fprintf(fp,"%04d%s",rm.nhz,sep);
+  fprintf(fp,"%07d%s",rm.nshoots2,sep);
+  fprintf(fp,"%04d%s",rm.nhz2,sep);
+  fprintf(fp,"%02d%s",rm.nch,sep);
   fprintf(fp,"%48s\r\n"," ");
 }
 
@@ -383,9 +384,9 @@ void raw_printf(FILE *fp, RMDataFile rm, int imax, const char* sep)
     // for each channel
     for (int i=0; i<rm.nch; i++) { 
       if (k<ndata[i])
-        fprintf(fp,"%1s%8d",sep,rm.ch[i].raw[k]);
+        fprintf(fp,"%s%8d",sep,rm.ch[i].raw[k]);
       else
-        fprintf(fp,"%1sx",sep);
+        fprintf(fp,"%sx",sep);
     }
     fprintf(fp,"\n"); 
   }
@@ -439,9 +440,9 @@ void phy_printf(FILE *fp, RMDataFile rm, int imax, const char* sep)
     // for each channel
     for (int i=0; i<rm.nch; i++) { 
       if (k<ndata[i])
-        fprintf(fp,"%1s%8.4f",sep,rm.ch[i].phy[k]);
+        fprintf(fp,"%s%8.4f",sep,rm.ch[i].phy[k]);
       else
-        fprintf(fp,"%1s%8.4f",sep,-999.);
+        fprintf(fp,"%s%8.4f",sep,-999.);
     }
     fprintf(fp,"\n"); 
   }
@@ -801,11 +802,11 @@ void profile_printf(FILE *fp, RMDataFile rm, int imax, const char* beg,
 void profile_write(FILE *fp, RMDataFile rm) 
 {  
   // Print main header
-  header_printf(fp, rm, "", "");
+  header_printf(fp, rm, " ", " ");
   
   // Print lines describing channels
   for (int i=0; i<rm.nch; i++) {
-    channel_printf(fp, rm.ch[i], "", "");
+    channel_printf(fp, rm.ch[i], " ", " ");
   }
 
   // Print bin data

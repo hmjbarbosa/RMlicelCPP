@@ -22,7 +22,7 @@ int main (int argc, char *argv[])
   RMDataFile XX;
   FILE *fout;
   char fdat[256];
-  
+
   if (argc<2) {
     printf("Enter a file name!\n");
     return 1;
@@ -37,9 +37,9 @@ int main (int argc, char *argv[])
     Init_RMDataFile(&XX);
     profile_read(argv[i], &XX);
     profile_printf(fout, XX, 0, "# ", " ", "\t");
-    Free_RMDataFile(&XX);
 
     // Close output file
+    Free_RMDataFile(&XX);
     fclose(fout);
   }
 

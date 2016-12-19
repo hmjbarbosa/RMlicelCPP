@@ -94,8 +94,8 @@ for j=1:nfile
   minjd=min(minjd, heads(j).jdi);
   maxjd=max(maxjd, heads(j).jdi);
 end
-disp(['read_manaus:: first date = ' datestr(minjd)]);
-disp(['read_manaus:: last date = ' datestr(maxjd)]);
+disp(['read_tiwa:: first date = ' datestr(minjd)]);
+disp(['read_tiwa:: last date = ' datestr(maxjd)]);
 tmp=datevec(minjd); tmp(4)=0; tmp(5)=0; tmp(6)=0; minday=datenum(tmp);
 tmp=datevec(maxjd); tmp(4)=0; tmp(5)=0; tmp(6)=0; maxday=datenum(tmp)+1;
 
@@ -105,7 +105,7 @@ tmp=datevec(maxjd); tmp(4)=0; tmp(5)=0; tmp(6)=0; maxday=datenum(tmp)+1;
 
 % Divide the period between minday and maxday into intervals of
 % size dt minutes
-dt=1000.; % min
+dt=30.; % min
 
 % Create the vector of times 
 times=(0:dt:(maxday-minday)*1440)/1440.+minday;
@@ -144,6 +144,9 @@ data(:,count==0,:)=NaN;
 glue355=glue(data(:,:,1), heads(1).ch(1),data(:,:,2),heads(1).ch(2));
 glue387=data(:,:,3);
 
+glue355=remove_bg(glue355,1000,-10);
+glue387=remove_bg(glue387,1000,-10);
+
 %------------------------------------------------------------------------
 %  Plots
 %------------------------------------------------------------------------
@@ -155,8 +158,15 @@ tmp(tmp==0)=nan;
 for j=1:nfile
   tmp(:,j)=tmp(:,j).*altsq(:);
 end
-gplot2(log(tmp(1:3000,:)),[],[],alt(1:3000)*1e-3);
+[h bar]=gplot2(log(tmp(1:800,:)),[],[],alt(1:800)*1e-3);
+ylabel(bar,'Log RCS')
 title([datestr(heads(1).jdi) ' to ' datestr(heads(end).jdf)])
+xlabel('Bins (#)')
+ylabel('Altitude (km)')
+prettify(gca,bar)
+drawnow
+tmp=datevec(jdi);
+print(['T2_RCS_fullres_' num2str(tmp(3)) '_' num2str(tmp(2)) '.png'],'-dpng')
 
 figure(101)
 tmp=remove_bg(glue355, 500, 3);
@@ -164,9 +174,17 @@ tmp(tmp==0)=nan;
 for j=1:ntimes
   tmp(:,j)=tmp(:,j).*altsq(:);
 end
-gplot2(log(tmp(1:3000,:)),[],times,alt(1:3000)*1e-3);
+[h bar]=gplot2(log(tmp(1:800,:)),[],times,alt(1:800)*1e-3);
+ylabel(bar,'Log RCS')
+title([datestr(heads(1).jdi) ' to ' datestr(heads(end).jdf)])
+xlim([jdi jdf])
 datetick('x',15,'keeplimits')
+xlabel('Time (#)')
+ylabel('Altitude (km)')
+prettify(gca,bar)
 drawnow
+tmp=datevec(jdi);
+print(['T2_RCS_30min_' num2str(tmp(3)) '_' num2str(tmp(2)) '.png'],'-dpng')
 
 %gplot2(tmp(1:2000,:),[0:2e7:2e9],[],alt(1:2000)*1e-3);
 

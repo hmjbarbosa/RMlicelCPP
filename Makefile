@@ -1,6 +1,6 @@
 CC=g++
-#CHECK=-fbounds-check -fcheck-new -Wextra -ftrapv -fstack-check 
-CHECK=-fbounds-check -Wextra -ftrapv 
+CHECK=-fbounds-check -fcheck-new -Wextra -ftrapv -fstack-check 
+#CHECK=-fbounds-check -Wextra -ftrapv 
 CFLAGS=-c -Wall -O0  -g $(CHECK) 
 LFLAGS=-Wall -O0  -g $(CHECK) 
 
@@ -126,7 +126,7 @@ check	: $(PROGS)
 	@rm -f test10 test10.csv RM10C1315.162.csv RM10C1315.172.csv > /dev/null; \
 	./rm2bin test10 RM10C1315.162 RM10C1315.172; \
 	./rm2csv test10 RM10C1315.162 RM10C1315.172; \
-	nbin=`head -n 4 test10.csv | tail -n 1 | sed s/\;/\\\n/g | head -n 4 | tail -n 1`; \
+	nbin=`head -n 4 test10.csv | tail -n 1 | awk '{print $$7}'`; \
 	nbin=`echo $$nbin + 0 | bc`; P=$$((nbin/25)); \
 	echo "|0%                 100%| "; \
 	i=0; ok=0; while read -r linA<&3 && read -r linB<&4 && read -r linC<&5; do \

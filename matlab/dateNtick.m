@@ -231,9 +231,8 @@ if another == 1,
         yaxlinch = yax(4);
         ylims = get(gca,'ylim');
         
-        offset =  .25 * (ylims(2)-ylims(1)) / yaxlinch
+        offset =  .25 * (ylims(2)-ylims(1)) / yaxlinch;
         yy = ylims(1) - offset;
-
 
         xlen = ( xt(length(xt)) - xt(1) ) * .027;
         ypos = yy * ones(length(xt),1);
@@ -241,21 +240,14 @@ if another == 1,
         labels = datestr(xt,15);
         text(xt-xlen,ypos,labels);
 
-
         set(gca,'units','normal');
 end   % 19
 
-
-
 aa = get(get(gca,'xlabel'),'position');
-offset = ylims(1) - ( .4 * (ylims(2)-ylims(1)) / yaxlinch)
+offset = ylims(1) - ( .4 * (ylims(2)-ylims(1)) / yaxlinch);
 set(get(gca,'xlabel'),'position',[aa(1) offset 0])
 
-
 %.................................................
-
-
-
 
 %--------------------------------------------------
 function [labels,format] = bestscale(xmin,xmax,dateChoice)

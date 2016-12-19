@@ -75,8 +75,8 @@ end
 %% ------------------------------------------------------------------------
 for i=RefBin(1)+1 : maxbin
   ext_ave = (alpha_mol(i,1) + alpha_mol(i-1,1)) * r_bin; 
-  fkt1(i) = fkt1(i-1) + ext_ave; 
-  fkt2(i) = fkt2(i-1) + ext_ave/mol.LR_mol(1) * LR_par(i,1); 
+  fkt1(i,1) = fkt1(i-1,1) + ext_ave; 
+  fkt2(i,1) = fkt2(i-1,1) + ext_ave/mol.LR_mol(1) * LR_par(i,1); 
 end
 % 
 for i=RefBin(1) : maxbin
