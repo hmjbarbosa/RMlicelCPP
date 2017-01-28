@@ -1,4 +1,4 @@
-% function [head, chphy, chraw] = profile_read_many(list, dbin, dtime, ach)
+% function [head, chphy, chraw] = profile_read_many_ascii(list, dbin, dtime, ach)
 %
 % Reads many Raymetrics/Licel data files at once, applying an analog
 % displacement and a dead time correction to each one. Data is output
@@ -82,8 +82,8 @@
 %
 %    >> contourf( (1:253), (1:4000), chphy(3).data );
 %
-function [head, chphy, chraw] = ...
-    profile_read_many(list, dbin, dtime, ach, maxz)
+function [head, chphy] = ...
+    profile_read_many_ascii_Colombia(list, dbin, dtime, ach, maxz)
 
 % size of file list
 nfile = numel(list);
@@ -106,22 +106,23 @@ if isempty(maxz) maxz=0; end
 
 %% READ EACH FILE
 disp(['profile_read_many::READING ' num2str(nfile) ' files']);
+tic
 for nf=1:nfile
-  if (mod(nf, floor(nfile/10))==0 & nfile>1000)
-    disp(['file= ' num2str(nf) '/' num2str(nfile)])
-  end
+    if (mod(nf, floor(nfile/10))==0 & nfile>1000)
+        disp(['file= ' num2str(nf) '/' num2str(nfile) '  ' num2str(toc)])
+    end
   
   % read file 
-  [head(nf), tmpphy, tmpraw]=profile_read(list{nf}, dbin, dtime, ach, maxz);
+  [head(nf), tmpphy]=profile_read_ascii_Colombia(list{nf}, dbin, dtime, ach, maxz);
 
   % initialize vectors
   if (nf==1)
     for ch=1:head(1).nch
-      chphy(ch).data(1:head(1).ch(1).ndata,1:nfile) = NaN;
-      chraw(ch).data(1:head(1).ch(1).ndata,1:nfile) = NaN;
+      chphy(ch).data = NaN(head(1).ch(1).ndata, nfile);
+      %chraw(ch).data(1:head(1).ch(1).ndata,1:nfile) = NaN;
     end
   end
-  
+
   % time-stamp of current file
   if (nf>1)
     if (head(nf).jdf < head(nf-1).jdf)
@@ -151,7 +152,7 @@ for nf=1:nfile
             head(t).ch(i).active=0;
             head(t).ch(i).ndata=head(nf-1).ch(1).ndata;
             chphy(i).data(1:head(t).ch(i).ndata, t)=NaN;
-            chraw(i).data(1:head(t).ch(i).ndata, t)=NaN;
+            %chraw(i).data(1:head(t).ch(i).ndata, t)=NaN;
           end
           head(t).nch=head(nf).nch;
         end
@@ -162,17 +163,17 @@ for nf=1:nfile
       b=head(nf-1).ch(ch).ndata;
       if (a > b)
         chphy(ch).data(b+1:a,1:nf-1)=NaN;
-        chraw(ch).data(b+1:a,1:nf-1)=NaN;
+        %chraw(ch).data(b+1:a,1:nf-1)=NaN;
         for t=1:nf-1
           head(t).ch(ch).ndata=head(nf).ch(ch).ndata;
         end
       end
     end
     chphy(ch).data(:,nf) = tmpphy(:,ch);
-    chraw(ch).data(:,nf) = tmpraw(:,ch);
+    %chraw(ch).data(:,nf) = tmpraw(:,ch);
   end
-  
+
 end
 clear tmpphy;
-clear tmpraw;
+%clear tmpraw;
 %
