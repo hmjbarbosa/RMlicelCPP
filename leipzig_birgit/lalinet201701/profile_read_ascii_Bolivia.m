@@ -84,7 +84,7 @@ datef=datei;
 timei=data(1:3,:)';
 
 for i=1:lineCount
-  head(i).file=[NAME '.' EXT];
+  head(i).file=[NAME EXT];
   head(i).site='Bolivia'; 
 
   head(i).datei=datei;

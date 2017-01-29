@@ -1,11 +1,11 @@
-function [times, P] = bins(minday,maxday,dt,heads,data) 
+function [P, times, count] = bins(minday,maxday,dt,heads,data) 
 
 % Divide the period between minday and maxday into intervals of
 % size dt minutes
-ntimes=floor((maxday-minday)*1440./dt)+1;
+ntimes=floor((maxday-minday)*1440./dt);
 
-% Create the vector of times 
-times=((1:ntimes))*dt/1440.+minday;
+% Create the vector of times (start of each interval)
+times=((0:ntimes-1))*dt/1440.+minday;
 
 % Initialize variables
 P(size(data,1), ntimes)=0;
@@ -16,7 +16,7 @@ count(ntimes)=0;
 clear list
 for j=1:size(data,2)
   % to which bin should the j-th profile contribute
-  idx=floor((heads(j).jdi-minday)*1440./dt);
+  idx=floor((heads(j).jdi-minday)*1440./dt)+1;
   if (idx>=1 & idx<=ntimes) 
     % how many profiles were added to this bin? 
     count(idx)=count(idx)+1;
