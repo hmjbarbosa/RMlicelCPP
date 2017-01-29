@@ -1,7 +1,7 @@
 function [out sd] = binning(in,N,dir)
 
 [nx ny]=size(in);
-sd=0;
+%sd=0;
 if dir==1
   j=0;
   for i=1:N:nx
