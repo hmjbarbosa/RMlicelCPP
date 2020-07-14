@@ -24,14 +24,9 @@ int main (int argc, char *argv[])
 
   if (argc<3) {
     printf("Usage: \n");
-    printf(" %s <output file> <list of input files>\n",argv[0]);
+    printf(" %s <outfile>  <infile1> [<infile2> ... ]\n",argv[0]);
     return 1;
   }
-
-  //  if (!access(argv[1], F_OK)) {
-  //  printf("Output file should not exist!\n");
-  //  return 1;
-  //}
 
   // Files to add
   for (int i=2; i<argc; i++) {
