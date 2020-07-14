@@ -139,16 +139,8 @@ void RM_Date::Nullify()
  */
 void RM_Date::RoundMinutes()
 {
-  /*
-  std::cerr<< this->write2nc() <<std::endl;
-  printf("%17.8f\n",jd);
-  printf("%17.8f\n",             secd*1.);
-  printf("%17.8f\n",             secd/double(secinmin));
-  printf("%17.8f\n",             secd/double(secinmin)+double(0.5));
-  printf("%17.8f\n",       floor(secd/double(secinmin)+double(0.5)));
-  printf("%17.8f\n",double(floor(secd/double(secinmin)+double(0.5))));
-  printf("%17.8f\n",double(floor(secd/double(secinmin)+double(0.5)))*double(secinmin));
-  */
+  //std::cerr<< this->write2nc() <<std::endl;
+
   secd = double(floor(secd/double(secinmin)+0.5))*double(secinmin);
   // it is always in the same day, except if it rounds up to 24hs
   if (secd>=secinday) { secd-=secinday; jd+=1; }
@@ -162,7 +154,7 @@ void RM_Date::RoundMinutes()
 
 //______________________________________________________________________________
 /*
-  Function: Date2nc
+  Function: Write2nc
   Description: write date/time in netcdf format
                YYYY-MM-DD hh:mm:ss UTC
   Author: hbarbosa
@@ -181,7 +173,7 @@ std::string RM_Date::write2nc()
 
 //______________________________________________________________________________
 /*
-  Function: YMD2Char
+  Function: Write2YMD
   Description: convert date to string
   Author: hbarbosa
   Date: 30 oct 2011
@@ -201,7 +193,7 @@ std::string RM_Date::write2DMY(const char sep)
 
 //______________________________________________________________________________
 /*
-  Function: Time2Char
+  Function: Write2hms
   Description: convert time to string
   Author: hbarbosa
   Date: 30 oct 2011
@@ -284,7 +276,7 @@ void RM_Date::CalcDate()
 //    if (ss==60) jd=jd+0.0001/secinday;
 //  }
 
-  // correct for fractional day outside range [0, 0)
+  // correct for fractional day outside range [0, 1)
   while(secd>=secinday) { secd-=secinday; jd+=1; }
   while(secd<0.)        { secd+=secinday; jd-=1; }
 
