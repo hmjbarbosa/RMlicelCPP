@@ -24,14 +24,12 @@ int main (int argc, char *argv[])
   int err, i0=1, tropt=0;
   
   if (argc<2) {
-    printf("Enter a file name!\n");
+    printf("Usage: \n");
+    printf(" %s <file1> [<file2> ... ]\n",argv[0]);
+
     return 1;
   }
   
-  if (~strcmp(argv[1],"-tr")==0) {
-    i0=2; tropt=1;
-  }
-
   for (int i=i0; i<argc; i++) {
     // Init, Read, Print some data 
     Init_RMDataFile(&XX);
@@ -39,8 +37,6 @@ int main (int argc, char *argv[])
 
     // Write netcdf
     if (!err) {
-      //sprintf(fnc,"RM_%s_%02dh%02d.nc",XX.end.write2YMD('_').c_str(), 
-      //        XX.end.GetHour(), XX.end.GetMin());
       sprintf(fnc,"%s.nc",argv[i]);
 
       profile_write_netcdf(fnc, XX, tropt);
