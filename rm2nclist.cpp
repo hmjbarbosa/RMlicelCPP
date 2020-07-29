@@ -51,7 +51,7 @@ int main (int argc, char *argv[])
 
     // check time order
     tdif=RMToAdd->end.SecDiff(LastDate);
-    std::cerr << tdif << "\n";
+    //std::cerr << tdif << "\n";
     if (tdif<0) {
       std::cerr << "ERROR: Files must be in chronological order!\n\n";
       exit(1);
