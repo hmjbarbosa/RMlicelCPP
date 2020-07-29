@@ -241,7 +241,9 @@ void RM_Date::CalcJD()
 
    // julian day is integer at noon (half day through)
    // hmjb: we subtract - 0.5 so that it starts at midnight (??? need check)
-   jd = (double) jd12h - 0.5 + double(secd) / double(secinday);
+
+   // 29-jul-2020 keep secd and jd separate
+   jd = (double) jd12h - 0.5; // + double(secd) / double(secinday);
 }
 
 //______________________________________________________________________________
@@ -285,11 +287,8 @@ void RM_Date::CalcDate()
   min=(sec-double(ss))/double(secinmin);   mn=floor( fmod(min,  (double) mininhour) +0.5);
   hour=(min-double(mn))/double(mininhour); hh=floor( fmod(hour, (double) hourinday) +0.5);
 
-  //printf("sec= %27.18f min=%27.18f hour=%27.18f\n",sec,min,hour);
-  //printf("ss= %d %d %d\n",ss, mn, hh);
-
-  //d1->jd = jd;
-  jd12h = floor(jd + 0.5 - double(secd)/double(secinday));
+  // 29-jul-2020 keep secd and jd separate
+  jd12h = floor(jd + 0.5); // - double(secd)/double(secinday));
 
   t1 = jd12h + 68569L;
   t2 = 4L * t1 / 146097L;
