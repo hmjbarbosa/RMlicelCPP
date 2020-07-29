@@ -1,5 +1,9 @@
 CC=g++
-CHECK=-fbounds-check -fcheck-new -Wextra -ftrapv -fstack-check 
+# 2-july-2020
+# apparently fbounds-check is meant only for F77 and Java
+# 
+CHECK=-fcheck-new -Wextra -ftrapv -fstack-check 
+#CHECK=-fbounds-check -fcheck-new -Wextra -ftrapv -fstack-check 
 #CHECK=-fbounds-check -Wextra -ftrapv 
 CFLAGS=-c -Wall -O0  -g $(CHECK) 
 LFLAGS=-Wall -O0  -g $(CHECK) 
