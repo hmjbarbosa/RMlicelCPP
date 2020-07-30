@@ -1,3 +1,4 @@
 *.[oa]
 *.mod
 *~
+.DS_Store

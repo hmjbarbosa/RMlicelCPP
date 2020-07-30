@@ -55,10 +55,10 @@ RMnetcdfUSP.o	:	RMnetcdfUSP.cpp RMlicelUSP.o TimeDate.o
 	$(CC) $(CFLAGS) RMnetcdfUSP.cpp
 
 clean	:	
-	rm -f *.o *~ 
+	rm -fR *.o *~ *.dSYM
 
 clean-all	:	
-	rm -f *.o *~ $(PROGS) *_cpp.d *.so
+	rm -fR *.o *~ *.dSYM $(PROGS) *_cpp.d *.so
 
 check	: $(PROGS)
 	@echo -n "TEST #1 :: rm2dat :: dat conversion: "
