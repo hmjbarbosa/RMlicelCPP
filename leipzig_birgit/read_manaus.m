@@ -152,6 +152,7 @@ glue387=remove_bg(glue387,1000,-10);
 %------------------------------------------------------------------------
 %
 ntop=1200;
+nbot=1;
 
 figure(100)
 tmp=remove_bg(chphy(1).data, 500, 3);
@@ -159,7 +160,7 @@ tmp(tmp==0)=nan;
 for j=1:nfile
   tmp(:,j)=tmp(:,j).*altsq(:);
 end
-[h bar]=gplot2(log(tmp(100:ntop,:)),[],[],alt(100:ntop)*1e-3);
+[h bar]=gplot2(log(tmp(nbot:ntop,:)),[],[],alt(nbot:ntop)*1e-3);
 ylabel(bar,'Log RCS')
 title([datestr(heads(1).jdi) ' to ' datestr(heads(end).jdf)])
 xlabel('Bins (#)')
@@ -176,7 +177,7 @@ tmp=nan(size(tmp2));
 for j=2:ntimes-1
   tmp(:,j)=nanmean(tmp2(:,j-1:j+1),2).*altsq(:);
 end
-[h bar]=gplot2(log(tmp(100:ntop,:)),[],times,alt(100:ntop)*1e-3);
+[h bar]=gplot2(log(tmp(nbot:ntop,:)),[],times,alt(nbot:ntop)*1e-3);
 ylabel(bar,'Log RCS')
 title([datestr(heads(1).jdi) ' to ' datestr(heads(end).jdf)])
 xlim([jdi jdf])

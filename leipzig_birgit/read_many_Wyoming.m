@@ -53,7 +53,7 @@ ff=dirpath(dir,'*dat');
 nfile=numel(ff);
 
 % loop over all files
-for i=1314:nfile
+for i=1:nfile
   disp([num2str(i) ' ' ff{i}])
   tmp=read_sonde_Wyoming(ff{i});
 

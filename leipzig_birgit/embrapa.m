@@ -32,8 +32,8 @@ lambda=[0.355 0.387]*1e-6; % [m]
 %start_jd=datenum('29-Aug-2014 13:00:00');
 %end_jd=datenum('1-Sep-2014 13:00:00');
 
-start_jd=datenum('2-Sep-2014 13:00:00');
-end_jd=datenum('3-Sep-2014 13:00:00');
+start_jd=datenum('6-Sep-2014 13:00:00');
+end_jd=datenum('7-Sep-2014 13:00:00');
 
 %start_jd=datenum('5-Mar-2016 0:00:00');
 %end_jd=datenum('6-Mar-2016 0:00:00');
