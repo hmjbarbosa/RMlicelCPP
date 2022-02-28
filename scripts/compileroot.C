@@ -1,4 +1,4 @@
 {
   gSystem->CompileMacro("TimeDate.cpp","f");
-  gSystem->CompileMacro("RMlicelUSP.cpp","f");
+  gSystem->CompileMacro("RMlicel.cpp","f");
 }

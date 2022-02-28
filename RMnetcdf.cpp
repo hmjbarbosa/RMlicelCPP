@@ -1,4 +1,4 @@
-#include "RMnetcdfUSP.h"
+#include "RMnetcdf.h"
 
 // ID for time as dimension or variable
 int t_dimid, t_varid;

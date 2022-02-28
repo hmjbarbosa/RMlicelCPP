@@ -8,9 +8,9 @@
 # To gain sometime, only days not already processed are processed. If
 # you want to overwrite the images, then change the flag 'erasefirst'.
 # User MUST set LIDAR directory, i.e., where to find the lidar files,
-# and HOME dir, i.e., where to find RMlicelUSP files.
+# and HOME dir, i.e., where to find RMlicel files.
 #
-HOME=/home/hbarbosa/Programs/RMlicelUSP/scripts
+HOME=/home/hbarbosa/Programs/RMlicel/scripts
 
 #LIDAR=/media/work/EMBRAPA/lidar
 LIDAR=/lfa-data/lidar

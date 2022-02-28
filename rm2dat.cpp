@@ -1,4 +1,4 @@
-#include "RMlicelUSP.h"
+#include "RMlicel.h"
 #include <iostream>
 /*
   PROGRAM: rm2dat

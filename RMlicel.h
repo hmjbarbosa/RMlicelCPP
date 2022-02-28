@@ -1,8 +1,8 @@
-/* RMlicelUSP.h -- defines, typedefs, and data structures for reading
-   Raymetrics/licel data files @USP.
+/* RMlicel.h -- defines, typedefs, and data structures for reading
+   Raymetrics/licel data files.
  */
-#ifndef _RMLICELUSP_H
-#define _RMLICELUSP_H
+#ifndef _RMLICEL_H
+#define _RMLICEL_H
 
 #include <stdlib.h> /* int32_t */
 #include <string.h> /* strcpy */
@@ -110,4 +110,4 @@ extern void profile_write(FILE *fp, RMDataFile rm);
 extern void profile_printf(FILE *fp, RMDataFile rm, int imax, 
                            const char* beg, const char* sep, const char* sep2);
 
-#endif /* _RMLICELUSP_H */
+#endif /* _RMLICEL_H */

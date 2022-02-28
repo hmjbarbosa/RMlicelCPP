@@ -27,32 +27,32 @@ tarball	:
 	tar -czvf $$ofile $$mydir/*.h $$mydir/*.cpp $$mydir/RM* $$mydir/ipen* \
 		$$mydir/arg* $$mydir/Makefile $$mydir/README
 
-rm2name	:	rm2name.cpp TimeDate.o RMlicelUSP.o
-	$(CC) $(LFLAGS) -o rm2name rm2name.cpp TimeDate.o RMlicelUSP.o
+rm2name	:	rm2name.cpp TimeDate.o RMlicel.o
+	$(CC) $(LFLAGS) -o rm2name rm2name.cpp TimeDate.o RMlicel.o
 
-rm2bin	:	rm2bin.cpp TimeDate.o RMlicelUSP.o
-	$(CC) $(LFLAGS) -o rm2bin rm2bin.cpp TimeDate.o RMlicelUSP.o
+rm2bin	:	rm2bin.cpp TimeDate.o RMlicel.o
+	$(CC) $(LFLAGS) -o rm2bin rm2bin.cpp TimeDate.o RMlicel.o
 
-rm2csv	:	rm2csv.cpp TimeDate.o RMlicelUSP.o
-	$(CC) $(LFLAGS) -o rm2csv rm2csv.cpp  TimeDate.o RMlicelUSP.o
+rm2csv	:	rm2csv.cpp TimeDate.o RMlicel.o
+	$(CC) $(LFLAGS) -o rm2csv rm2csv.cpp  TimeDate.o RMlicel.o
 
-rm2dat	:	rm2dat.cpp TimeDate.o RMlicelUSP.o
-	$(CC) $(LFLAGS) -o rm2dat rm2dat.cpp  TimeDate.o RMlicelUSP.o
+rm2dat	:	rm2dat.cpp TimeDate.o RMlicel.o
+	$(CC) $(LFLAGS) -o rm2dat rm2dat.cpp  TimeDate.o RMlicel.o
 
-rm2nclist	:	rm2nclist.cpp TimeDate.o RMlicelUSP.o RMnetcdfUSP.o
-	$(CC) $(LFLAGS) -o rm2nclist rm2nclist.cpp TimeDate.o RMlicelUSP.o RMnetcdfUSP.o $(NETCDF) 
+rm2nclist	:	rm2nclist.cpp TimeDate.o RMlicel.o RMnetcdf.o
+	$(CC) $(LFLAGS) -o rm2nclist rm2nclist.cpp TimeDate.o RMlicel.o RMnetcdf.o $(NETCDF) 
 
-rm2nc	:	rm2nc.cpp TimeDate.o RMlicelUSP.o RMnetcdfUSP.o
-	$(CC) $(LFLAGS) -o rm2nc rm2nc.cpp TimeDate.o RMlicelUSP.o RMnetcdfUSP.o $(NETCDF) 
+rm2nc	:	rm2nc.cpp TimeDate.o RMlicel.o RMnetcdf.o
+	$(CC) $(LFLAGS) -o rm2nc rm2nc.cpp TimeDate.o RMlicel.o RMnetcdf.o $(NETCDF) 
 
 TimeDate.o	:	TimeDate.cpp
 	$(CC) $(CFLAGS) TimeDate.cpp
 
-RMlicelUSP.o	:	RMlicelUSP.cpp TimeDate.o 
-	$(CC) $(CFLAGS) RMlicelUSP.cpp
+RMlicel.o	:	RMlicel.cpp TimeDate.o 
+	$(CC) $(CFLAGS) RMlicel.cpp
 
-RMnetcdfUSP.o	:	RMnetcdfUSP.cpp RMlicelUSP.o TimeDate.o 
-	$(CC) $(CFLAGS) RMnetcdfUSP.cpp
+RMnetcdf.o	:	RMnetcdf.cpp RMlicel.o TimeDate.o 
+	$(CC) $(CFLAGS) RMnetcdf.cpp
 
 clean	:	
 	rm -fR *.o *~ *.dSYM

@@ -1,11 +1,11 @@
-/* RMlicelUSP.h -- defines, typedefs, and data structures for reading
-   Raymetrics/licel data files @USP.
+/* RMlicel.h -- defines, typedefs, and data structures for reading
+   Raymetrics/licel data files.
  */
-#ifndef _RMNETCDFUSP_H
-#define _RMNETCDFUSP_H
+#ifndef _RMNETCDF_H
+#define _RMNETCDF_H
 
 #include "netcdf.h"
-#include "RMlicelUSP.h"
+#include "RMlicel.h"
 
 #define version "29jul20"
 
@@ -17,4 +17,4 @@ extern void profile_write_netcdf(const char* fname, RMDataFile rm, int tropt);
 extern void profile_add_netcdf(const char* fname, 
                                RMDataFile First, RMDataFile toadd);
 
-#endif /* _RMNETCDFUSP_H */
+#endif /* _RMNETCDF_H */

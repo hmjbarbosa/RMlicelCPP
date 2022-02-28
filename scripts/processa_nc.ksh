@@ -8,9 +8,9 @@
 # To gain sometime, only files not already converted are processed. If
 # you want to overwrite the files, then change the flag 'erasefirst'.
 # User MUST set LIDAR directory, i.e., where to find the lidar files,
-# and HOME dir, i.e., where to find RMlicelUSP files.
+# and HOME dir, i.e., where to find RMlicel files.
 #
-HOME=/home/hbarbosa/Programs/RMlicelUSP
+HOME=/home/hbarbosa/Programs/RMlicel
 
 #LIDAR=/media/work/EMBRAPA/lidar
 LIDAR=/lfa-data/lidar

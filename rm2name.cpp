@@ -1,4 +1,4 @@
-#include "RMnetcdfUSP.h"
+#include "RMnetcdf.h"
 #include <iomanip>
 
 /*

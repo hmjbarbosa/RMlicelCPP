@@ -3,8 +3,8 @@
 #define _MYLIDAR_H
 
 /* Some definitions added to netCDF files */
-#define title "LIDAR data from AEROCLIMA project"
-#define contact "Dr. Henrique M. J. Barbosa (hbarbosa@if.usp.br)"
+#define title "LIDAR data from EMBRAPA/Manaus"
+#define contact "Dr. Henrique Barbosa (hmjbarbosa@gmail.com)"
 
 /* Photoncounting sampling rate from Licel Transiente Recorder*/
 #define PCsampling 20. // Mhz
