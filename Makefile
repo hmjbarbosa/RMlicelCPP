@@ -8,7 +8,9 @@ CHECK=-fcheck-new -Wextra -ftrapv -fstack-check
 CFLAGS=-c -Wall -O0  -g $(CHECK) 
 LFLAGS=-Wall -O0  -g $(CHECK) 
 
-NETCDF=-L/usr/local/lib -lnetcdf -I/usr/local/include
+#NETCDF=-L/usr/local/lib -lnetcdf -I/usr/local/include
+NETCDF_INC=-I/opt/homebrew/include
+NETCDF_LIB=-L/opt/homebrew/lib -lnetcdf 
 # -pthread -static testing.cpp -lnetcdf -lhdf5_hl -lhdf5 -lz  -lm -lcurl -lidn -llber -lldap -lrt -lgssapi_krb5 -lssl -lcrypto -lz -static-libstdc++ -static-libgcc
 
 PROGS=\
@@ -40,10 +42,10 @@ rm2dat	:	rm2dat.cpp TimeDate.o RMlicel.o
 	$(CC) $(LFLAGS) -o rm2dat rm2dat.cpp  TimeDate.o RMlicel.o
 
 rm2nclist	:	rm2nclist.cpp TimeDate.o RMlicel.o RMnetcdf.o
-	$(CC) $(LFLAGS) -o rm2nclist rm2nclist.cpp TimeDate.o RMlicel.o RMnetcdf.o $(NETCDF) 
+	$(CC) $(LFLAGS) $(NETCDF_LIB) $(NETCDF_INC) -o rm2nclist rm2nclist.cpp TimeDate.o RMlicel.o RMnetcdf.o 
 
 rm2nc	:	rm2nc.cpp TimeDate.o RMlicel.o RMnetcdf.o
-	$(CC) $(LFLAGS) -o rm2nc rm2nc.cpp TimeDate.o RMlicel.o RMnetcdf.o $(NETCDF) 
+	$(CC) $(LFLAGS) $(NETCDF_LIB) $(NETCDF_INC) -o rm2nc rm2nc.cpp TimeDate.o RMlicel.o RMnetcdf.o
 
 TimeDate.o	:	TimeDate.cpp
 	$(CC) $(CFLAGS) TimeDate.cpp
@@ -52,7 +54,7 @@ RMlicel.o	:	RMlicel.cpp TimeDate.o
 	$(CC) $(CFLAGS) RMlicel.cpp
 
 RMnetcdf.o	:	RMnetcdf.cpp RMlicel.o TimeDate.o 
-	$(CC) $(CFLAGS) RMnetcdf.cpp
+	$(CC) $(CFLAGS) $(NETCDF_INC) RMnetcdf.cpp 
 
 clean	:	
 	rm -fR *.o *~ *.dSYM
