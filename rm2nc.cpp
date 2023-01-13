@@ -37,7 +37,7 @@ int main (int argc, char *argv[])
 
     // Write netcdf
     if (!err) {
-      sprintf(fnc,"%s.nc",argv[i]);
+      snprintf(fnc,256,"%s.nc",argv[i]);
 
       profile_write_netcdf(fnc, XX, tropt);
     }

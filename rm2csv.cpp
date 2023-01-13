@@ -28,7 +28,7 @@ int main (int argc, char *argv[])
   
   for (int i=1; i<argc; i++) {
     // Open output file
-    sprintf(fcsv,"%s.csv",argv[i]);
+    snprintf(fcsv,256,"%s.csv",argv[i]);
     fout=fopen(fcsv,"w");
 
     // Init, Read, Print and destroy RM data file

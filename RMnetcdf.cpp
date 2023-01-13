@@ -83,9 +83,11 @@ void profile_add_netcdf(const char* fname, RMDataFile First, RMDataFile toadd)
   size_t chcount[NDIMS];
 
   // temporary string for writing netCDF attributes
-  char longstr[256];
+  const int maxoptlen = 256;
+  char longstr[maxoptlen];
 
-  char verylongstr[36000];
+  const int maxlongoptlen = 36000;
+  char verylongstr[maxlongoptlen];
 
   /* ************** RM DATA FILE **********************************   */
   /* ************** CHECKS ****************************************   */
@@ -176,7 +178,7 @@ void profile_add_netcdf(const char* fname, RMDataFile First, RMDataFile toadd)
     ok=nc_redef(ncid);
     if (ok != NC_NOERR) handle_error(ok,5);
 
-    sprintf(longstr,"%s",toadd.end.write2nc().c_str());
+    snprintf(longstr,maxoptlen,"%s",toadd.end.write2nc().c_str());
     ok=nc_put_att_text(ncid, NC_GLOBAL, "end_time",strlen(longstr),longstr);
     if (ok != NC_NOERR) handle_error(ok,6);
 
@@ -184,7 +186,7 @@ void profile_add_netcdf(const char* fname, RMDataFile First, RMDataFile toadd)
     if (ok != NC_NOERR) handle_error(ok,666);
     //std::cerr << verylongstr << "\n";
     
-    sprintf(verylongstr,"%s%s;",verylongstr,toadd.file);
+    snprintf(verylongstr,maxlongoptlen,"%s%s;",verylongstr,toadd.file);
     //std::cerr << verylongstr << "\n";
     
     ok=nc_put_att_text(ncid, NC_GLOBAL, "file_char", strlen(verylongstr), verylongstr);
@@ -219,7 +221,8 @@ void profile_write_netcdf(const char* fname, RMDataFile rm, int tropt)
   int dimid[NDIMS];
 
   // temporary string for writing netCDF attributes
-  char longstr[256];
+  const int maxoptlen = 256;
+  char longstr[maxoptlen];
 
   // long arrays
   float *fval;
@@ -290,7 +293,7 @@ void profile_write_netcdf(const char* fname, RMDataFile rm, int tropt)
   //adate=RM_Date(rm.end);
   //adate.RoundMinutes();
   //sprintf(longstr,"minutes since %s",adate.write2nc().c_str());
-  sprintf(longstr,"seconds since %s",rm.end.write2nc().c_str());
+  snprintf(longstr,maxoptlen,"seconds since %s",rm.end.write2nc().c_str());
   ok=nc_put_att_text(ncid, t_varid, "units",strlen(longstr),longstr);
   if (ok != NC_NOERR) handle_error(ok,16);
   
@@ -402,27 +405,27 @@ void profile_write_netcdf(const char* fname, RMDataFile rm, int tropt)
   ok=nc_put_att_text(ncid, NC_GLOBAL, "contact",strlen(contact),contact);
   if (ok != NC_NOERR) handle_error(ok,35);
 
-  sprintf(longstr,"Converted from original format by rm2nc v.%s",version);
+  snprintf(longstr,maxoptlen,"Converted from original format by rm2nc v.%s",version);
   ok=nc_put_att_text(ncid, NC_GLOBAL, "history",strlen(longstr),longstr);
   if (ok != NC_NOERR) handle_error(ok,36);
 
-  sprintf(longstr,"http://www.unidata.ucar.edu/netcdf/conventions.html + COARDS");
+  snprintf(longstr,maxoptlen,"http://www.unidata.ucar.edu/netcdf/conventions.html + COARDS");
   ok=nc_put_att_text(ncid, NC_GLOBAL, "Conventions",strlen(longstr),longstr);
   if (ok != NC_NOERR) handle_error(ok,37);
 
   // add a ; after the file name
-  sprintf(longstr,"%s;",rm.file);
+  snprintf(longstr,maxoptlen,"%s;",rm.file);
   ok=nc_put_att_text(ncid, NC_GLOBAL, "file_char", strlen(longstr), longstr);
   if (ok != NC_NOERR) handle_error(ok,38);
 
   ok=nc_put_att_text(ncid, NC_GLOBAL, "site_char", strlen(rm.site), rm.site);
   if (ok != NC_NOERR) handle_error(ok,39);
 
-  sprintf(longstr,"%s",rm.start.write2nc().c_str());
+  snprintf(longstr,maxoptlen,"%s",rm.start.write2nc().c_str());
   ok=nc_put_att_text(ncid, NC_GLOBAL, "start_time",strlen(longstr),longstr);
   if (ok != NC_NOERR) handle_error(ok,40);
 
-  sprintf(longstr,"%s",rm.end.write2nc().c_str());
+  snprintf(longstr,maxoptlen,"%s",rm.end.write2nc().c_str());
   ok=nc_put_att_text(ncid, NC_GLOBAL, "end_time",strlen(longstr),longstr);
   if (ok != NC_NOERR) handle_error(ok,41);
 
@@ -467,12 +470,12 @@ void profile_write_netcdf(const char* fname, RMDataFile rm, int tropt)
       //std:: cerr << rm.ch[i].tr << std::endl;
       // NAMES
       if (tropt==1)
-        sprintf(longstr,"%s",rm.ch[i].tr);
+        snprintf(longstr,maxoptlen,"%s",rm.ch[i].tr);
       else
         if (rm.ch[i].photons==1)
-          sprintf(longstr,"ch%dpc",rm.ch[i].wlen);
+          snprintf(longstr,maxoptlen,"ch%dpc",rm.ch[i].wlen);
         else
-          sprintf(longstr,"ch%dan",rm.ch[i].wlen);
+          snprintf(longstr,maxoptlen,"ch%dan",rm.ch[i].wlen);
 
       //std:: cerr << longstr << std::endl;
       fflush(stderr);
@@ -480,7 +483,7 @@ void profile_write_netcdf(const char* fname, RMDataFile rm, int tropt)
       ok=nc_def_var(ncid, longstr , NC_FLOAT, NDIMS, dimid, &chnid[i]);
       if (ok != NC_NOERR) handle_error(ok,52);
 
-      sprintf(longstr,"channel%d lamb=%d phot=%d elastic=%d",
+      snprintf(longstr,maxoptlen,"channel%d lamb=%d phot=%d elastic=%d",
               i,rm.ch[i].wlen,rm.ch[i].photons,rm.ch[i].elastic);
       ok=nc_put_att_text(ncid, chnid[i], "title", strlen(longstr), longstr);
       if (ok != NC_NOERR) handle_error(ok,53);

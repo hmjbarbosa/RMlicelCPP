@@ -22,7 +22,7 @@ int main (int argc, char *argv[])
   RMDataFile XX1, XX;
   RMDataFile *RMFirst, *RMToAdd;
   RM_Date LastDate;
-  char fdat[256];
+  char fnc[256];
   int tdif;
 
   if (argc<3) {
@@ -36,8 +36,8 @@ int main (int argc, char *argv[])
   Init_RMDataFile(RMFirst);
   profile_read(argv[2], RMFirst);
   // Init NC file and write first data
-  sprintf(fdat,"%s.nc",argv[1]);
-  profile_write_netcdf(fdat, *RMFirst, 0);
+  snprintf(fnc,256,"%s.nc",argv[1]);
+  profile_write_netcdf(fnc, *RMFirst, 0);
   // Copy previous date
   LastDate = RMFirst->end;
   
@@ -58,7 +58,7 @@ int main (int argc, char *argv[])
     }
 
     // re-open netcdf and add a new profile
-    profile_add_netcdf(fdat, *RMFirst, *RMToAdd);
+    profile_add_netcdf(fnc, *RMFirst, *RMToAdd);
     // Copy previous date
     LastDate = RMToAdd->end;
 

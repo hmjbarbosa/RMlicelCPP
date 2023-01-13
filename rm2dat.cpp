@@ -1,5 +1,5 @@
 #include "RMlicel.h"
-#include <iostream>
+
 /*
   PROGRAM: rm2dat
   AUTHOR: hbarbosa
@@ -30,7 +30,7 @@ int main (int argc, char *argv[])
   
   for (int i=1; i<argc; i++) {
     // Open output file
-    sprintf(fdat,"%s.dat",argv[i]);
+    snprintf(fdat,256,"%s.dat",argv[i]);
     fout=fopen(fdat,"w");
 
     // Init, Read, Print and destroy RM data file
