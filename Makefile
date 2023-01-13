@@ -65,8 +65,8 @@ clean-all	:
 check-dat	:	rm2dat
 	@echo -n TEST 1 :: rm2dat :: dat conversion: 
 	@rm -f RM1120200.012.dat > /dev/null; \
-	./rm2dat RM1120200.012; TMP=`md5sum RM1120200.012.dat`; \
-	if test "$$TMP" = "08c6f9cf5fd4c0748b5c74159ffbe796  RM1120200.012.dat" ; then \
+	./rm2dat RM1120200.012; TMP=`diff -b --strip-trailing-cr RM1120200.012.dat checks/RM1120200.012.dat`; \
+	if test "x$$TMP" = "x" ; then \
 		echo ok;\
 		rm -f RM1120200.012.dat;\
 	else echo FAIL;	fi; 
@@ -74,8 +74,8 @@ check-dat	:	rm2dat
 check-csv	:	rm2csv
 	@echo -n TEST 2 :: rm2csv :: csv conversion: 
 	@rm -f RM1120200.012.csv > /dev/null; \
-	./rm2csv RM1120200.012; TMP=`md5sum RM1120200.012.csv`; \
-	if test "$$TMP" = "24a4e279077b5dacb8c74674404aded9  RM1120200.012.csv" ; then \
+	./rm2csv RM1120200.012; TMP=`diff -b --strip-trailing-cr RM1120200.012.csv checks/RM1120200.012.csv`; \
+	if test "x$$TMP" = "x" ; then \
 		echo ok;\
 		rm -f RM1120200.012.csv;\
 	else echo FAIL;	fi; 
