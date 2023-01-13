@@ -1,4 +1,4 @@
-CC=g++
+CC=g++-12
 # 2-july-2020
 # apparently fbounds-check is meant only for F77 and Java
 # 
@@ -6,7 +6,7 @@ CHECK=-fcheck-new -Wextra -ftrapv -fstack-check
 #CHECK=-fbounds-check -fcheck-new -Wextra -ftrapv -fstack-check 
 #CHECK=-fbounds-check -Wextra -ftrapv 
 CFLAGS=-c -Wall -O0  -g $(CHECK) 
-LFLAGS=-Wall -O0  -g $(CHECK) 
+LFLAGS=-Wall -O0  $(CHECK) 
 
 #NETCDF=-L/usr/local/lib -lnetcdf -I/usr/local/include
 NETCDF_INC=-I/opt/homebrew/include
