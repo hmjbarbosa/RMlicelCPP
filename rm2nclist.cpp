@@ -22,7 +22,7 @@ int main (int argc, char *argv[])
   RMDataFile XX1, XX;
   RMDataFile *RMFirst, *RMToAdd;
   RM_Date LastDate;
-  char fnc[256];
+  char fnc[256] = "";
   int tdif;
 
   if (argc<3) {

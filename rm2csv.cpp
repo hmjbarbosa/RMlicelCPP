@@ -19,7 +19,7 @@ int main (int argc, char *argv[])
 {
   RMDataFile XX;
   FILE *fout;
-  char fcsv[256];
+  char fcsv[256] = "";
   
   if (argc<2) {
     printf("Enter a file name!\n");

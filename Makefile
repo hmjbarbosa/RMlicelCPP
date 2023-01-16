@@ -1,8 +1,10 @@
-CC=g++-12
+CC=g++
+#-12
 # 2-july-2020
 # apparently fbounds-check is meant only for F77 and Java
 # 
-CHECK=-fcheck-new -Wextra -ftrapv -fstack-check 
+CHECK=-fcheck-new -Wextra -ftrapv -fstack-check -fstack-protector-all
+#-fsanitize=address
 #CHECK=-fbounds-check -fcheck-new -Wextra -ftrapv -fstack-check 
 #CHECK=-fbounds-check -Wextra -ftrapv 
 CFLAGS=-c -Wall -O0  -g $(CHECK) 
@@ -51,7 +53,7 @@ TimeDate.o	:	TimeDate.cpp
 	$(CC) $(CFLAGS) TimeDate.cpp
 
 RMlicel.o	:	RMlicel.cpp TimeDate.o 
-	$(CC) $(CFLAGS) RMlicel.cpp
+	$(CC) $(CFLAGS) RMlicel.cpp 
 
 RMnetcdf.o	:	RMnetcdf.cpp RMlicel.o TimeDate.o 
 	$(CC) $(CFLAGS) $(NETCDF_INC) RMnetcdf.cpp 

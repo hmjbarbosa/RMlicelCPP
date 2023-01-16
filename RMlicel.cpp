@@ -174,13 +174,15 @@ void header_read_error() {
 
 void header_read(FILE *fp, RMDataFile *rm, bool debug) 
 {
-  char lat[6];
-  char lon[6];
-  char T0[4];
-  char P0[6];  
+  // 13-jan-2023
+  // char arrays need at least 1 extra postion for the \0
+  char lat[10] = "";
+  char lon[10] = "";
+  char T0 [10] = "";
+  char P0 [10] = "";  
   int n, YY, MM, DD, hh, mn, ss;
   long int pos;
-  char tmp[128];
+  char tmp[128] = "";
   //double xx;
 
   // Line 1
@@ -217,7 +219,8 @@ void header_read(FILE *fp, RMDataFile *rm, bool debug)
   if (n!=3) header_read_error();
   n=fscanf(fp,"%2d:%2d:%2d",&hh,&mn,&ss);
   if (n!=3) header_read_error();
-
+ 
+  
   rm->end = RM_Date(YY,MM,DD,hh,mn,ss, UTC);
   //xx=rm->end.GetJD();
   //std::cerr << "header_read2= " << rm->end.write2hms() << '\t' << (xx-floor(xx))*1440 << '\n';
@@ -226,31 +229,57 @@ void header_read(FILE *fp, RMDataFile *rm, bool debug)
   n=fscanf(fp,"%d",&rm->alt);
   if (n!=1) header_read_error();
   n=fscanf(fp,"%s",lon);
+  //std::cerr << "long=" << lon << "|  n=" << strlen(lon) << " pos=" << ftell(fp) << endl;
   if (n!=1) header_read_error();
+  //std::cerr << "long2=" << lon << "|" << strlen(lon) << "\t|" << lat << " pos=" << ftell(fp) << std::endl;
+
+  //for (int i=0; i<8 ; i++){ 
+  //  printf("%d LAT ASCII value of '%c' = %d     LON value of '%c' = %d\n", i, lat[i], (int) lat[i], lon[i], (int) lon[i]);
+  //}
+  
   n=fscanf(fp,"%s",lat);
+
+  //for (int i=0; i<8 ; i++){ 
+  //  printf("%d LAT ASCII value of '%c' = %d     LON value of '%c' = %d\n", i, lat[i], (int) lat[i], lon[i], (int) lon[i]);
+  //}
+
+  //std::cerr << "long3=" << lon << "|" << strlen(lon) << "\t|" << lat << " pos=" << ftell(fp) << std::endl;
   if (n!=1) header_read_error();
+  //std::cerr << "long4=" << lon << "|" << strlen(lon) << "\t|" << lat << " pos=" << ftell(fp) << std::endl;
 
   // Some old Licel does not include 00, T0 and P0 in this line
   // So we need to read the rest of the line, and from that try to
   // read what we want.
   fgets(tmp, sizeof(tmp), fp);
+  //cerr << "long5=" << lon << '\t' << lat << endl;
   if (debug) fprintf(stderr,"line=%s\n",tmp);
+  //cerr << "long6=" << lon << '\t' << lat << endl;
   n=sscanf(tmp,"%d %d %s %s", &rm->zen, &rm->idum, T0, P0);
+  //cerr << "long7=" << lon << '\t' << lat << endl;
 
   //Because of the fgets() above, the CR+LF are already removed
   //n=fscanf(fp,"%*[^\n]"); n=fscanf(fp,"%*c");
 
   // Depending on windows configuration, data file may have numbers
   // separated by comma instead of dot
+  //cerr << "long8=" << lon << endl;
   for (int i=0; i<6; i++) {
     if (lat[i]==',') lat[i]='.';
     if (lon[i]==',') lon[i]='.';
     if (P0[i]==',') P0[i]='.';
   }
+  //cerr << "long9=" << lon << endl;  
   for (int i=0; i<4; i++) {
     if (T0[i]==',') T0[i]='.';
   }
   rm->lon=atof(lon);
+  //cerr << atof("1.3") << endl;
+  //cerr << atof("-1.3") << endl;
+  //cerr << atof("01.3") << endl;
+  //cerr << atof("-01.3") << endl;
+  //cerr << lon << endl;
+  //cerr << atof(lon) << endl;
+  //cerr << "depois que converteu = " << rm->lon << endl; 
   rm->lat=atof(lat);
   rm->T0=atof(T0);
   rm->P0=atof(P0);
@@ -285,6 +314,7 @@ void header_printf(FILE *fp, RMDataFile rm,
   fprintf(fp,"%s%s",rm.end.write2DMY('/').c_str(),sep);
   fprintf(fp,"%s%s",rm.end.write2hms().c_str(),sep);
   fprintf(fp,"%04d%s",rm.alt,sep);
+  //cerr << " escrevendo a long= " << rm.lon << endl;
   fprintf(fp,"%06.1f%s",rm.lon,sep);
   fprintf(fp,"%06.1f%s",rm.lat,sep);
   fprintf(fp,"%02d%s",rm.zen,sep);
@@ -674,7 +704,7 @@ int profile_read (const char* fname, RMDataFile *rm, bool debug, bool noraw)
   FILE *fp; // file pointer
   size_t nread; // amount of data read
   float dScale; // conversion between raw and physical data
-  char szBuffer[90]; // dummy buffer
+  char szBuffer[91]; // dummy buffer
   int n;
   
   Init_RMDataFile(rm);

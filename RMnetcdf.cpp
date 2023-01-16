@@ -84,10 +84,10 @@ void profile_add_netcdf(const char* fname, RMDataFile First, RMDataFile toadd)
 
   // temporary string for writing netCDF attributes
   const int maxoptlen = 256;
-  char longstr[maxoptlen];
+  char longstr[maxoptlen] = "";
 
   const int maxlongoptlen = 36000;
-  char verylongstr[maxlongoptlen];
+  char verylongstr[maxlongoptlen] = "";
 
   /* ************** RM DATA FILE **********************************   */
   /* ************** CHECKS ****************************************   */
@@ -222,7 +222,7 @@ void profile_write_netcdf(const char* fname, RMDataFile rm, int tropt)
 
   // temporary string for writing netCDF attributes
   const int maxoptlen = 256;
-  char longstr[maxoptlen];
+  char longstr[maxoptlen] = "";
 
   // long arrays
   float *fval;

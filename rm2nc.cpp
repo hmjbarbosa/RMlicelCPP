@@ -20,7 +20,7 @@
 int main (int argc, char *argv[]) 
 {
   RMDataFile XX;
-  char fnc[256];
+  char fnc[256] = "";
   int err, i0=1, tropt=0;
   
   if (argc<2) {

@@ -163,7 +163,7 @@ void RM_Date::RoundMinutes()
  */
 std::string RM_Date::write2nc()
 {
-  const int maxdatelen = 27;
+  const int maxdatelen = 30;
   char strdate[maxdatelen];
   int h, m;
   h=int(this->utc);
