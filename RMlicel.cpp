@@ -47,11 +47,16 @@ void channel_read_error() {
   exit(-1);
 }
 
-void channel_read(FILE *fp, channel *ch) 
+void channel_read(FILE *fp, channel *ch, const char *beg) 
 {
   int n;
-  n=fscanf(fp,"%d",&ch->active);
+  char opt[128] = "";
+
+  strcpy(opt, beg);
+  strcat(opt, "%d");
+  n=fscanf(fp,opt,&ch->active);
   if (n!=1) channel_read_error();
+  
   n=fscanf(fp,"%d",&ch->photons);
   if (n!=1) channel_read_error();
   n=fscanf(fp,"%d",&ch->elastic);
@@ -172,7 +177,7 @@ void header_read_error() {
 // 1 0 1 16380 1 0990 7.50 00355.o 0 0 00 000 12 000599 0.500 BT0               
 // 1 1 1 16380 1 0990 7.50 00355.o 0 0 00 000 00 000599 3.1746 BC0              
 
-void header_read(FILE *fp, RMDataFile *rm, bool debug) 
+void header_read(FILE *fp, RMDataFile *rm, const char *beg, bool debug) 
 {
   // 13-jan-2023
   // char arrays need at least 1 extra postion for the \0
@@ -183,15 +188,19 @@ void header_read(FILE *fp, RMDataFile *rm, bool debug)
   int n, YY, MM, DD, hh, mn, ss;
   long int pos;
   char tmp[128] = "";
-  //double xx;
+  char opt[128] = "";
 
   // Line 1
-  n=fscanf(fp,"%s", rm->file);
+  strcpy(opt, beg);
+  strcat(opt, "%s");
+  n=fscanf(fp,opt, rm->file);
   if (n!=1) header_read_error();
   n=fscanf(fp,"%*[^\n]"); n=fscanf(fp,"%*c");
   
   // Line 2
-  n=fscanf(fp,"%s",rm->site);
+  strcpy(opt, beg);
+  strcat(opt, "%s");
+  n=fscanf(fp,opt,rm->site);
   if (n!=1) header_read_error();
   // some sites might have spaces.
   // keep reading until we find something like ??/??/????
@@ -212,80 +221,53 @@ void header_read(FILE *fp, RMDataFile *rm, bool debug)
   if (n!=3) header_read_error();
 
   rm->start = RM_Date(YY,MM,DD,hh,mn,ss, UTC);
-  //xx=rm->start.GetJD();
-  //std::cerr << "header_read1= " << rm->start.write2hms() << '\t' << (xx-floor(xx))*1440 << '\n';
 
   n=fscanf(fp,"%2d/%2d/%4d",&DD,&MM,&YY);
   if (n!=3) header_read_error();
   n=fscanf(fp,"%2d:%2d:%2d",&hh,&mn,&ss);
   if (n!=3) header_read_error();
  
-  
   rm->end = RM_Date(YY,MM,DD,hh,mn,ss, UTC);
-  //xx=rm->end.GetJD();
-  //std::cerr << "header_read2= " << rm->end.write2hms() << '\t' << (xx-floor(xx))*1440 << '\n';
 
   if (n!=3) header_read_error();
   n=fscanf(fp,"%d",&rm->alt);
   if (n!=1) header_read_error();
   n=fscanf(fp,"%s",lon);
-  //std::cerr << "long=" << lon << "|  n=" << strlen(lon) << " pos=" << ftell(fp) << endl;
   if (n!=1) header_read_error();
-  //std::cerr << "long2=" << lon << "|" << strlen(lon) << "\t|" << lat << " pos=" << ftell(fp) << std::endl;
-
-  //for (int i=0; i<8 ; i++){ 
-  //  printf("%d LAT ASCII value of '%c' = %d     LON value of '%c' = %d\n", i, lat[i], (int) lat[i], lon[i], (int) lon[i]);
-  //}
   
   n=fscanf(fp,"%s",lat);
 
-  //for (int i=0; i<8 ; i++){ 
-  //  printf("%d LAT ASCII value of '%c' = %d     LON value of '%c' = %d\n", i, lat[i], (int) lat[i], lon[i], (int) lon[i]);
-  //}
-
-  //std::cerr << "long3=" << lon << "|" << strlen(lon) << "\t|" << lat << " pos=" << ftell(fp) << std::endl;
   if (n!=1) header_read_error();
-  //std::cerr << "long4=" << lon << "|" << strlen(lon) << "\t|" << lat << " pos=" << ftell(fp) << std::endl;
 
   // Some old Licel does not include 00, T0 and P0 in this line
   // So we need to read the rest of the line, and from that try to
   // read what we want.
   fgets(tmp, sizeof(tmp), fp);
-  //cerr << "long5=" << lon << '\t' << lat << endl;
   if (debug) fprintf(stderr,"line=%s\n",tmp);
-  //cerr << "long6=" << lon << '\t' << lat << endl;
   n=sscanf(tmp,"%d %d %s %s", &rm->zen, &rm->idum, T0, P0);
-  //cerr << "long7=" << lon << '\t' << lat << endl;
 
   //Because of the fgets() above, the CR+LF are already removed
   //n=fscanf(fp,"%*[^\n]"); n=fscanf(fp,"%*c");
 
   // Depending on windows configuration, data file may have numbers
   // separated by comma instead of dot
-  //cerr << "long8=" << lon << endl;
   for (int i=0; i<6; i++) {
     if (lat[i]==',') lat[i]='.';
     if (lon[i]==',') lon[i]='.';
     if (P0[i]==',') P0[i]='.';
   }
-  //cerr << "long9=" << lon << endl;  
   for (int i=0; i<4; i++) {
     if (T0[i]==',') T0[i]='.';
   }
   rm->lon=atof(lon);
-  //cerr << atof("1.3") << endl;
-  //cerr << atof("-1.3") << endl;
-  //cerr << atof("01.3") << endl;
-  //cerr << atof("-01.3") << endl;
-  //cerr << lon << endl;
-  //cerr << atof(lon) << endl;
-  //cerr << "depois que converteu = " << rm->lon << endl; 
   rm->lat=atof(lat);
   rm->T0=atof(T0);
   rm->P0=atof(P0);
 
   // Line 3
-  n=fscanf(fp,"%d %d %d %d %d",
+  strcpy(opt, beg);
+  strcat(opt, "%d %d %d %d %d");
+  n=fscanf(fp,opt, 
            &rm->nshoots, &rm->nhz, &rm->nshoots2, &rm->nhz2, &rm->nch);
   if (n!=5) header_read_error();
   n=fscanf(fp,"%*[^\n]"); n=fscanf(fp,"%*c");
@@ -470,9 +452,9 @@ void phy_printf(FILE *fp, RMDataFile rm, int imax, const char* sep)
     // for each channel
     for (int i=0; i<rm.nch; i++) { 
       if (k<ndata[i])
-        fprintf(fp,"%s%8.4f",sep,rm.ch[i].phy[k]);
+        fprintf(fp,"%s%f",sep,rm.ch[i].phy[k]);
       else
-        fprintf(fp,"%s%8.4f",sep,-999.);
+        fprintf(fp,"%s%f",sep,-999.);
     }
     fprintf(fp,"\n"); 
   }
@@ -717,7 +699,7 @@ int profile_read (const char* fname, RMDataFile *rm, bool debug, bool noraw)
   }
 
   // READ THE FIRST 3 LINES
-  header_read(fp, rm, debug);
+  header_read(fp, rm, "", debug);
   if (debug) {
     header_debug(*rm);
     fprintf(stderr,"pos after header: %ld\n",ftell(fp));
@@ -795,6 +777,92 @@ int profile_read (const char* fname, RMDataFile *rm, bool debug, bool noraw)
 
     }// is chanel active?
   }// chanel read
+
+  return (0);
+}
+
+/*
+  Function: read_single_file
+  Description: read one lidar file and store all data inside a RMDataFile variable
+  Author: hbarbosa
+  Date: 17 Jan 2023
+ */
+int profile_read_txt (const char* fname, RMDataFile *rm, bool debug, bool israw) 
+{
+  FILE *fp; // file pointer
+  size_t nread; // amount of data read
+  float dScale; // conversion between raw and physical data
+  char szBuffer[91]; // dummy buffer
+  int n, id;
+  
+  Init_RMDataFile(rm);
+  
+  // OPEN DATA FILE
+  fp=fopen(fname,"r");
+  if (debug) {
+    fprintf(stderr,"pos after open: %ld\n",ftell(fp));
+  }
+
+  // READ THE FIRST 3 LINES
+  header_read(fp, rm, "#", debug);
+  if (debug) {
+    header_debug(*rm);
+    fprintf(stderr,"pos after header: %ld\n",ftell(fp));
+  }
+  
+  //if (noraw) return 0;
+
+  // ALLOCATE MEMORY FOR HOLDING CHANNELS
+  rm->ch=(channel*) malloc(rm->nch*sizeof(channel));
+  
+  // READ LINES DESCRIBING CHANNELS
+  for (int i=0; i<rm->nch; i++) {
+    channel_read(fp, &rm->ch[i], "#");
+    if (debug) {
+      channel_debug(rm->ch[i]);
+      fprintf(stderr,"pos after channel: %ld\n",ftell(fp));
+    }
+  }
+
+  // after all channels there is an extra empty line
+  //n=fscanf(fp,"%*[^\n]"); n=fscanf(fp,"%*c");
+
+  // READ ACTUAL DATA (IN ASCII FORMAT)
+  // In this case, we have columns in a text file
+  for (int i=0; i<rm->nch; i++) {
+    if (rm->ch[i].active!=0) {
+      rm->ch[i].raw = (bin *) malloc(sizeof(bin)*rm->ch[i].ndata);
+      rm->ch[i].phy = (float *) malloc(sizeof(float)*rm->ch[i].ndata);
+    }
+  }
+
+  // assume all channels have the same amount of data
+  for (int k=0; k<rm->ch[0].ndata; k++) {
+    // read line ID number
+    n=fscanf(fp,"%d",&id);
+    if (k!=id) {
+      fprintf(stderr,"Error reading dat file, wrong line number (%d, %d)\n",k,id);
+      exit(0);
+    }
+    for (int i=0; i<rm->nch; i++) {
+      if (rm->ch[i].active!=0) {
+        n=fscanf(fp,"%f",&rm->ch[i].phy[k]);
+      }
+    }
+    //printf("%f\n",rm->ch[0].phy[k]);
+  }
+  
+  // convert data to raw units
+  for (int i=0; i<rm->nch; i++) {
+    if (!rm->ch[i].photons)
+      dScale = rm->ch[i].nshoots*pow(2,rm->ch[i].bits)/(rm->ch[i].discr*1.e3);
+    else 
+      dScale = rm->ch[i].nshoots/PCsampling;
+
+    printf("ch=%d scale=%f\n", i, dScale);
+    for (int j=0; j<rm->ch[i].ndata; j++) 
+      rm->ch[i].raw[j] = (bin) (rm->ch[i].phy[j] * dScale);
+  }
 
   return (0);
 }

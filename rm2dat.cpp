@@ -36,11 +36,17 @@ int main (int argc, char *argv[])
     // Init, Read, Print and destroy RM data file
     Init_RMDataFile(&XX);
     profile_read(argv[i], &XX);
+    printf("%f %d \n", XX.ch[0].phy[0], XX.ch[0].raw[0]);
+    printf("%f %d \n", XX.ch[0].phy[1], XX.ch[0].raw[1]);
+    printf("%f %d \n", XX.ch[0].phy[2], XX.ch[0].raw[2]);
+
+    
     profile_printf(fout, XX, 0, "# ", " ", "\t");
 
     // Close output file
     Free_RMDataFile(&XX);
     fclose(fout);
+    printf("saiu do rm2dat ====\n");    
   }
 
   return 0;

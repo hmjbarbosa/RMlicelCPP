@@ -1,5 +1,4 @@
-CC=g++
-#-12
+CC=g++-12
 # 2-july-2020
 # apparently fbounds-check is meant only for F77 and Java
 # 
@@ -21,7 +20,8 @@ PROGS=\
 	rm2csv \
 	rm2dat \
 	rm2nc \
-	rm2name
+	rm2name \
+	dat2rm
 
 all	:	$(PROGS)
 
@@ -42,6 +42,9 @@ rm2csv	:	rm2csv.cpp TimeDate.o RMlicel.o
 
 rm2dat	:	rm2dat.cpp TimeDate.o RMlicel.o
 	$(CC) $(LFLAGS) -o rm2dat rm2dat.cpp  TimeDate.o RMlicel.o
+
+dat2rm	:	dat2rm.cpp TimeDate.o RMlicel.o
+	$(CC) $(LFLAGS) -o dat2rm dat2rm.cpp  TimeDate.o RMlicel.o
 
 rm2nclist	:	rm2nclist.cpp TimeDate.o RMlicel.o RMnetcdf.o
 	$(CC) $(LFLAGS) $(NETCDF_LIB) $(NETCDF_INC) -o rm2nclist rm2nclist.cpp TimeDate.o RMlicel.o RMnetcdf.o 
@@ -130,7 +133,7 @@ check-nc	:	rm2nc rm2nclist
 		rm -f argentina_lidar_b1230700.005373.nc;\
 	else echo FAIL; fi;
 	@echo -n TEST 9 :: rm2list:: Converting IPEN files to netCDF list: 
-	@rm -f test9.nc > /dev/null; ./rm2nclist test9 ipen_RM1291010.162 ipen_RM1291010.181; \
+	@rm -f test9.nc > /dev/null; ./rm2nclist test9.nc ipen_RM1291010.162 ipen_RM1291010.181; \
 	TMP=`md5sum test9.nc`; \
 	if test "$$TMP" = "16a5590ae8b0e1b742b5acd87f27458b  test9.nc" ; then \
 		echo ok;\

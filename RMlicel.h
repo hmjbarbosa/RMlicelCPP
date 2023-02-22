@@ -86,12 +86,12 @@ extern void channel_debug(channel ch);
 extern void channel_debug_phy(channel ch);
 extern void channel_debug_raw(channel ch);
 extern void channel_read_error();
-extern void channel_read  (FILE *fp, channel*ch);
+extern void channel_read  (FILE *fp, channel*ch, const char* beg = "");
 extern void channel_printf(FILE *fp, channel ch, const char* beg, const char* sep);
 
 extern void header_debug(RMDataFile rm);
 extern void header_read_error();
-extern void header_read  (FILE *fp, RMDataFile*rm, bool debug = false);
+extern void header_read  (FILE *fp, RMDataFile*rm, const char *beg = "", bool debug = false);
 extern void header_printf(FILE *fp, RMDataFile rm, 
                           const char* beg, const char* sep);
 
@@ -105,6 +105,7 @@ extern void phy_printf(FILE *fp, RMDataFile rm, int imax, const char* sep);
 extern void check_profiles (RMDataFile A, RMDataFile B);
 extern void profile_debug(RMDataFile rm);
 extern int profile_read (const char* fname, RMDataFile *rm, bool debug = false, bool noraw = false);
+extern int profile_read_txt (const char* fname, RMDataFile *rm, bool debug = false, bool israw = false);
 extern void profile_add (RMDataFile *acum, RMDataFile toadd);
 extern void profile_write(FILE *fp, RMDataFile rm);
 extern void profile_printf(FILE *fp, RMDataFile rm, int imax, 
